@@ -70,6 +70,288 @@
     ]
   },
   {
+    "name": "Brand · design system",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "Tokens from The Reading Lesson brand and design guidelines. They are published as CSS custom properties by snippets/brand-tokens.liquid, so sections and blocks can use var(--color-tomato), var(--space-5), var(--radius-lg) and so on."
+      },
+      {
+        "type": "header",
+        "content": "Brand fonts"
+      },
+      {
+        "type": "checkbox",
+        "id": "brand_fonts_enabled",
+        "label": "Use the brand fonts",
+        "default": true,
+        "info": "Serves the Besley, Public Sans and Andika files bundled with this theme. Turn off to fall back to the fonts picked under Typography."
+      },
+      {
+        "type": "checkbox",
+        "id": "brand_type_scale_enabled",
+        "label": "Use the brand type scale",
+        "default": true,
+        "info": "Applies the guideline sizes, line heights and letter spacing, including the mobile hero (40px) and display (32px) sizes."
+      },
+      {
+        "type": "header",
+        "content": "Purchase accent"
+      },
+      {
+        "type": "checkbox",
+        "id": "brand_purchase_accent",
+        "label": "Use tomato for purchase actions",
+        "default": true,
+        "info": "Add to cart, buy buttons and the cart turn tomato. Every other primary button stays ink."
+      },
+      {
+        "type": "header",
+        "content": "Core colours"
+      },
+      {
+        "type": "color",
+        "id": "brand_ink",
+        "label": "Ink",
+        "default": "#1D2340",
+        "info": "Text, main buttons and the announcement bar."
+      },
+      {
+        "type": "color",
+        "id": "brand_tomato",
+        "label": "Tomato",
+        "default": "#C2412D",
+        "info": "Purchase: cart, Add to cart, sale."
+      },
+      {
+        "type": "color",
+        "id": "brand_sun",
+        "label": "Sun",
+        "default": "#E9B949"
+      },
+      {
+        "type": "color",
+        "id": "brand_sky",
+        "label": "Sky",
+        "default": "#8FBCDB"
+      },
+      {
+        "type": "color",
+        "id": "brand_grape",
+        "label": "Grape",
+        "default": "#5A4A8C"
+      },
+      {
+        "type": "color",
+        "id": "brand_leaf",
+        "label": "Leaf",
+        "default": "#86AD90"
+      },
+      {
+        "type": "header",
+        "content": "Neutrals"
+      },
+      {
+        "type": "color",
+        "id": "brand_paper",
+        "label": "Paper",
+        "default": "#FAF6EF",
+        "info": "Page background."
+      },
+      {
+        "type": "color",
+        "id": "brand_paper_deep",
+        "label": "Paper deep",
+        "default": "#F2EADC",
+        "info": "Alternating sections and quiet surfaces."
+      },
+      {
+        "type": "color",
+        "id": "brand_card",
+        "label": "Card",
+        "default": "#FFFFFF"
+      },
+      {
+        "type": "color",
+        "id": "brand_ink_muted",
+        "label": "Ink muted",
+        "default": "#5B5F74"
+      },
+      {
+        "type": "color",
+        "id": "brand_line",
+        "label": "Line",
+        "default": "#E5DCCD",
+        "info": "Hairlines and borders."
+      },
+      {
+        "type": "color",
+        "id": "brand_line_strong",
+        "label": "Line strong",
+        "default": "#8A8373"
+      },
+      {
+        "type": "color",
+        "id": "brand_rule",
+        "label": "Rule",
+        "default": "#DDD2BF",
+        "info": "Notebook lines and dividers."
+      },
+      {
+        "type": "header",
+        "content": "Tints"
+      },
+      {
+        "type": "paragraph",
+        "content": "Backgrounds only. Ink text sits on every tint."
+      },
+      {
+        "type": "color",
+        "id": "brand_tomato_soft",
+        "label": "Tomato soft",
+        "default": "#F8E4DC"
+      },
+      {
+        "type": "color",
+        "id": "brand_sun_soft",
+        "label": "Sun soft",
+        "default": "#F8ECD0"
+      },
+      {
+        "type": "color",
+        "id": "brand_sky_soft",
+        "label": "Sky soft",
+        "default": "#E3EEF6"
+      },
+      {
+        "type": "color",
+        "id": "brand_grape_soft",
+        "label": "Grape soft",
+        "default": "#E9E4F2"
+      },
+      {
+        "type": "color",
+        "id": "brand_leaf_soft",
+        "label": "Leaf soft",
+        "default": "#E4EFE6"
+      },
+      {
+        "type": "header",
+        "content": "Deep tones"
+      },
+      {
+        "type": "paragraph",
+        "content": "Coloured text on paper, card or the matching tint."
+      },
+      {
+        "type": "color",
+        "id": "brand_tomato_deep",
+        "label": "Tomato deep",
+        "default": "#A3321F"
+      },
+      {
+        "type": "color",
+        "id": "brand_sun_deep",
+        "label": "Sun deep",
+        "default": "#7D5A0B"
+      },
+      {
+        "type": "color",
+        "id": "brand_sky_deep",
+        "label": "Sky deep",
+        "default": "#2F6690"
+      },
+      {
+        "type": "color",
+        "id": "brand_leaf_deep",
+        "label": "Leaf deep",
+        "default": "#3C6B4A"
+      },
+      {
+        "type": "header",
+        "content": "Text on colour"
+      },
+      {
+        "type": "color",
+        "id": "brand_on_tomato",
+        "label": "On tomato",
+        "default": "#FFFFFF"
+      },
+      {
+        "type": "color",
+        "id": "brand_on_grape",
+        "label": "On grape",
+        "default": "#FFFFFF"
+      },
+      {
+        "type": "color",
+        "id": "brand_link",
+        "label": "Link",
+        "default": "#5A4A8C"
+      },
+      {
+        "type": "color",
+        "id": "brand_focus_ring",
+        "label": "Focus ring",
+        "default": "#5A4A8C"
+      },
+      {
+        "type": "header",
+        "content": "Learning path"
+      },
+      {
+        "type": "paragraph",
+        "content": "Each step keeps its colour: sky for reading, sun for writing, leaf for math."
+      },
+      {
+        "type": "color",
+        "id": "brand_path_reading",
+        "label": "1 Reading",
+        "default": "#8FBCDB"
+      },
+      {
+        "type": "color",
+        "id": "brand_path_writing",
+        "label": "2 Writing",
+        "default": "#E9B949"
+      },
+      {
+        "type": "color",
+        "id": "brand_path_math",
+        "label": "3 Math",
+        "default": "#86AD90"
+      },
+      {
+        "type": "header",
+        "content": "Age codes"
+      },
+      {
+        "type": "color",
+        "id": "brand_age_0_2",
+        "label": "Ages 0-2",
+        "default": "#E9B949"
+      },
+      {
+        "type": "color",
+        "id": "brand_age_3_5",
+        "label": "Ages 3-5",
+        "default": "#8FBCDB"
+      },
+      {
+        "type": "color",
+        "id": "brand_age_6_8",
+        "label": "Ages 6-8",
+        "default": "#86AD90"
+      },
+      {
+        "type": "color",
+        "id": "brand_age_9_12",
+        "label": "Ages 9-12",
+        "default": "#5A4A8C"
+      }
+    ]
+  },
+  {
     "name": "t:names.typography",
     "settings": [
       {
@@ -225,16 +507,32 @@
             "label": "20px"
           },
           {
+            "value": "21",
+            "label": "21px"
+          },
+          {
             "value": "24",
             "label": "24px"
+          },
+          {
+            "value": "28",
+            "label": "28px"
           },
           {
             "value": "32",
             "label": "32px"
           },
           {
+            "value": "36",
+            "label": "36px"
+          },
+          {
             "value": "40",
             "label": "40px"
+          },
+          {
+            "value": "46",
+            "label": "46px"
           },
           {
             "value": "48",
@@ -243,6 +541,10 @@
           {
             "value": "56",
             "label": "56px"
+          },
+          {
+            "value": "68",
+            "label": "68px"
           },
           {
             "value": "72",
@@ -373,16 +675,32 @@
             "label": "20px"
           },
           {
+            "value": "21",
+            "label": "21px"
+          },
+          {
             "value": "24",
             "label": "24px"
+          },
+          {
+            "value": "28",
+            "label": "28px"
           },
           {
             "value": "32",
             "label": "32px"
           },
           {
+            "value": "36",
+            "label": "36px"
+          },
+          {
             "value": "40",
             "label": "40px"
+          },
+          {
+            "value": "46",
+            "label": "46px"
           },
           {
             "value": "48",
@@ -391,6 +709,10 @@
           {
             "value": "56",
             "label": "56px"
+          },
+          {
+            "value": "68",
+            "label": "68px"
           },
           {
             "value": "72",
@@ -529,16 +851,32 @@
             "label": "20px"
           },
           {
+            "value": "21",
+            "label": "21px"
+          },
+          {
             "value": "24",
             "label": "24px"
+          },
+          {
+            "value": "28",
+            "label": "28px"
           },
           {
             "value": "32",
             "label": "32px"
           },
           {
+            "value": "36",
+            "label": "36px"
+          },
+          {
             "value": "40",
             "label": "40px"
+          },
+          {
+            "value": "46",
+            "label": "46px"
           },
           {
             "value": "48",
@@ -547,6 +885,10 @@
           {
             "value": "56",
             "label": "56px"
+          },
+          {
+            "value": "68",
+            "label": "68px"
           },
           {
             "value": "72",
@@ -685,16 +1027,32 @@
             "label": "20px"
           },
           {
+            "value": "21",
+            "label": "21px"
+          },
+          {
             "value": "24",
             "label": "24px"
+          },
+          {
+            "value": "28",
+            "label": "28px"
           },
           {
             "value": "32",
             "label": "32px"
           },
           {
+            "value": "36",
+            "label": "36px"
+          },
+          {
             "value": "40",
             "label": "40px"
+          },
+          {
+            "value": "46",
+            "label": "46px"
           },
           {
             "value": "48",
@@ -703,6 +1061,10 @@
           {
             "value": "56",
             "label": "56px"
+          },
+          {
+            "value": "68",
+            "label": "68px"
           },
           {
             "value": "72",
@@ -841,16 +1203,32 @@
             "label": "20px"
           },
           {
+            "value": "21",
+            "label": "21px"
+          },
+          {
             "value": "24",
             "label": "24px"
+          },
+          {
+            "value": "28",
+            "label": "28px"
           },
           {
             "value": "32",
             "label": "32px"
           },
           {
+            "value": "36",
+            "label": "36px"
+          },
+          {
             "value": "40",
             "label": "40px"
+          },
+          {
+            "value": "46",
+            "label": "46px"
           },
           {
             "value": "48",
@@ -859,6 +1237,10 @@
           {
             "value": "56",
             "label": "56px"
+          },
+          {
+            "value": "68",
+            "label": "68px"
           },
           {
             "value": "72",
@@ -997,16 +1379,32 @@
             "label": "20px"
           },
           {
+            "value": "21",
+            "label": "21px"
+          },
+          {
             "value": "24",
             "label": "24px"
+          },
+          {
+            "value": "28",
+            "label": "28px"
           },
           {
             "value": "32",
             "label": "32px"
           },
           {
+            "value": "36",
+            "label": "36px"
+          },
+          {
             "value": "40",
             "label": "40px"
+          },
+          {
+            "value": "46",
+            "label": "46px"
           },
           {
             "value": "48",
@@ -1015,6 +1413,10 @@
           {
             "value": "56",
             "label": "56px"
+          },
+          {
+            "value": "68",
+            "label": "68px"
           },
           {
             "value": "72",

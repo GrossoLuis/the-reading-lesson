@@ -1,0 +1,587 @@
+{% doc %}
+  The Reading Lesson — design system tokens.
+
+  Publishes the colour, typography, spacing, shape and shadow tokens from the brand and
+  design guidelines as CSS custom properties, so sections and blocks can build on
+  var(--color-tomato), var(--space-5), var(--radius-lg) instead of hard-coded values.
+
+  Rendered from layout/theme.liquid and layout/password.liquid, after 'color-palette',
+  so the overrides in here win over the theme defaults.
+
+  Three switches under Brand · design system in theme settings:
+  - brand_fonts_enabled     self-hosted Besley, Public Sans and Andika
+  - brand_type_scale_enabled  the guideline sizes, line heights and letter spacing
+  - brand_purchase_accent   tomato on Add to cart, buy buttons and the cart
+
+  @example
+  {% render 'brand-tokens' %}
+{% enddoc %}
+
+{%- liquid
+  assign serif_fallback = "'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, 'Times New Roman', serif"
+  assign sans_fallback = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+  assign reading_fallback = "'Trebuchet MS', Verdana, Geneva, sans-serif"
+-%}
+
+{% style %}
+  {%- if settings.brand_fonts_enabled -%}
+    /* Besley and Public Sans ship as variable faces (400–700); Andika is static. */
+    @font-face {
+      font-family: 'Besley';
+      src: url({{ 'brand-besley.woff2' | asset_url }}) format('woff2');
+      font-weight: 400 700;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: 'Besley';
+      src: url({{ 'brand-besley-italic.woff2' | asset_url }}) format('woff2');
+      font-weight: 400 700;
+      font-style: italic;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: 'Public Sans';
+      src: url({{ 'brand-public-sans.woff2' | asset_url }}) format('woff2');
+      font-weight: 400 700;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: 'Public Sans';
+      src: url({{ 'brand-public-sans-italic.woff2' | asset_url }}) format('woff2');
+      font-weight: 400 700;
+      font-style: italic;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: 'Andika';
+      src: url({{ 'brand-andika.woff2' | asset_url }}) format('woff2');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: 'Andika';
+      src: url({{ 'brand-andika-bold.woff2' | asset_url }}) format('woff2');
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
+  {%- endif -%}
+
+  :root {
+    /* ---------------------------------------------------------------
+       Colour — ink blue on warm paper, primaries as accents
+       --------------------------------------------------------------- */
+    --color-ink: {{ settings.brand_ink }};
+    --color-ink-rgb: {{ settings.brand_ink.rgb }};
+    --color-ink-muted: {{ settings.brand_ink_muted }};
+    --color-ink-muted-rgb: {{ settings.brand_ink_muted.rgb }};
+
+    --color-paper: {{ settings.brand_paper }};
+    --color-paper-rgb: {{ settings.brand_paper.rgb }};
+    --color-paper-deep: {{ settings.brand_paper_deep }};
+    --color-paper-deep-rgb: {{ settings.brand_paper_deep.rgb }};
+    --color-card: {{ settings.brand_card }};
+    --color-card-rgb: {{ settings.brand_card.rgb }};
+
+    --color-line: {{ settings.brand_line }};
+    --color-line-rgb: {{ settings.brand_line.rgb }};
+    --color-line-strong: {{ settings.brand_line_strong }};
+    --color-line-strong-rgb: {{ settings.brand_line_strong.rgb }};
+    --color-rule: {{ settings.brand_rule }};
+    --color-rule-rgb: {{ settings.brand_rule.rgb }};
+
+    --color-tomato: {{ settings.brand_tomato }};
+    --color-tomato-rgb: {{ settings.brand_tomato.rgb }};
+    --color-tomato-soft: {{ settings.brand_tomato_soft }};
+    --color-tomato-deep: {{ settings.brand_tomato_deep }};
+    --color-on-tomato: {{ settings.brand_on_tomato }};
+    --color-on-tomato-rgb: {{ settings.brand_on_tomato.rgb }};
+
+    --color-sun: {{ settings.brand_sun }};
+    --color-sun-rgb: {{ settings.brand_sun.rgb }};
+    --color-sun-soft: {{ settings.brand_sun_soft }};
+    --color-sun-deep: {{ settings.brand_sun_deep }};
+
+    --color-sky: {{ settings.brand_sky }};
+    --color-sky-rgb: {{ settings.brand_sky.rgb }};
+    --color-sky-soft: {{ settings.brand_sky_soft }};
+    --color-sky-deep: {{ settings.brand_sky_deep }};
+
+    --color-grape: {{ settings.brand_grape }};
+    --color-grape-rgb: {{ settings.brand_grape.rgb }};
+    --color-grape-soft: {{ settings.brand_grape_soft }};
+    --color-on-grape: {{ settings.brand_on_grape }};
+    --color-on-grape-rgb: {{ settings.brand_on_grape.rgb }};
+
+    --color-leaf: {{ settings.brand_leaf }};
+    --color-leaf-rgb: {{ settings.brand_leaf.rgb }};
+    --color-leaf-soft: {{ settings.brand_leaf_soft }};
+    --color-leaf-deep: {{ settings.brand_leaf_deep }};
+
+    --color-link: {{ settings.brand_link }};
+    --color-link-rgb: {{ settings.brand_link.rgb }};
+
+    /* Learning path — sky for reading, sun for writing, leaf for math */
+    --color-path-reading: {{ settings.brand_path_reading }};
+    --color-path-reading-soft: {{ settings.brand_sky_soft }};
+    --color-path-reading-deep: {{ settings.brand_sky_deep }};
+    --color-path-writing: {{ settings.brand_path_writing }};
+    --color-path-writing-soft: {{ settings.brand_sun_soft }};
+    --color-path-writing-deep: {{ settings.brand_sun_deep }};
+    --color-path-math: {{ settings.brand_path_math }};
+    --color-path-math-soft: {{ settings.brand_leaf_soft }};
+    --color-path-math-deep: {{ settings.brand_leaf_deep }};
+
+    /* Age codes — ink text on every chip except 9–12, which carries white */
+    --color-age-0-2: {{ settings.brand_age_0_2 }};
+    --color-age-3-5: {{ settings.brand_age_3_5 }};
+    --color-age-6-8: {{ settings.brand_age_6_8 }};
+    --color-age-9-12: {{ settings.brand_age_9_12 }};
+    --color-on-age-0-2: {{ settings.brand_ink }};
+    --color-on-age-3-5: {{ settings.brand_ink }};
+    --color-on-age-6-8: {{ settings.brand_ink }};
+    --color-on-age-9-12: {{ settings.brand_on_grape }};
+
+    /* ---------------------------------------------------------------
+       Spacing — 4px base
+       --------------------------------------------------------------- */
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-5: 1.5rem;
+    --space-6: 2rem;
+    --space-7: 3rem;
+    --space-8: 4.5rem;
+    --space-9: 7rem;
+
+    /* ---------------------------------------------------------------
+       Radius and stroke — soft corners, fine lines
+       --------------------------------------------------------------- */
+    --radius-sm: 0.375rem;
+    --radius-md: 0.75rem;
+    --radius-lg: 1.25rem;
+    --radius-xl: 2rem;
+    --radius-full: 9999px;
+
+    --stroke-sm: 1px;
+    --stroke-md: 1.5px;
+    --stroke-lg: 10px;
+
+    /* ---------------------------------------------------------------
+       Shadows — real, ink-tinted, never grey
+       --------------------------------------------------------------- */
+    --shadow-sm: 0 1px 2px rgb(var(--color-ink-rgb) / 0.06), 0 1px 3px rgb(var(--color-ink-rgb) / 0.04);
+    --shadow-md: 0 2px 4px rgb(var(--color-ink-rgb) / 0.05), 0 6px 16px -4px rgb(var(--color-ink-rgb) / 0.1);
+    --shadow-lg: 0 4px 8px rgb(var(--color-ink-rgb) / 0.05), 0 18px 40px -12px rgb(var(--color-ink-rgb) / 0.16);
+    --shadow-book: 0 1px 2px rgb(var(--color-ink-rgb) / 0.08), 0 10px 20px -6px rgb(var(--color-ink-rgb) / 0.22);
+
+    /* Focus ring — 2px grape, 3px clear of the element, corners at radius-lg */
+    --color-focus-ring: {{ settings.brand_focus_ring }};
+    --focus-ring-width: 2px;
+    --focus-ring-offset: 3px;
+    --focus-ring: 0 0 0 var(--focus-ring-offset) var(--color-background),
+      0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width)) var(--color-focus-ring);
+    --focus-outline-width: var(--focus-ring-width);
+    --focus-outline-offset: var(--focus-ring-offset);
+
+    /* Signature elements */
+    --colour-bar-thickness: var(--stroke-lg);
+    --notebook-line-gap: var(--space-2);
+
+    {%- if settings.brand_fonts_enabled -%}
+      /* ---------------------------------------------------------------
+         Type families — Besley to tell, Public Sans to guide,
+         Andika only for what a child reads
+         --------------------------------------------------------------- */
+      --font-body--family: 'Public Sans', {{ sans_fallback }};
+      --font-body--style: normal;
+      --font-body--weight: 400;
+
+      --font-subheading--family: 'Public Sans', {{ sans_fallback }};
+      --font-subheading--style: normal;
+      --font-subheading--weight: 600;
+
+      --font-heading--family: 'Besley', {{ serif_fallback }};
+      --font-heading--style: normal;
+      --font-heading--weight: 600;
+
+      /* The accent carries the one heartfelt word per headline, in italics */
+      --font-accent--family: 'Besley', {{ serif_fallback }};
+      --font-accent--style: italic;
+      --font-accent--weight: 600;
+
+      --font-reading--family: 'Andika', {{ reading_fallback }};
+      --font-reading--style: normal;
+      --font-reading--weight: 400;
+    {%- else -%}
+      --font-reading--family: var(--font-body--family);
+      --font-reading--style: var(--font-body--style);
+      --font-reading--weight: var(--font-body--weight);
+    {%- endif -%}
+
+    /* ---------------------------------------------------------------
+       Type roles the theme has no preset for. Sizes interpolate between
+       375px and 1440px viewports, matching the mobile sizes in the guide.
+       --------------------------------------------------------------- */
+    --font-note--family: var(--font-heading--family);
+    --font-note--style: normal;
+    --font-note--weight: 400;
+    --font-note--size: clamp(1.1875rem, 1.143rem + 0.19vw, 1.3125rem);
+    --font-note--line-height: 1.45;
+    --font-note--letter-spacing: 0em;
+
+    --font-price--family: var(--font-heading--family);
+    --font-price--style: var(--font-heading--style);
+    --font-price--weight: var(--font-heading--weight);
+    --font-price--size: 1.25rem;
+    --font-price--line-height: 1.2;
+    --font-price--letter-spacing: 0em;
+
+    --font-lead--family: var(--font-body--family);
+    --font-lead--style: var(--font-body--style);
+    --font-lead--weight: 400;
+    --font-lead--size: clamp(1.125rem, 1.103rem + 0.09vw, 1.1875rem);
+    --font-lead--line-height: 1.55;
+    --font-lead--letter-spacing: 0em;
+
+    --font-small--family: var(--font-body--family);
+    --font-small--style: var(--font-body--style);
+    --font-small--weight: 400;
+    --font-small--size: 0.84375rem;
+    --font-small--line-height: 1.5;
+    --font-small--letter-spacing: 0em;
+
+    --font-button--family: var(--font-body--family);
+    --font-button--style: var(--font-body--style);
+    --font-button--weight: 600;
+    --font-button--size: 0.9375rem;
+    --font-button--line-height: 1.2;
+    --font-button--letter-spacing: 0em;
+
+    --font-eyebrow--family: var(--font-subheading--family);
+    --font-eyebrow--style: var(--font-subheading--style);
+    --font-eyebrow--weight: 700;
+    --font-eyebrow--size: 0.75rem;
+    --font-eyebrow--line-height: 1.3;
+    --font-eyebrow--letter-spacing: 0.1em;
+
+    --font-reading--size: clamp(1.25rem, 1.162rem + 0.38vw, 1.5rem);
+    --font-reading--line-height: 1.7;
+    --font-reading--letter-spacing: 0.01em;
+
+    {%- if settings.brand_type_scale_enabled -%}
+      /* ---------------------------------------------------------------
+         The guideline scale. The theme maps hero and display onto h1 and
+         h2, so the brand h1/h2/h3 land on h3/h4/h5 and h6 is the eyebrow.
+         --------------------------------------------------------------- */
+      --font-size--h1: clamp(2.5rem, 1.884rem + 2.63vw, 4.25rem); /* hero 40 → 68 */
+      --font-size--h2: clamp(2rem, 1.692rem + 1.31vw, 2.875rem); /* display 32 → 46 */
+      --font-size--h3: clamp(1.75rem, 1.574rem + 0.75vw, 2.25rem); /* h1 28 → 36 */
+      --font-size--h4: clamp(1.5rem, 1.412rem + 0.38vw, 1.75rem); /* h2 24 → 28 */
+      --font-size--h5: 1.25rem; /* h3 20 */
+      --font-size--h6: var(--font-eyebrow--size); /* eyebrow 12 */
+      --font-size--paragraph: 1rem; /* body 16 */
+
+      --font-hero--family: var(--font-heading--family);
+      --font-hero--style: var(--font-heading--style);
+      --font-hero--weight: var(--font-heading--weight);
+      --font-hero--size: var(--font-size--h1);
+      --font-hero--line-height: 1.05;
+      --font-hero--letter-spacing: -0.02em;
+
+      --font-display--family: var(--font-heading--family);
+      --font-display--style: var(--font-heading--style);
+      --font-display--weight: var(--font-heading--weight);
+      --font-display--size: var(--font-size--h2);
+      --font-display--line-height: 1.1;
+      --font-display--letter-spacing: -0.015em;
+
+      --font-h1--line-height: var(--font-hero--line-height);
+      --font-h1--letter-spacing: var(--font-hero--letter-spacing);
+      --font-h2--line-height: var(--font-display--line-height);
+      --font-h2--letter-spacing: var(--font-display--letter-spacing);
+      --font-h3--line-height: 1.15;
+      --font-h3--letter-spacing: -0.01em;
+      --font-h4--line-height: 1.2;
+      --font-h4--letter-spacing: 0em;
+      --font-h5--line-height: 1.3;
+      --font-h5--letter-spacing: 0em;
+      --font-h6--line-height: var(--font-eyebrow--line-height);
+      --font-h6--letter-spacing: var(--font-eyebrow--letter-spacing);
+      --font-paragraph--line-height: 1.6;
+    {%- else -%}
+      --font-hero--family: var(--font-h1--family);
+      --font-hero--style: var(--font-h1--style);
+      --font-hero--weight: var(--font-h1--weight);
+      --font-hero--size: var(--font-h1--size);
+      --font-hero--line-height: var(--font-h1--line-height);
+      --font-hero--letter-spacing: var(--font-h1--letter-spacing);
+
+      --font-display--family: var(--font-h2--family);
+      --font-display--style: var(--font-h2--style);
+      --font-display--weight: var(--font-h2--weight);
+      --font-display--size: var(--font-h2--size);
+      --font-display--line-height: var(--font-h2--line-height);
+      --font-display--letter-spacing: var(--font-h2--letter-spacing);
+    {%- endif -%}
+  }
+
+  /* Buttons read as Public Sans 600 · 15px, in sentence case */
+  .button,
+  .button-secondary,
+  .button-custom,
+  button.shopify-payment-button__button--unbranded {
+    font-weight: var(--font-button--weight);
+    font-size: var(--font-button--size);
+    line-height: var(--font-button--line-height);
+    letter-spacing: var(--font-button--letter-spacing);
+  }
+
+  {%- if settings.brand_purchase_accent -%}
+    /* Tomato means purchase. Every other primary button stays ink. */
+    .add-to-cart-button,
+    .button[id^='BuyButtons-ProductSubmitButton-'],
+    .quick-add__button,
+    .cart__checkout-button,
+    button.shopify-payment-button__button--unbranded {
+      --color-primary-button-background: var(--color-tomato);
+      --color-primary-button-border: var(--color-tomato);
+      --color-primary-button-text: var(--color-on-tomato);
+      --color-primary-button-focus-outline: var(--color-tomato);
+      --color-primary-button-hover-background: var(--color-tomato-deep);
+      --color-primary-button-hover-border: var(--color-tomato-deep);
+      --color-primary-button-hover-text: var(--color-on-tomato);
+    }
+  {%- endif -%}
+
+  /* ---------------------------------------------------------------
+     Surfaces. Put one of these on a section or block to swap the
+     background, text and border trio the theme reads everywhere.
+     --------------------------------------------------------------- */
+  .surface-paper {
+    --color-background: var(--color-paper);
+    --color-background-rgb: var(--color-paper-rgb);
+    --color-foreground: var(--color-ink);
+    --color-foreground-rgb: var(--color-ink-rgb);
+    --color-border: var(--color-line);
+    --color-border-rgb: var(--color-line-rgb);
+    {% render 'brightness-opacities', background: settings.brand_paper %}
+  }
+
+  .surface-paper-deep {
+    --color-background: var(--color-paper-deep);
+    --color-background-rgb: var(--color-paper-deep-rgb);
+    --color-foreground: var(--color-ink);
+    --color-foreground-rgb: var(--color-ink-rgb);
+    --color-border: var(--color-line);
+    --color-border-rgb: var(--color-line-rgb);
+    {% render 'brightness-opacities', background: settings.brand_paper_deep %}
+  }
+
+  .surface-card {
+    --color-background: var(--color-card);
+    --color-background-rgb: var(--color-card-rgb);
+    --color-foreground: var(--color-ink);
+    --color-foreground-rgb: var(--color-ink-rgb);
+    --color-border: var(--color-line);
+    --color-border-rgb: var(--color-line-rgb);
+    {% render 'brightness-opacities', background: settings.brand_card %}
+  }
+
+  .surface-ink {
+    --color-background: var(--color-ink);
+    --color-background-rgb: var(--color-ink-rgb);
+    --color-foreground: var(--color-card);
+    --color-foreground-rgb: var(--color-card-rgb);
+    --color-border: rgb(var(--color-card-rgb) / 0.25);
+    --color-border-rgb: var(--color-card-rgb);
+    {% render 'brightness-opacities', background: settings.brand_ink %}
+  }
+
+  .surface-tomato {
+    --color-background: var(--color-tomato);
+    --color-background-rgb: var(--color-tomato-rgb);
+    --color-foreground: var(--color-on-tomato);
+    --color-foreground-rgb: var(--color-on-tomato-rgb);
+    --color-border: rgb(var(--color-on-tomato-rgb) / 0.3);
+    --color-border-rgb: var(--color-on-tomato-rgb);
+    {% render 'brightness-opacities', background: settings.brand_tomato %}
+  }
+
+  .surface-grape {
+    --color-background: var(--color-grape);
+    --color-background-rgb: var(--color-grape-rgb);
+    --color-foreground: var(--color-on-grape);
+    --color-foreground-rgb: var(--color-on-grape-rgb);
+    --color-border: rgb(var(--color-on-grape-rgb) / 0.3);
+    --color-border-rgb: var(--color-on-grape-rgb);
+    {% render 'brightness-opacities', background: settings.brand_grape %}
+  }
+
+  /* Tints carry ink text, so the opacity pairs stay on the light side */
+  .surface-tomato-soft,
+  .surface-sun-soft,
+  .surface-sky-soft,
+  .surface-grape-soft,
+  .surface-leaf-soft {
+    --color-foreground: var(--color-ink);
+    --color-foreground-rgb: var(--color-ink-rgb);
+    --color-border: rgb(var(--color-ink-rgb) / 0.12);
+    --color-border-rgb: var(--color-ink-rgb);
+    {% render 'brightness-opacities', background: settings.brand_paper %}
+  }
+
+  .surface-tomato-soft {
+    --color-background: var(--color-tomato-soft);
+    --color-background-rgb: {{ settings.brand_tomato_soft.rgb }};
+    --color-surface-accent: var(--color-tomato-deep);
+  }
+
+  .surface-sun-soft {
+    --color-background: var(--color-sun-soft);
+    --color-background-rgb: {{ settings.brand_sun_soft.rgb }};
+    --color-surface-accent: var(--color-sun-deep);
+  }
+
+  .surface-sky-soft {
+    --color-background: var(--color-sky-soft);
+    --color-background-rgb: {{ settings.brand_sky_soft.rgb }};
+    --color-surface-accent: var(--color-sky-deep);
+  }
+
+  .surface-grape-soft {
+    --color-background: var(--color-grape-soft);
+    --color-background-rgb: {{ settings.brand_grape_soft.rgb }};
+    --color-surface-accent: var(--color-grape);
+  }
+
+  .surface-leaf-soft {
+    --color-background: var(--color-leaf-soft);
+    --color-background-rgb: {{ settings.brand_leaf_soft.rgb }};
+    --color-surface-accent: var(--color-leaf-deep);
+  }
+
+  .surface-paper,
+  .surface-paper-deep,
+  .surface-card,
+  .surface-ink,
+  .surface-tomato,
+  .surface-grape,
+  .surface-tomato-soft,
+  .surface-sun-soft,
+  .surface-sky-soft,
+  .surface-grape-soft,
+  .surface-leaf-soft {
+    color: var(--color-foreground);
+    background-color: var(--color-background);
+  }
+
+  /* ---------------------------------------------------------------
+     Type roles as classes, for the sizes the theme has no preset for.
+     --------------------------------------------------------------- */
+  .text-hero,
+  .text-display,
+  .text-note,
+  .text-price,
+  .text-lead,
+  .text-small,
+  .text-eyebrow,
+  .text-reading {
+    font-family: var(--role-family);
+    font-style: var(--role-style);
+    font-weight: var(--role-weight);
+    font-size: var(--role-size);
+    line-height: var(--role-line-height);
+    letter-spacing: var(--role-letter-spacing);
+  }
+
+  .text-hero {
+    --role-family: var(--font-hero--family);
+    --role-style: var(--font-hero--style);
+    --role-weight: var(--font-hero--weight);
+    --role-size: var(--font-hero--size);
+    --role-line-height: var(--font-hero--line-height);
+    --role-letter-spacing: var(--font-hero--letter-spacing);
+  }
+
+  .text-display {
+    --role-family: var(--font-display--family);
+    --role-style: var(--font-display--style);
+    --role-weight: var(--font-display--weight);
+    --role-size: var(--font-display--size);
+    --role-line-height: var(--font-display--line-height);
+    --role-letter-spacing: var(--font-display--letter-spacing);
+  }
+
+  .text-note {
+    --role-family: var(--font-note--family);
+    --role-style: var(--font-note--style);
+    --role-weight: var(--font-note--weight);
+    --role-size: var(--font-note--size);
+    --role-line-height: var(--font-note--line-height);
+    --role-letter-spacing: var(--font-note--letter-spacing);
+  }
+
+  .text-price {
+    --role-family: var(--font-price--family);
+    --role-style: var(--font-price--style);
+    --role-weight: var(--font-price--weight);
+    --role-size: var(--font-price--size);
+    --role-line-height: var(--font-price--line-height);
+    --role-letter-spacing: var(--font-price--letter-spacing);
+  }
+
+  .text-lead {
+    --role-family: var(--font-lead--family);
+    --role-style: var(--font-lead--style);
+    --role-weight: var(--font-lead--weight);
+    --role-size: var(--font-lead--size);
+    --role-line-height: var(--font-lead--line-height);
+    --role-letter-spacing: var(--font-lead--letter-spacing);
+  }
+
+  .text-small {
+    --role-family: var(--font-small--family);
+    --role-style: var(--font-small--style);
+    --role-weight: var(--font-small--weight);
+    --role-size: var(--font-small--size);
+    --role-line-height: var(--font-small--line-height);
+    --role-letter-spacing: var(--font-small--letter-spacing);
+  }
+
+  .text-eyebrow {
+    --role-family: var(--font-eyebrow--family);
+    --role-style: var(--font-eyebrow--style);
+    --role-weight: var(--font-eyebrow--weight);
+    --role-size: var(--font-eyebrow--size);
+    --role-line-height: var(--font-eyebrow--line-height);
+    --role-letter-spacing: var(--font-eyebrow--letter-spacing);
+
+    text-transform: uppercase;
+  }
+
+  .text-reading {
+    --role-family: var(--font-reading--family);
+    --role-style: var(--font-reading--style);
+    --role-weight: var(--font-reading--weight);
+    --role-size: var(--font-reading--size);
+    --role-line-height: var(--font-reading--line-height);
+    --role-letter-spacing: var(--font-reading--letter-spacing);
+  }
+
+  /* The heartfelt word in a headline */
+  .text-accent {
+    font-family: var(--font-accent--family);
+    font-style: var(--font-accent--style);
+    font-weight: var(--font-accent--weight);
+  }
+{% endstyle %}

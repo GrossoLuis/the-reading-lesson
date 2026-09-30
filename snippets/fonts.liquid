@@ -1,12 +1,22 @@
-{%- unless settings.type_body_font.system? -%}
-  {{ settings.type_body_font | font_url | preload_tag: as: 'font', type: 'font/woff2', fetchpriority: 'low' }}
-{%- endunless -%}
-{%- unless settings.type_subheading_font.system? -%}
-  {{ settings.type_subheading_font | font_url | preload_tag: as: 'font', type: 'font/woff2', fetchpriority: 'low' }}
-{%- endunless -%}
-{%- unless settings.type_heading_font.system? -%}
-  {{ settings.type_heading_font | font_url | preload_tag: as: 'font', type: 'font/woff2', fetchpriority: 'low' }}
-{%- endunless -%}
-{%- unless settings.type_accent_font.system? -%}
-  {{ settings.type_accent_font | font_url | preload_tag: as: 'font', type: 'font/woff2', fetchpriority: 'low' }}
-{%- endunless -%}
+{%- if settings.brand_fonts_enabled -%}
+  {%- comment -%}
+    Besley and Public Sans carry every headline and every line of body copy, so both are
+    preloaded. Andika is only used for reading samples and syllables, and Besley italic only
+    for the heartfelt word, so those faces are left to load on demand.
+  {%- endcomment -%}
+  {{ 'brand-besley.woff2' | asset_url | preload_tag: as: 'font', type: 'font/woff2', crossorigin: 'anonymous' }}
+  {{ 'brand-public-sans.woff2' | asset_url | preload_tag: as: 'font', type: 'font/woff2', crossorigin: 'anonymous' }}
+{%- else -%}
+  {%- unless settings.type_body_font.system? -%}
+    {{ settings.type_body_font | font_url | preload_tag: as: 'font', type: 'font/woff2', fetchpriority: 'low' }}
+  {%- endunless -%}
+  {%- unless settings.type_subheading_font.system? -%}
+    {{ settings.type_subheading_font | font_url | preload_tag: as: 'font', type: 'font/woff2', fetchpriority: 'low' }}
+  {%- endunless -%}
+  {%- unless settings.type_heading_font.system? -%}
+    {{ settings.type_heading_font | font_url | preload_tag: as: 'font', type: 'font/woff2', fetchpriority: 'low' }}
+  {%- endunless -%}
+  {%- unless settings.type_accent_font.system? -%}
+    {{ settings.type_accent_font | font_url | preload_tag: as: 'font', type: 'font/woff2', fetchpriority: 'low' }}
+  {%- endunless -%}
+{%- endif -%}
