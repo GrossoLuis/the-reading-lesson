@@ -25,11 +25,11 @@
 
 {% style %}
   {%- if settings.brand_fonts_enabled -%}
-    /* Besley and Public Sans ship as variable faces (400–700); Andika is static. */
+    /* Besley (400–900) and Public Sans (400–700) ship as variable faces; Andika is static. */
     @font-face {
       font-family: 'Besley';
       src: url({{ 'brand-besley.woff2' | asset_url }}) format('woff2');
-      font-weight: 400 700;
+      font-weight: 400 900;
       font-style: normal;
       font-display: swap;
     }
@@ -37,7 +37,7 @@
     @font-face {
       font-family: 'Besley';
       src: url({{ 'brand-besley-italic.woff2' | asset_url }}) format('woff2');
-      font-weight: 400 700;
+      font-weight: 400 900;
       font-style: italic;
       font-display: swap;
     }
