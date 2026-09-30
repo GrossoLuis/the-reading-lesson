@@ -42,6 +42,12 @@
     assign accent_font_italic_face_id = '[accent_font_italic_family]-[accent_font_italic_weight]-[accent_font_italic_style]|' | replace: '[accent_font_italic_family]', accent_font_italic.family | replace: '[accent_font_italic_weight]', accent_font_italic.weight | replace: '[accent_font_italic_style]', accent_font_italic.style
     assign accent_font_bold_italic_face_id = '[accent_font_bold_italic_family]-[accent_font_bold_italic_weight]-[accent_font_bold_italic_style]|' | replace: '[accent_font_bold_italic_family]', accent_font_bold_italic.family | replace: '[accent_font_bold_italic_weight]', accent_font_bold_italic.weight | replace: '[accent_font_bold_italic_style]', accent_font_bold_italic.style
 
+    comment
+      The brand fonts are self-hosted by 'brand-tokens', which also overrides the family
+      variables below, so there is nothing to fetch from the font picker while they are on.
+    endcomment
+    unless settings.brand_fonts_enabled
+
     unless rendered_fonts contains primary_font_face_id
       echo primary_font | font_face: font_display: 'swap'
       assign rendered_fonts = rendered_fonts | append: primary_font_face_id
@@ -120,6 +126,8 @@
     unless rendered_fonts contains accent_font_bold_italic_face_id
       echo accent_font_bold_italic | font_face: font_display: 'swap'
       assign rendered_fonts = rendered_fonts | append: accent_font_bold_italic_face_id
+    endunless
+
     endunless
   %}
 
