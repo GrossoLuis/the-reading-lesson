@@ -1,6 +1,56 @@
 {
   "type": "header",
   "name": "t:names.header",
-  "sections": {},
-  "order": []
+  "sections": {
+    "announcement_bar": {
+      "type": "announcement-bar",
+      "blocks": {
+        "message_shipping": {
+          "type": "message",
+          "settings": {
+            "text": "Free shipping on orders over $40",
+            "link": ""
+          }
+        },
+        "message_gift": {
+          "type": "message",
+          "settings": {
+            "text": "Free gift wrapping",
+            "link": ""
+          }
+        },
+        "message_returns": {
+          "type": "message",
+          "settings": {
+            "text": "Easy 30-day returns",
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "message_shipping",
+        "message_gift",
+        "message_returns"
+      ],
+      "settings": {
+        "background": "ink",
+        "interval": 5
+      }
+    },
+    "header": {
+      "type": "header",
+      "settings": {
+        "menu": "main-menu",
+        "sticky": true,
+        "show_search": true,
+        "search_placeholder": "Search for a story",
+        "show_account": true,
+        "show_wishlist": true
+      }
+    }
+  },
+  "order": [
+    "announcement_bar",
+    "header"
+  ]
 }

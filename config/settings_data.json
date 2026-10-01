@@ -1,7 +1,7 @@
 {
   "current": {
-    "logo_height": 36,
-    "logo_height_mobile": 28,
+    "logo_height": 25,
+    "logo_height_mobile": 20,
     "color_palette": {
       "background": "#FAF6EF",
       "foreground": "#1D2340",
