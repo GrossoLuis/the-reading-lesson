@@ -1,0 +1,47 @@
+{%- doc -%}
+  Line icons for the custom sections: 24px grid, 1.5px stroke (--stroke-md), round caps,
+  drawn in currentColor so they follow the text colour.
+
+  @param {string} name - search, account, heart, bag, menu, close, chevron-down, chevron-right, arrow-right
+  @param {number} [size] - Rendered size in px. Defaults to 22.
+
+  @example
+  {% render 'brand-icon', name: 'bag', size: 22 %}
+{%- enddoc -%}
+
+{%- assign size = size | default: 22 -%}
+
+<svg
+  class="brand-icon brand-icon--{{ name }}"
+  width="{{ size }}"
+  height="{{ size }}"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.5"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+  focusable="false"
+>
+  {%- case name -%}
+    {%- when 'search' -%}
+      <circle cx="11" cy="11" r="6.25"/><path d="m15.75 15.75 4 4"/>
+    {%- when 'account' -%}
+      <circle cx="12" cy="8" r="3.75"/><path d="M4.75 19.75c.9-3.5 3.8-5.5 7.25-5.5s6.35 2 7.25 5.5"/>
+    {%- when 'heart' -%}
+      <path d="M12 19.25s-7.25-4.3-7.25-9.6A3.9 3.9 0 0 1 8.65 5.75c1.45 0 2.65.75 3.35 1.95.7-1.2 1.9-1.95 3.35-1.95a3.9 3.9 0 0 1 3.9 3.9c0 5.3-7.25 9.6-7.25 9.6Z"/>
+    {%- when 'bag' -%}
+      <path d="M5.75 8.25h12.5l-.85 10.6a1.5 1.5 0 0 1-1.5 1.4h-7.8a1.5 1.5 0 0 1-1.5-1.4l-.85-10.6Z"/><path d="M9 10.25V7a3 3 0 0 1 6 0v3.25"/>
+    {%- when 'menu' -%}
+      <path d="M4.75 7.25h14.5M4.75 12h14.5M4.75 16.75h14.5"/>
+    {%- when 'close' -%}
+      <path d="m6.75 6.75 10.5 10.5M17.25 6.75l-10.5 10.5"/>
+    {%- when 'chevron-down' -%}
+      <path d="m7.75 10 4.25 4.25L16.25 10"/>
+    {%- when 'chevron-right' -%}
+      <path d="m10 7.75 4.25 4.25L10 16.25"/>
+    {%- when 'arrow-right' -%}
+      <path d="M5.75 12h12.5M13.5 7.25 18.25 12l-4.75 4.75"/>
+  {%- endcase -%}
+</svg>

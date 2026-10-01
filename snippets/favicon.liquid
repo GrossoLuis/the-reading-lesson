@@ -1,0 +1,27 @@
+{%- doc -%}
+  Favicon: the image from Theme settings › Logo and favicon, or, when none is set,
+  the three brand dots in `assets/favicon.png` (512×512, transparent).
+{%- enddoc -%}
+
+{%- if settings.favicon != blank -%}
+  <link
+    rel="icon"
+    type="image/png"
+    href="{{ settings.favicon | image_url: width: 32, height: 32 }}"
+  >
+  <link
+    rel="apple-touch-icon"
+    href="{{ settings.favicon | image_url: width: 180, height: 180 }}"
+  >
+{%- else -%}
+  <link
+    rel="icon"
+    type="image/png"
+    sizes="512x512"
+    href="{{ 'favicon.png' | asset_url }}"
+  >
+  <link
+    rel="apple-touch-icon"
+    href="{{ 'favicon.png' | asset_url }}"
+  >
+{%- endif -%}

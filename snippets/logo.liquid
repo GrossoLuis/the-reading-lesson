@@ -1,0 +1,79 @@
+{%- doc -%}
+  The Reading Lesson logo: three coloured dots (tomato, sun, sky) and the name in
+  Besley 600, outlined in `assets/logo-the-reading-lesson.svg`.
+
+  Uses the image set in Theme settings › Logo and favicon (Default logo / Inverse logo)
+  when there is one, and falls back to the SVG in assets. Height comes from the same
+  settings (desktop and mobile), so every logo on the site resizes together.
+
+  @param {boolean} [inverse] - White text, for dark surfaces such as ink.
+
+  @example
+  {% render 'logo' %}
+  {% render 'logo', inverse: true %}
+{%- enddoc -%}
+
+{%- liquid
+  if inverse
+    assign logo_image = settings.logo_inverse
+    assign logo_asset = 'logo-the-reading-lesson-inverse.svg'
+  else
+    assign logo_image = settings.logo
+    assign logo_asset = 'logo-the-reading-lesson.svg'
+  endif
+
+  assign logo_height = settings.logo_height | default: 25
+  assign logo_height_mobile = settings.logo_height_mobile | default: 20
+-%}
+
+<span
+  class="logo"
+  style="--logo-height: {{ logo_height }}px; --logo-height-mobile: {{ logo_height_mobile }}px;"
+>
+  {%- if logo_image != blank -%}
+    {%- assign logo_width = logo_image.width | times: logo_height | divided_by: logo_image.height -%}
+    {{-
+      logo_image
+      | image_url: height: 200
+      | image_tag:
+        class: 'logo__image',
+        alt: shop.name,
+        width: logo_width,
+        height: logo_height,
+        loading: 'eager',
+        fetchpriority: 'high'
+    -}}
+  {%- else -%}
+    <img
+      class="logo__image"
+      src="{{ logo_asset | asset_url }}"
+      alt="The Reading Lesson"
+      width="1217"
+      height="105"
+      fetchpriority="high"
+    >
+  {%- endif -%}
+</span>
+
+{% stylesheet %}
+  .logo {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* Height drives the size; the guideline asks for at least 120px of width on screen. */
+  .logo__image {
+    display: block;
+    width: auto;
+    height: var(--logo-height);
+    min-width: 120px;
+    max-width: 100%;
+    object-fit: contain;
+  }
+
+  @media screen and (max-width: 749px) {
+    .logo__image {
+      height: var(--logo-height-mobile);
+    }
+  }
+{% endstylesheet %}

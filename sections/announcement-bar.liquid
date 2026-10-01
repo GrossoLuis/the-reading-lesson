@@ -1,0 +1,266 @@
+{%- comment -%}
+  Top promotion bar: ink (navy) with white text, as in the homepage preview.
+
+  Desktop shows every message in one line, separated by sun dots. Below 990px, or
+  when the messages don't fit, it shows one message at a time and rotates them.
+{%- endcomment -%}
+
+{%- liquid
+  assign messages = section.blocks | where: 'type', 'message'
+  case section.settings.background
+    when 'grape'
+      assign bar_bg = 'var(--color-grape)'
+      assign bar_fg = 'var(--color-on-grape)'
+      assign bar_dot = 'var(--color-sun)'
+    when 'tomato'
+      assign bar_bg = 'var(--color-tomato)'
+      assign bar_fg = 'var(--color-on-tomato)'
+      assign bar_dot = 'var(--color-sun)'
+    when 'paper-deep'
+      assign bar_bg = 'var(--color-paper-deep)'
+      assign bar_fg = 'var(--color-ink)'
+      assign bar_dot = 'var(--color-tomato)'
+    else
+      assign bar_bg = 'var(--color-ink)'
+      assign bar_fg = '#FFFFFF'
+      assign bar_dot = 'var(--color-sun)'
+  endcase
+-%}
+
+{%- if messages.size > 0 -%}
+  <announcement-strip
+    class="announcement-strip"
+    style="--bar-bg: {{ bar_bg }}; --bar-fg: {{ bar_fg }}; --bar-dot: {{ bar_dot }};"
+    data-interval="{{ section.settings.interval | times: 1000 }}"
+    role="region"
+    aria-label="Announcements"
+  >
+    <div class="announcement-strip__inner">
+      <ul class="announcement-strip__list">
+        {%- for block in messages -%}
+          <li
+            class="announcement-strip__item{% if forloop.first %} is-active{% endif %}"
+            {{ block.shopify_attributes }}
+          >
+            {%- if block.settings.link != blank -%}
+              <a
+                class="announcement-strip__link"
+                href="{{ block.settings.link }}"
+              >
+                {{- block.settings.text -}}
+              </a>
+            {%- else -%}
+              <span>{{ block.settings.text }}</span>
+            {%- endif -%}
+          </li>
+        {%- endfor -%}
+      </ul>
+    </div>
+  </announcement-strip>
+{%- endif -%}
+
+{% stylesheet %}
+  .announcement-strip {
+    display: block;
+    background: var(--bar-bg);
+    color: var(--bar-fg);
+  }
+
+  .announcement-strip__inner {
+    max-width: var(--page-width);
+    margin-inline: auto;
+    padding-inline: var(--page-margin);
+  }
+
+  .announcement-strip__list {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-5);
+    min-height: 40px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-family: var(--font-body--family);
+    font-size: 13.5px;
+    font-weight: 500;
+    line-height: 1.3;
+    text-align: center;
+  }
+
+  .announcement-strip__item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+    padding-block: var(--space-2);
+  }
+
+  /* Sun dot between messages. */
+  .announcement-strip__item + .announcement-strip__item::before {
+    content: '';
+    flex: none;
+    width: 5px;
+    aspect-ratio: 1;
+    border-radius: var(--radius-full);
+    background: var(--bar-dot);
+  }
+
+  .announcement-strip__link {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .announcement-strip__link:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .announcement-strip__link:focus-visible {
+    outline: var(--focus-ring-width) solid currentColor;
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* One message at a time: on small screens, or when JS finds the line overflows. */
+  @media screen and (max-width: 989px) {
+    .announcement-strip__list {
+      display: grid;
+    }
+
+    .announcement-strip__item {
+      grid-area: 1 / 1;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 400ms ease, visibility 0s linear 400ms;
+    }
+
+    .announcement-strip__item.is-active {
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 400ms ease;
+    }
+
+    .announcement-strip__item + .announcement-strip__item::before {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .announcement-strip__item {
+      transition: none;
+    }
+  }
+{% endstylesheet %}
+
+{% javascript %}
+  if (!customElements.get('announcement-strip')) {
+    class AnnouncementStrip extends HTMLElement {
+      #timer = null;
+      #index = 0;
+      #mq = window.matchMedia('(max-width: 989px)');
+
+      connectedCallback() {
+        this.items = [...this.querySelectorAll('.announcement-strip__item')];
+        if (this.items.length < 2) return;
+
+        this.#mq.addEventListener('change', this.#sync);
+        this.addEventListener('mouseenter', this.#stop);
+        this.addEventListener('mouseleave', this.#sync);
+        this.addEventListener('focusin', this.#stop);
+        this.addEventListener('focusout', this.#sync);
+        this.#sync();
+      }
+
+      disconnectedCallback() {
+        this.#mq.removeEventListener('change', this.#sync);
+        this.#stop();
+      }
+
+      #sync = () => {
+        this.#stop();
+        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (!this.#mq.matches || reduced) return;
+        const interval = Number(this.dataset.interval) || 5000;
+        this.#timer = window.setInterval(() => this.#show(this.#index + 1), interval);
+      };
+
+      #stop = () => {
+        window.clearInterval(this.#timer);
+        this.#timer = null;
+      };
+
+      #show(index) {
+        this.#index = (index + this.items.length) % this.items.length;
+        this.items.forEach((item, i) => item.classList.toggle('is-active', i === this.#index));
+      }
+    }
+
+    customElements.define('announcement-strip', AnnouncementStrip);
+  }
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "Announcement bar",
+  "tag": "section",
+  "class": "announcement-bar-section",
+  "max_blocks": 6,
+  "settings": [
+    {
+      "type": "select",
+      "id": "background",
+      "label": "Background",
+      "options": [
+        { "value": "ink", "label": "Ink (navy)" },
+        { "value": "grape", "label": "Grape" },
+        { "value": "tomato", "label": "Tomato" },
+        { "value": "paper-deep", "label": "Paper deep" }
+      ],
+      "default": "ink"
+    },
+    {
+      "type": "range",
+      "id": "interval",
+      "label": "Seconds per message on mobile",
+      "min": 3,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "default": 5
+    }
+  ],
+  "blocks": [
+    {
+      "type": "message",
+      "name": "Message",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "Free shipping on orders over $40"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        }
+      ]
+    }
+  ],
+  "enabled_on": {
+    "groups": ["header"]
+  },
+  "presets": [
+    {
+      "name": "Announcement bar",
+      "blocks": [
+        { "type": "message", "settings": { "text": "Free shipping on orders over $40" } },
+        { "type": "message", "settings": { "text": "Free gift wrapping" } },
+        { "type": "message", "settings": { "text": "Easy 30-day returns" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
