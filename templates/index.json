@@ -1,10 +1,51 @@
 {
   "sections": {
-    "main": {
-      "type": "blank"
+    "hero": {
+      "type": "hero",
+      "blocks": {
+        "trust_shipping": {
+          "type": "trust",
+          "settings": {
+            "icon": "truck",
+            "text": "Nationwide shipping"
+          }
+        },
+        "trust_gift": {
+          "type": "trust",
+          "settings": {
+            "icon": "gift",
+            "text": "Ready to gift"
+          }
+        },
+        "trust_returns": {
+          "type": "trust",
+          "settings": {
+            "icon": "returns",
+            "text": "Hassle-free returns"
+          }
+        }
+      },
+      "block_order": ["trust_shipping", "trust_gift", "trust_returns"],
+      "settings": {
+        "eyebrow": "Hand-picked children’s books",
+        "heading_start": "Every book is an",
+        "syllable_word": "ad-ven-ture",
+        "show_arc": true,
+        "heading_end": "to read",
+        "heading_accent": "together",
+        "text": "<p>Picture books, early readers and books for learning letters. For children ages 3 to 8, and for the grown-ups who read with them.</p>",
+        "primary_label": "Shop the program",
+        "primary_url": "/collections/all",
+        "secondary_label": "Get Lesson One free",
+        "secondary_url": "",
+        "media_link": "",
+        "media_link_label": "Shop the books",
+        "badge_number": "3–8",
+        "badge_label": "Years",
+        "badge_color": "sun",
+        "note": "new books every week"
+      }
     }
   },
-  "order": [
-    "main"
-  ]
+  "order": ["hero"]
 }
