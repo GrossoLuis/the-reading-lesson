@@ -146,6 +146,83 @@
         "surface": "paper"
       }
     },
+    "method_kbB66n": {
+      "type": "method",
+      "blocks": {
+        "step_8hffXD": {
+          "type": "step",
+          "settings": {
+            "title": "Every sound arrives with a picture",
+            "text": "<p>Each new letter is paired with an image: s with a snake, t with a turtle. Paired-associative learning is among the most effective mnemonic tools available for a young memory, and it costs the child no extra effort.</p><p>Lessons don't follow the alphabet. They start with the most common letters in English, so a child reads real words in the first lesson instead of waiting until letter W.</p>",
+            "stat_value": "",
+            "stat_label": "",
+            "stat_two_value": "",
+            "stat_two_label": "",
+            "image": "shopify://shop_images/method-sounds.png",
+            "image_alt": "Lesson one page: the letters c, o, s, a, t each paired with an animal picture",
+            "caption": "Lesson 1 · sounds paired with pictures",
+            "sample_style": "letters",
+            "sample_text": "c o s a t",
+            "page_label": "Lesson 1"
+          }
+        },
+        "step_44ynBn": {
+          "type": "step",
+          "settings": {
+            "title": "Bars under the letters are training wheels",
+            "text": "<p>To young readers, letters in a word all melt together. A bar under each sound unit separates what the eye can't. The program is designed so that the child touches each bar, says the sound, then slides across and blends. It takes most children about five lessons to sound out a word alone.</p><p>Then the bars start disappearing. The visual helpers in this book are designed to be removed, on purpose, before the child notices that they're leaning on them.</p>",
+            "stat_value": "~5 lessons",
+            "stat_label": "for most children to sound out a word alone",
+            "stat_two_value": "",
+            "stat_two_label": "",
+            "image": "shopify://shop_images/method-blend.png",
+            "image_alt": "Lesson one page: a and t blending into at, with bars under each sound",
+            "caption": "Lesson 1 · blending two sounds",
+            "sample_style": "blend",
+            "sample_text": "a t",
+            "page_label": "Lesson 1"
+          }
+        },
+        "step_jfJqtp": {
+          "type": "step",
+          "settings": {
+            "title": "Pages are designed to be distraction-free",
+            "text": "<p>Large letters shrink as the child's reading grows. Words sit far apart, with almost nothing else on the page. The first ten lessons are lower-case only, because ninety-five percent of printed letters are lower-case, and that's what a new reader meets most. Special marks handle the b-and-d confusion, then quietly leave.</p><p>Roughly 500 key words carry the course, chosen from the most common words in English — including the ones like <em>you</em>, <em>do</em>, and <em>to</em> that no phonics rule can explain.</p>",
+            "stat_value": "95%",
+            "stat_label": "of printed letters are lower-case",
+            "stat_two_value": "~500",
+            "stat_two_label": "key words carry the course",
+            "image": "shopify://shop_images/method-story.png",
+            "image_alt": "Lesson one page: a child's first story, cat, a cat, a cat sat",
+            "caption": "Lesson 1 · a first story, page 15",
+            "sample_style": "story",
+            "sample_text": "cat / a cat / a cat sat",
+            "page_label": "Lesson 1"
+          }
+        }
+      },
+      "block_order": [
+        "step_8hffXD",
+        "step_44ynBn",
+        "step_jfJqtp"
+      ],
+      "name": "The method",
+      "settings": {
+        "eyebrow": "The method",
+        "heading": "Built on how reading <em>actually</em> works",
+        "intro": "<p>Phonics and whole-language are usually argued about as opposites. They aren't! A fluent reader recognizes most words on sight and falls back on sounding out the unfamiliar ones. So we teach both, in the order a child's brain can absorb them.</p>",
+        "show_equation": true,
+        "term_one": "Words on sight",
+        "term_two": "Sounding out",
+        "term_result": "A fluent reader",
+        "closing_text": "<p>Which is why there are no games here, and no animation competing with the words. What the book offers instead is the thing that actually keeps a four-year-old going: reading a real sentence, out loud, on the first day.</p>",
+        "closing_statement": "We are not teaching phonics. We are teaching <em>reading</em>.",
+        "button_label": "Shop the program",
+        "button_url": "shopify://collections/all",
+        "image_height": 480,
+        "surface": "paper-deep"
+      }
+    },
     "testimonials_GA6aE9": {
       "type": "testimonials",
       "blocks": {
@@ -243,87 +320,13 @@
         "link_url": "",
         "surface": "paper"
       }
-    },
-    "method_kbB66n": {
-      "type": "method",
-      "blocks": {
-        "step_8hffXD": {
-          "type": "step",
-          "settings": {
-            "title": "Every sound arrives with a picture",
-            "text": "<p>Each new letter is paired with an image: s with a snake, t with a turtle. Paired-associative learning is among the most effective mnemonic tools available for a young memory, and it costs the child no extra effort.</p><p>Lessons don't follow the alphabet. They start with the most common letters in English, so a child reads real words in the first lesson instead of waiting until letter W.</p>",
-            "stat_value": "",
-            "stat_label": "",
-            "stat_two_value": "",
-            "stat_two_label": "",
-            "image_alt": "Lesson one page: the letters c, o, s, a, t each paired with an animal picture",
-            "caption": "Lesson 1 · sounds paired with pictures",
-            "sample_style": "letters",
-            "sample_text": "c o s a t",
-            "page_label": "Lesson 1"
-          }
-        },
-        "step_44ynBn": {
-          "type": "step",
-          "settings": {
-            "title": "Bars under the letters are training wheels",
-            "text": "<p>To young readers, letters in a word all melt together. A bar under each sound unit separates what the eye can't. The program is designed so that the child touches each bar, says the sound, then slides across and blends. It takes most children about five lessons to sound out a word alone.</p><p>Then the bars start disappearing. The visual helpers in this book are designed to be removed, on purpose, before the child notices that they're leaning on them.</p>",
-            "stat_value": "~5 lessons",
-            "stat_label": "for most children to sound out a word alone",
-            "stat_two_value": "",
-            "stat_two_label": "",
-            "image_alt": "Lesson one page: a and t blending into at, with bars under each sound",
-            "caption": "Lesson 1 · blending two sounds",
-            "sample_style": "blend",
-            "sample_text": "a t",
-            "page_label": "Lesson 1"
-          }
-        },
-        "step_jfJqtp": {
-          "type": "step",
-          "settings": {
-            "title": "Pages are designed to be distraction-free",
-            "text": "<p>Large letters shrink as the child's reading grows. Words sit far apart, with almost nothing else on the page. The first ten lessons are lower-case only, because ninety-five percent of printed letters are lower-case, and that's what a new reader meets most. Special marks handle the b-and-d confusion, then quietly leave.</p><p>Roughly 500 key words carry the course, chosen from the most common words in English — including the ones like <em>you</em>, <em>do</em>, and <em>to</em> that no phonics rule can explain.</p>",
-            "stat_value": "95%",
-            "stat_label": "of printed letters are lower-case",
-            "stat_two_value": "~500",
-            "stat_two_label": "key words carry the course",
-            "image_alt": "Lesson one page: a child's first story, cat, a cat, a cat sat",
-            "caption": "Lesson 1 · a first story, page 15",
-            "sample_style": "story",
-            "sample_text": "cat / a cat / a cat sat",
-            "page_label": "Lesson 1"
-          }
-        }
-      },
-      "block_order": [
-        "step_8hffXD",
-        "step_44ynBn",
-        "step_jfJqtp"
-      ],
-      "name": "The method",
-      "settings": {
-        "eyebrow": "The method",
-        "heading": "Built on how reading <em>actually</em> works",
-        "intro": "<p>Phonics and whole-language are usually argued about as opposites. They aren't! A fluent reader recognizes most words on sight and falls back on sounding out the unfamiliar ones. So we teach both, in the order a child's brain can absorb them.</p>",
-        "show_equation": true,
-        "term_one": "Words on sight",
-        "term_two": "Sounding out",
-        "term_result": "A fluent reader",
-        "closing_text": "<p>Which is why there are no games here, and no animation competing with the words. What the book offers instead is the thing that actually keeps a four-year-old going: reading a real sentence, out loud, on the first day.</p>",
-        "closing_statement": "We are not teaching phonics. We are teaching <em>reading</em>.",
-        "button_label": "Shop the program",
-        "button_url": "shopify://collections/all",
-        "image_height": 480,
-        "surface": "paper-deep"
-      }
     }
   },
   "order": [
     "main",
     "hero_k6yc4U",
     "carousel_cta_iJt7VN",
-    "testimonials_GA6aE9",
-    "method_kbB66n"
+    "method_kbB66n",
+    "testimonials_GA6aE9"
   ]
 }
