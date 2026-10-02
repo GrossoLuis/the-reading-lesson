@@ -39,11 +39,10 @@
         }
       },
       "block_order": [
-        "trust_Kix83g",
-        "trust_7p78VU",
-        "trust_fdpQ8d"
+        "trust_shipping",
+        "trust_gift",
+        "trust_returns"
       ],
-      "name": "Hero",
       "settings": {
         "eyebrow": "Hand-picked children’s books",
         "heading_start": "Every book is an",
@@ -66,10 +65,305 @@
         "badge_color": "sun",
         "note": "new books every week"
       }
+    },
+    "carousel_cta": {
+      "type": "carousel-cta",
+      "blocks": {
+        "photo_1": {
+          "type": "slide",
+          "settings": {
+            "tag": "Reading",
+            "color": "sky",
+            "caption": "Her first word, sounded out loud",
+            "link": ""
+          }
+        },
+        "photo_2": {
+          "type": "slide",
+          "settings": {
+            "tag": "Writing",
+            "color": "sun",
+            "caption": "Tracing letters, one curve at a time",
+            "link": ""
+          }
+        },
+        "photo_3": {
+          "type": "slide",
+          "settings": {
+            "tag": "Reading",
+            "color": "grape",
+            "caption": "Bedtime stories, read together",
+            "link": ""
+          }
+        },
+        "photo_4": {
+          "type": "slide",
+          "settings": {
+            "tag": "Math",
+            "color": "leaf",
+            "caption": "Counting the ducks on every page",
+            "link": ""
+          }
+        },
+        "photo_5": {
+          "type": "slide",
+          "settings": {
+            "tag": "Reading",
+            "color": "sky",
+            "caption": "The book he asks for every night",
+            "link": ""
+          }
+        },
+        "photo_6": {
+          "type": "slide",
+          "settings": {
+            "tag": "Writing",
+            "color": "sun",
+            "caption": "My name, written all by myself",
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "photo_1",
+        "photo_2",
+        "photo_3",
+        "photo_4",
+        "photo_5",
+        "photo_6"
+      ],
+      "settings": {
+        "eyebrow": "Reading together",
+        "heading": "Little readers, <em>big</em> discoveries",
+        "text": "<p>Real families, real progress. Children sounding out their first words, tracing letters and finding the joy of a story they can read on their own.</p>",
+        "primary_label": "Start reading together",
+        "primary_url": "/collections/all",
+        "secondary_label": "",
+        "secondary_url": "",
+        "image_ratio": "portrait",
+        "slide_size": "medium",
+        "stagger": true,
+        "autoplay": false,
+        "autoplay_speed": 5,
+        "carousel_label": "Children reading with The Reading Lesson",
+        "surface": "paper"
+      }
+    },
+    "method": {
+      "type": "method",
+      "blocks": {
+        "step_1": {
+          "type": "step",
+          "settings": {
+            "title": "Every sound arrives with a picture",
+            "text": "<p>Each new letter is paired with an image: s with a snake, t with a turtle. Paired-associative learning is among the most effective mnemonic tools available for a young memory, and it costs the child no extra effort.</p><p>Lessons don't follow the alphabet. They start with the most common letters in English, so a child reads real words in the first lesson instead of waiting until letter W.</p>",
+            "image_alt": "Lesson one page: the letters c, o, s, a, t each paired with an animal picture",
+            "caption": "Lesson 1 · sounds paired with pictures",
+            "sample_style": "letters",
+            "sample_text": "c o s a t",
+            "image": "shopify://shop_images/method-sounds.png"
+          }
+        },
+        "step_2": {
+          "type": "step",
+          "settings": {
+            "title": "Bars under the letters are training wheels",
+            "text": "<p>To young readers, letters in a word all melt together. A bar under each sound unit separates what the eye can't. The program is designed so that the child touches each bar, says the sound, then slides across and blends. It takes most children about five lessons to sound out a word alone.</p><p>Then the bars start disappearing. The visual helpers in this book are designed to be removed, on purpose, before the child notices that they're leaning on them.</p>",
+            "stat_value": "~5 lessons",
+            "stat_label": "for most children to sound out a word alone",
+            "image_alt": "Lesson one page: a and t blending into at, with bars under each sound",
+            "caption": "Lesson 1 · blending two sounds",
+            "sample_style": "blend",
+            "sample_text": "a t",
+            "image": "shopify://shop_images/method-blend.png"
+          }
+        },
+        "step_3": {
+          "type": "step",
+          "settings": {
+            "title": "Pages are designed to be distraction-free",
+            "text": "<p>Large letters shrink as the child's reading grows. Words sit far apart, with almost nothing else on the page. The first ten lessons are lower-case only, because ninety-five percent of printed letters are lower-case, and that's what a new reader meets most. Special marks handle the b-and-d confusion, then quietly leave.</p><p>Roughly 500 key words carry the course, chosen from the most common words in English — including the ones like <em>you</em>, <em>do</em>, and <em>to</em> that no phonics rule can explain.</p>",
+            "stat_value": "95%",
+            "stat_label": "of printed letters are lower-case",
+            "stat_two_value": "~500",
+            "stat_two_label": "key words carry the course",
+            "image_alt": "Lesson one page: a child's first story, cat, a cat, a cat sat",
+            "caption": "Lesson 1 · a first story, page 15",
+            "sample_style": "story",
+            "sample_text": "cat / a cat / a cat sat",
+            "image": "shopify://shop_images/method-story.png"
+          }
+        }
+      },
+      "block_order": [
+        "step_1",
+        "step_2",
+        "step_3"
+      ],
+      "settings": {
+        "eyebrow": "The method",
+        "heading": "Built on how reading <em>actually</em> works",
+        "intro": "<p>Phonics and whole-language are usually argued about as opposites. They aren't! A fluent reader recognizes most words on sight and falls back on sounding out the unfamiliar ones. So we teach both, in the order a child's brain can absorb them.</p>",
+        "show_equation": true,
+        "term_one": "Words on sight",
+        "term_two": "Sounding out",
+        "term_result": "A fluent reader",
+        "closing_text": "<p>Which is why there are no games here, and no animation competing with the words. What the book offers instead is the thing that actually keeps a four-year-old going: reading a real sentence, out loud, on the first day.</p>",
+        "closing_statement": "We are not teaching phonics. We are teaching <em>reading</em>.",
+        "button_label": "Shop the program",
+        "button_url": "/collections/all",
+        "surface": "paper-deep"
+      }
+    },
+    "testimonials": {
+      "type": "testimonials",
+      "blocks": {
+        "featured_1": {
+          "type": "featured",
+          "settings": {
+            "quote": "<p>“We’d tried another popular reading program first. My daughter would grimace and beg me to do anything else. With The Reading Lesson, we got past the first lessons <em>‘without tears and complaints’</em> — and it delivered results.”</p>",
+            "source": "<p><strong>Paraphrased from a NextGen Homeschool curriculum review.</strong> Families arriving after a first attempt that didn’t take is the most common story we hear.</p>"
+          }
+        },
+        "featured_2": {
+          "type": "featured",
+          "settings": {
+            "quote": "<p>“Refreshingly straightforward approach and uncluttered format. <em>Highly recommended.</em>”</p>",
+            "source": "<p><strong>Library Journal.</strong> Discovery Education independently praised the same thing: calm, uncluttered pages.</p>"
+          }
+        },
+        "featured_3": {
+          "type": "featured",
+          "settings": {
+            "quote": "<p>“By far the <em>easiest to use</em>.”</p>",
+            "source": "<p><strong>Home Educating Family Association</strong>, after trying several reading programs. Every lesson tells you exactly what to say.</p>"
+          }
+        },
+        "hl_easy": {
+          "type": "highlight",
+          "settings": {
+            "title": "Easiest to use",
+            "color": "sky",
+            "text": "<p>“By far the easiest to use,” wrote one reviewer for the Home Educating Family Association, after trying several reading programs. Every lesson tells you exactly what to say.</p>"
+          }
+        },
+        "hl_calm": {
+          "type": "highlight",
+          "settings": {
+            "title": "Calm, uncluttered pages",
+            "color": "sun",
+            "text": "<p>“Refreshingly straightforward approach and uncluttered format. Highly recommended.” — <em>Library Journal</em>. Discovery Education independently praised the same thing. The calm is the method.</p>"
+          }
+        },
+        "hl_works": {
+          "type": "highlight",
+          "settings": {
+            "title": "It simply works",
+            "color": "leaf",
+            "text": "<p>“Take my advice. This book works!” — Jennifer LB Lesse, <em>A StoryBook Weaver’s Book Reviews</em>. Kids read their first tiny story before Lesson One is over.</p>"
+          }
+        },
+        "review_1": {
+          "type": "review",
+          "settings": {
+            "rating": 5,
+            "author": "Amazon reviewer",
+            "quote": "<p>“The single best program for teaching children to read I have found to date, and I have seen many. It worked. Not only was it simple enough for anyone to use, but the program is built on solid phonics and whole language principles.”</p>"
+          }
+        },
+        "review_2": {
+          "type": "review",
+          "settings": {
+            "rating": 5,
+            "author": "Amazon reviewer",
+            "quote": "<p>“I got this a few weeks before my daughter turned 4. Amazingly, she often brings me the book in the morning when she wakes up and asks to do a page from her lesson book. She’s enjoying it.”</p>"
+          }
+        },
+        "review_3": {
+          "type": "review",
+          "settings": {
+            "rating": 5,
+            "author": "Amazon reviewer",
+            "quote": "<p>“We’ve successfully taught 7 children to read with The Reading Lesson and I’m currently teaching our 8th. Allow me to quell any fears you may have. This curriculum is wonderful and most importantly, it works.”</p>"
+          }
+        }
+      },
+      "block_order": [
+        "featured_1",
+        "featured_2",
+        "featured_3",
+        "hl_easy",
+        "hl_calm",
+        "hl_works",
+        "review_1",
+        "review_2",
+        "review_3"
+      ],
+      "settings": {
+        "eyebrow": "What parents keep saying",
+        "heading": "Three decades of <em>reviews</em>",
+        "families_eyebrow": "From families like yours",
+        "families_heading": "What parents say after Lesson 20",
+        "link_label": "Read thousands of parent reviews on Amazon",
+        "link_url": "",
+        "surface": "paper",
+        "featured_autoplay": true,
+        "featured_speed": 5,
+        "featured_label": "Featured reviews"
+      }
+    },
+    "learning_path": {
+      "type": "learning-path",
+      "blocks": {
+        "path_1": {
+          "type": "card",
+          "settings": {
+            "category": "reading",
+            "step_label": "Start here",
+            "title": "The Reading Lesson",
+            "text": "<p>Zero to a second-grade reading level in 20 lessons. Ages 3–⁠8.</p>"
+          }
+        },
+        "path_2": {
+          "type": "card",
+          "settings": {
+            "category": "writing",
+            "step_label": "Alongside it",
+            "title": "Handwriting companions",
+            "text": "<p>Writing what they're reading builds the memory. Practice pages that follow the lessons.</p>"
+          }
+        },
+        "path_3": {
+          "type": "card",
+          "settings": {
+            "category": "math",
+            "step_label": "Then",
+            "title": "The Verbal Math Lesson",
+            "text": "<p>Math out loud. No pencil, no paper, no worksheets. Because small hands shouldn't decide how a child feels about math.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "path_1",
+        "path_2",
+        "path_3"
+      ],
+      "settings": {
+        "eyebrow": "The rest of the shelf",
+        "heading": "What families <em>do next</em>",
+        "text": "<p>Same method, same calm pages, one skill at a time. Every title is available here in print or as a full-color ebook, shipped and delivered direct from our family.</p>",
+        "show_count": true,
+        "button_label": "View all books",
+        "button_url": "",
+        "surface": "paper-deep"
+      }
     }
   },
   "order": [
-    "main",
-    "hero_k6yc4U"
+    "hero",
+    "carousel_cta",
+    "method",
+    "testimonials",
+    "learning_path"
   ]
 }

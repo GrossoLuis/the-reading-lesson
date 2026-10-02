@@ -42,7 +42,7 @@
       "settings": {
         "menu": "main-menu",
         "sticky": true,
-        "show_search": true,
+        "show_search": false,
         "search_placeholder": "Search for a story",
         "show_account": true,
         "show_wishlist": true

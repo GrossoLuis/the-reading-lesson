@@ -1,0 +1,802 @@
+{%- comment -%}
+  Learning path: up to four collection (or product) cards, each tagged Reading, Writing
+  or Math in its path colour, from the brand guidelines ("One skill at a time, in the
+  right order").
+
+  - Header: eyebrow, display heading (italic words take the grape accent), intro and
+    an optional "View all" button.
+  - Cards (blocks): the cover on the soft tint of its category with the category tag,
+    a numbered step badge joined to the next by a dotted path, the step label
+    ("Start here"), title, text, book count and "Explore". The whole card is the link.
+  - Content falls back to the chosen collection or product: title, description, image
+    (product image, collection image, or the first product's), then an illustrated
+    stand-in cover in the category's colour.
+
+  Colours: sky reading, sun writing, leaf math, grape for anything else.
+{%- endcomment -%}
+
+{%- liquid
+  assign s = section.settings
+  assign cards = section.blocks | where: 'type', 'card'
+
+  case cards.size
+    when 1
+      assign image_sizes = '(min-width: 750px) 420px, 100vw'
+    when 2
+      assign image_sizes = '(min-width: 750px) 300px, 60vw'
+    else
+      assign image_sizes = '(min-width: 990px) 220px, (min-width: 750px) 30vw, 60vw'
+  endcase
+-%}
+
+<div class="learning-path surface-{{ s.surface }}">
+  <div class="learning-path__container">
+    <header class="learning-path__header">
+      {%- if s.eyebrow != blank -%}
+        <p class="learning-path__eyebrow text-eyebrow">{{ s.eyebrow }}</p>
+      {%- endif -%}
+      {%- if s.heading != blank -%}
+        <h2 class="learning-path__heading text-display">{{ s.heading }}</h2>
+      {%- endif -%}
+      {%- if s.text != blank -%}
+        <div class="learning-path__intro">{{ s.text }}</div>
+      {%- endif -%}
+    </header>
+
+    {%- if cards.size > 0 -%}
+      <ol
+        class="learning-path__cards"
+        role="list"
+        style="--cards: {{ cards.size }};"
+      >
+        {%- for block in cards -%}
+          {%- liquid
+            assign b = block.settings
+            assign collection_ref = b.collection
+            assign product_ref = b.product
+
+            case b.category
+              when 'writing'
+                assign category_label = 'Writing'
+                assign cover_design = 'letters'
+              when 'math'
+                assign category_label = 'Math'
+                assign cover_design = 'dots'
+              when 'other'
+                assign category_label = b.other_label | default: 'More'
+                assign cover_design = 'sunshine'
+              else
+                assign category_label = 'Reading'
+                assign cover_design = 'reading'
+            endcase
+
+            assign title = b.title
+            if title == blank
+              assign title = product_ref.title | default: collection_ref.title
+            endif
+
+            assign url = b.link
+            if url == blank
+              assign url = product_ref.url | default: collection_ref.url
+            endif
+
+            assign cover = b.image
+            if cover == blank
+              assign cover = product_ref.featured_image | default: collection_ref.featured_image
+            endif
+            if cover == blank and collection_ref.products.size > 0
+              assign cover = collection_ref.products.first.featured_image
+            endif
+
+            assign count = 0
+            if s.show_count and collection_ref != blank and product_ref == blank
+              assign count = collection_ref.products_count
+            endif
+          -%}
+          <li
+            class="learning-path__card learning-path__card--{{ b.category }}"
+            {{ block.shopify_attributes }}
+          >
+            <div class="learning-path__media">
+              <span class="learning-path__tag">{{ category_label }}</span>
+              <span class="learning-path__cover">
+                {%- if cover != blank -%}
+                  {{
+                    cover
+                    | image_url: width: 600
+                    | image_tag:
+                      class: 'learning-path__image',
+                      widths: '200, 300, 400, 500, 600',
+                      sizes: image_sizes,
+                      loading: 'lazy',
+                      alt: ''
+                  }}
+                {%- else -%}
+                  {% render 'placeholder-book-cover', design: cover_design %}
+                {%- endif -%}
+              </span>
+            </div>
+
+            <div class="learning-path__body">
+              <p class="learning-path__step">
+                <span
+                  class="learning-path__badge"
+                  aria-hidden="true"
+                >
+                  <span class="learning-path__badge-number">{{ forloop.index }}</span>
+                  <span class="learning-path__badge-label">Step</span>
+                </span>
+                {%- if b.step_label != blank -%}
+                  <span class="learning-path__step-label">{{ b.step_label }}</span>
+                {%- endif -%}
+              </p>
+
+              <h3 class="learning-path__title">
+                {%- if url != blank -%}
+                  <a
+                    class="learning-path__link"
+                    href="{{ url }}"
+                  >
+                    {{- title -}}
+                  </a>
+                {%- else -%}
+                  {{- title -}}
+                {%- endif -%}
+              </h3>
+
+              {%- if b.text != blank -%}
+                <div class="learning-path__text">{{ b.text }}</div>
+              {%- else -%}
+                {%- assign fallback_text = product_ref.description | default: collection_ref.description -%}
+                {%- if fallback_text != blank -%}
+                  <div class="learning-path__text">
+                    <p>{{ fallback_text | strip_html | truncatewords: 22 }}</p>
+                  </div>
+                {%- endif -%}
+              {%- endif -%}
+
+              <div class="learning-path__footer">
+                {%- if url != blank -%}
+                  <span
+                    class="learning-path__explore"
+                    aria-hidden="true"
+                  >
+                    {{- b.link_label | default: 'Explore' }}
+                    {% render 'brand-icon', name: 'arrow-right', size: 16 %}
+                  </span>
+                {%- endif -%}
+                {%- if count > 0 -%}
+                  <span class="learning-path__count text-small">
+                    {{- count }}
+                    {% if count == 1 %}book{% else %}books{% endif -%}
+                  </span>
+                {%- endif -%}
+              </div>
+            </div>
+          </li>
+        {%- endfor -%}
+      </ol>
+    {%- endif -%}
+
+    {%- if s.button_label != blank and s.button_url != blank -%}
+      <div class="learning-path__more">
+        {% render 'brand-button',
+          label: s.button_label,
+          url: s.button_url,
+          style: 'secondary',
+          arrow: true
+        %}
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+
+{% stylesheet %}
+  .learning-path {
+    --lp-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+    --lp-gap: var(--space-6);
+
+    padding-block: var(--space-9);
+  }
+
+  .learning-path__container {
+    max-width: var(--page-width);
+    margin-inline: auto;
+    padding-inline: var(--page-margin);
+  }
+
+  /* ---------- Header ---------- */
+
+  .learning-path__header {
+    display: grid;
+    justify-items: center;
+    max-width: 44rem;
+    margin: 0 auto var(--space-8);
+    text-align: center;
+  }
+
+  .learning-path__eyebrow {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: 0 0 var(--space-4);
+    color: var(--color-ink-muted);
+  }
+
+  .learning-path__eyebrow::before {
+    content: '';
+    flex: none;
+    width: 8px;
+    aspect-ratio: 1;
+    border-radius: var(--radius-full);
+    background: var(--color-sun);
+  }
+
+  .learning-path__heading {
+    margin: 0;
+    color: var(--color-ink);
+    text-wrap: balance;
+  }
+
+  .learning-path__heading em,
+  .learning-path__heading i {
+    font-family: var(--font-accent--family);
+    font-style: var(--font-accent--style);
+    font-weight: var(--font-accent--weight);
+    color: var(--color-grape);
+  }
+
+  .learning-path__intro {
+    max-width: 36rem;
+    margin-top: var(--space-4);
+    font-size: 17px;
+    line-height: 1.65;
+    color: var(--color-ink-muted);
+  }
+
+  .learning-path__intro p {
+    margin: 0;
+  }
+
+  /* ---------- Cards ---------- */
+
+  .learning-path__cards {
+    display: grid;
+    grid-template-columns: repeat(var(--cards), minmax(0, 1fr));
+    gap: var(--space-7) var(--lp-gap);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* One or two cards shouldn't stretch across the whole page. */
+  .learning-path__cards[style*='--cards: 1;'] {
+    max-width: 420px;
+    margin-inline: auto;
+  }
+
+  .learning-path__cards[style*='--cards: 2;'] {
+    max-width: 820px;
+    margin-inline: auto;
+  }
+
+  .learning-path__card {
+    --lp-color: var(--color-path-reading, var(--color-sky));
+    --lp-soft: var(--color-path-reading-soft, var(--color-sky-soft));
+    --lp-deep: var(--color-path-reading-deep, var(--color-sky-deep));
+
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .learning-path__card--writing {
+    --lp-color: var(--color-path-writing, var(--color-sun));
+    --lp-soft: var(--color-path-writing-soft, var(--color-sun-soft));
+    --lp-deep: var(--color-path-writing-deep, var(--color-sun-deep));
+  }
+
+  .learning-path__card--math {
+    --lp-color: var(--color-path-math, var(--color-leaf));
+    --lp-soft: var(--color-path-math-soft, var(--color-leaf-soft));
+    --lp-deep: var(--color-path-math-deep, var(--color-leaf-deep));
+  }
+
+  .learning-path__card--other {
+    --lp-color: var(--color-grape);
+    --lp-soft: var(--color-grape-soft);
+    --lp-deep: var(--color-grape);
+  }
+
+  /* Cover on its category tint. */
+  .learning-path__media {
+    position: relative;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 5 / 4;
+    padding: var(--space-6) var(--space-5);
+    overflow: hidden;
+    background: var(--lp-soft);
+    border-radius: var(--radius-lg);
+  }
+
+  /* Soft halo of the category colour behind the book. */
+  .learning-path__media::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 55%;
+    width: 62%;
+    aspect-ratio: 1;
+    border-radius: var(--radius-full);
+    background: radial-gradient(closest-side, rgb(255 255 255 / 0.55), transparent);
+    transform: translate(-50%, -50%);
+  }
+
+  .learning-path__tag {
+    position: absolute;
+    z-index: 1;
+    top: var(--space-4);
+    left: var(--space-4);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 5px 11px 5px 9px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--lp-deep);
+    background: rgb(var(--color-card-rgb) / 0.85);
+    border-radius: var(--radius-full);
+    box-shadow: 0 1px 2px rgb(var(--color-ink-rgb) / 0.06);
+  }
+
+  .learning-path__tag::before {
+    content: '';
+    width: 7px;
+    aspect-ratio: 1;
+    border-radius: var(--radius-full);
+    background: var(--lp-color);
+  }
+
+  .learning-path__cover {
+    position: relative;
+    display: block;
+    width: min(46%, 190px);
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    border-radius: var(--radius-image);
+    box-shadow: var(--shadow-book);
+    transform: rotate(-2deg);
+    transition: transform 500ms var(--lp-ease), box-shadow 500ms var(--lp-ease);
+  }
+
+  .learning-path__card:nth-child(even) .learning-path__cover {
+    transform: rotate(2deg);
+  }
+
+  .learning-path__card:hover .learning-path__cover {
+    transform: translateY(-8px) rotate(0deg);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .learning-path__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* ---------- Body ---------- */
+
+  .learning-path__body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    padding-top: var(--space-5);
+  }
+
+  .learning-path__step {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin: 0 0 var(--space-4);
+  }
+
+  /* The path: a dotted line from each badge to the next card's. */
+  .learning-path__card:not(:last-child) .learning-path__step::after {
+    content: '';
+    position: absolute;
+    z-index: 0;
+    top: 50%;
+    left: 44px;
+    right: calc(var(--lp-gap) * -1);
+    height: 0;
+    border-top: 2px dotted var(--color-line-strong);
+    opacity: 0.7;
+  }
+
+  .learning-path__badge {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    flex: none;
+    width: 44px;
+    aspect-ratio: 1;
+    color: var(--color-ink);
+    background: var(--lp-color);
+    border-radius: var(--radius-full);
+    box-shadow: 0 0 0 4px var(--color-background);
+  }
+
+  .learning-path__badge::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border: var(--stroke-sm) solid currentColor;
+    border-radius: inherit;
+    opacity: 0.4;
+  }
+
+  .learning-path__card--other .learning-path__badge {
+    color: var(--color-on-grape);
+  }
+
+  .learning-path__badge-number {
+    font-family: var(--font-heading--family);
+    font-weight: 600;
+    font-size: 17px;
+    line-height: 1;
+  }
+
+  .learning-path__badge-label {
+    margin-top: 1px;
+    font-size: 6.5px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .learning-path__step-label {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding-inline: var(--space-3);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-ink-muted);
+    background: var(--color-background);
+  }
+
+  .learning-path__step-label::before {
+    content: '';
+    width: 5px;
+    aspect-ratio: 1;
+    border-radius: var(--radius-full);
+    background: var(--lp-color);
+  }
+
+  .learning-path__title {
+    margin: 0;
+    font-family: var(--font-heading--family);
+    font-weight: 600;
+    font-size: clamp(20px, 1.8vw, 24px);
+    line-height: 1.25;
+    color: var(--color-ink);
+    text-wrap: balance;
+  }
+
+  .learning-path__link {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  /* The whole card is the link. */
+  .learning-path__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    border-radius: var(--radius-lg);
+  }
+
+  .learning-path__link:focus-visible {
+    outline: none;
+  }
+
+  .learning-path__link:focus-visible::after {
+    outline: var(--focus-ring-width) solid var(--color-focus-ring, var(--color-grape));
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .learning-path__text {
+    margin-top: var(--space-2);
+    font-size: 15.5px;
+    line-height: 1.6;
+    color: var(--color-ink-muted);
+    text-wrap: pretty;
+  }
+
+  .learning-path__text p {
+    margin: 0;
+  }
+
+  .learning-path__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-top: auto;
+    padding-top: var(--space-4);
+  }
+
+  .learning-path__explore {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--font-button--size);
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+
+  .learning-path__explore .brand-icon {
+    transition: transform 200ms ease;
+  }
+
+  .learning-path__card:hover .learning-path__explore .brand-icon {
+    transform: translateX(4px);
+  }
+
+  .learning-path__card:hover .learning-path__explore {
+    text-decoration: underline;
+    text-decoration-color: var(--lp-color);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 5px;
+  }
+
+  .learning-path__count {
+    color: var(--color-ink-muted);
+  }
+
+  .learning-path__more {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--space-8);
+  }
+
+  /* ---------- Breakpoints ---------- */
+
+  @media screen and (max-width: 989px) {
+    .learning-path {
+      padding-block: var(--space-8);
+    }
+
+    .learning-path__header {
+      margin-bottom: var(--space-7);
+    }
+
+    /* Four cards go two by two; the path line only joins cards on the same row. */
+    .learning-path__cards[style*='--cards: 4;'] {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .learning-path__cards[style*='--cards: 4;'] .learning-path__card:nth-child(2) .learning-path__step::after {
+      display: none;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .learning-path {
+      padding-block: var(--space-7);
+    }
+
+    .learning-path__cards,
+    .learning-path__cards[style*='--cards: 4;'] {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-7);
+    }
+
+    .learning-path__card:not(:last-child) .learning-path__step::after {
+      display: none;
+    }
+
+    .learning-path__media {
+      aspect-ratio: 4 / 3;
+    }
+
+    .learning-path__cover {
+      width: min(40%, 170px);
+    }
+
+    .learning-path__more .brand-button {
+      width: 100%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .learning-path__cover,
+    .learning-path__explore .brand-icon {
+      transition: none;
+    }
+
+    .learning-path__card:hover .learning-path__cover {
+      transform: rotate(0deg);
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Learning path",
+  "tag": "section",
+  "class": "learning-path-section",
+  "max_blocks": 4,
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "The rest of the shelf"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "info": "Put a word in italics to give it the accent colour.",
+      "default": "What families <em>do next</em>"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Intro",
+      "default": "<p>Same method, same calm pages, one skill at a time. Every title is available here in print or as a full-color ebook, shipped and delivered direct from our family.</p>"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_count",
+      "label": "Show the number of books",
+      "info": "On cards linked to a collection.",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "View all books"
+    },
+    {
+      "type": "url",
+      "id": "button_url",
+      "label": "Button link",
+      "info": "The button shows once a link is set."
+    },
+    {
+      "type": "select",
+      "id": "surface",
+      "label": "Background",
+      "options": [
+        { "value": "paper", "label": "Paper" },
+        { "value": "paper-deep", "label": "Paper deep" },
+        { "value": "card", "label": "White" }
+      ],
+      "default": "paper-deep"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "card",
+      "name": "Card",
+      "settings": [
+        {
+          "type": "select",
+          "id": "category",
+          "label": "Category",
+          "info": "Sets the colour: sky reading, sun writing, leaf math.",
+          "options": [
+            { "value": "reading", "label": "Reading" },
+            { "value": "writing", "label": "Writing (handwriting)" },
+            { "value": "math", "label": "Math" },
+            { "value": "other", "label": "Other" }
+          ],
+          "default": "reading"
+        },
+        {
+          "type": "text",
+          "id": "other_label",
+          "label": "Label for Other",
+          "default": "More"
+        },
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Or a single book",
+          "info": "Takes the place of the collection."
+        },
+        {
+          "type": "text",
+          "id": "step_label",
+          "label": "Step label",
+          "default": "Start here"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "info": "Leave empty to use the collection or book title."
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "info": "Leave empty to use the start of its description."
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Cover",
+          "info": "Leave empty to use the book or collection image. 3:4 works best."
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Custom link",
+          "info": "Leave empty to link to the collection or book."
+        },
+        {
+          "type": "text",
+          "id": "link_label",
+          "label": "Link label",
+          "default": "Explore"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Learning path",
+      "blocks": [
+        {
+          "type": "card",
+          "settings": {
+            "category": "reading",
+            "step_label": "Start here",
+            "title": "The Reading Lesson",
+            "text": "<p>Zero to a second-grade reading level in 20 lessons. Ages 3–⁠8.</p>"
+          }
+        },
+        {
+          "type": "card",
+          "settings": {
+            "category": "writing",
+            "step_label": "Alongside it",
+            "title": "Handwriting companions",
+            "text": "<p>Writing what they're reading builds the memory. Practice pages that follow the lessons.</p>"
+          }
+        },
+        {
+          "type": "card",
+          "settings": {
+            "category": "math",
+            "step_label": "Then",
+            "title": "The Verbal Math Lesson",
+            "text": "<p>Math out loud. No pencil, no paper, no worksheets. Because small hands shouldn't decide how a child feels about math.</p>"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

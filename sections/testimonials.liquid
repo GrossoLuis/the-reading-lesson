@@ -1,0 +1,949 @@
+{%- comment -%}
+  Testimonials: press reviews and parent reviews in one section.
+
+  1. What parents keep saying: eyebrow and display heading, then the featured reviews
+     (blocks) on an ink card with a big sun quote mark, one at a time, changing every few
+     seconds (assets/testimonials.js), beside a list of highlights (blocks), each with
+     its colour dot, title and text.
+  2. From families like yours: a sub-header, the parent reviews (blocks) as cards with
+     stars, and a link to read more. On phones the cards become a swipeable row.
+
+  Reviews are written in the theme for now; they can be swapped for an app's widget
+  later. Cards ease in on scroll where the browser supports scroll-driven
+  animations, never with reduced motion.
+{%- endcomment -%}
+
+{%- liquid
+  assign s = section.settings
+  assign highlights = section.blocks | where: 'type', 'highlight'
+  assign reviews = section.blocks | where: 'type', 'review'
+  assign features = section.blocks | where: 'type', 'featured'
+
+  assign interval = 0
+  if s.featured_autoplay
+    assign interval = s.featured_speed | times: 1000
+  endif
+-%}
+
+{%- if features.size > 1 -%}
+  <script
+    type="module"
+    src="{{ 'testimonials.js' | asset_url }}"
+  ></script>
+{%- endif -%}
+
+<div class="testimonials surface-{{ s.surface }}">
+  <div class="testimonials__container">
+    {%- comment -%} ---------- 1. What parents keep saying ---------- {%- endcomment -%}
+    <header class="testimonials__header">
+      {%- if s.eyebrow != blank -%}
+        <p class="testimonials__eyebrow text-eyebrow">{{ s.eyebrow }}</p>
+      {%- endif -%}
+      {%- if s.heading != blank -%}
+        <h2 class="testimonials__heading text-display">{{ s.heading }}</h2>
+      {%- endif -%}
+    </header>
+
+    {%- if features.size > 0 or highlights.size > 0 -%}
+      <div class="testimonials__press{% if features.size == 0 %} testimonials__press--no-feature{% endif %}">
+        {%- if features.size > 0 -%}
+          <testimonials-feature
+            class="testimonials__feature surface-ink"
+            role="region"
+            aria-roledescription="carousel"
+            aria-label="{{ s.featured_label | default: 'Featured reviews' | escape }}"
+            {% if interval > 0 %}
+              data-interval="{{ interval }}"
+            {% endif %}
+          >
+            <svg
+              class="testimonials__mark"
+              viewBox="0 0 48 36"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                fill="currentColor"
+                d="M0 36V22.6C0 9.9 6.4 2.3 19.1 0l1.7 5.2C14 7 10.6 11 10.3 17H20v19H0Zm27.2 0V22.6C27.2 9.9 33.6 2.3 46.3 0L48 5.2C41.2 7 37.8 11 37.5 17h9.7v19h-20Z"
+              />
+            </svg>
+
+            <div class="testimonials__feature-slides">
+              {%- for block in features -%}
+                <figure
+                  class="testimonials__feature-slide{% if forloop.first %} is-active{% endif %}"
+                  {% if features.size > 1 %}
+                    role="group"
+                    aria-roledescription="slide"
+                    aria-label="{{ forloop.index }} / {{ forloop.length }}"
+                  {% endif %}
+                  data-feature-slide
+                  {{ block.shopify_attributes }}
+                >
+                  <blockquote class="testimonials__feature-quote">{{ block.settings.quote }}</blockquote>
+                  {%- if block.settings.source != blank -%}
+                    <figcaption class="testimonials__feature-source text-small">{{ block.settings.source }}</figcaption>
+                  {%- endif -%}
+                </figure>
+              {%- endfor -%}
+            </div>
+
+            {%- if features.size > 1 -%}
+              <div class="testimonials__feature-nav">
+                <div class="testimonials__dots">
+                  {%- for block in features -%}
+                    <button
+                      type="button"
+                      class="testimonials__dot{% if forloop.first %} is-active{% endif %}"
+                      aria-label="Show review {{ forloop.index }}"
+                      {% if forloop.first %}
+                        aria-current="true"
+                      {% endif %}
+                      data-feature-dot
+                    ></button>
+                  {%- endfor -%}
+                </div>
+                <button
+                  type="button"
+                  class="testimonials__feature-toggle"
+                  aria-pressed="false"
+                  aria-label="Pause"
+                  data-label-pause="Pause"
+                  data-label-play="Play"
+                  data-feature-toggle
+                  hidden
+                >
+                  {% render 'brand-icon', name: 'pause', size: 16 %}
+                  {% render 'brand-icon', name: 'play', size: 16 %}
+                </button>
+              </div>
+            {%- endif -%}
+          </testimonials-feature>
+        {%- endif -%}
+
+        {%- if highlights.size > 0 -%}
+          <ul
+            class="testimonials__highlights"
+            role="list"
+          >
+            {%- for block in highlights -%}
+              <li
+                class="testimonials__highlight"
+                style="--dot: var(--color-{{ block.settings.color }});"
+                {{ block.shopify_attributes }}
+              >
+                <h3 class="testimonials__highlight-title">{{ block.settings.title }}</h3>
+                <div class="testimonials__highlight-text">{{ block.settings.text }}</div>
+              </li>
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- comment -%} ---------- 2. From families like yours ---------- {%- endcomment -%}
+    {%- if reviews.size > 0 -%}
+      <div class="testimonials__families">
+        <div class="testimonials__subheader">
+          {%- if s.families_eyebrow != blank -%}
+            <p class="testimonials__eyebrow testimonials__eyebrow--center text-eyebrow">
+              {{- s.families_eyebrow -}}
+            </p>
+          {%- endif -%}
+          {%- if s.families_heading != blank -%}
+            <h3 class="testimonials__subheading">{{ s.families_heading }}</h3>
+          {%- endif -%}
+        </div>
+
+        <ul
+          class="testimonials__reviews"
+          role="list"
+        >
+          {%- for block in reviews -%}
+            {%- assign rating = block.settings.rating -%}
+            <li
+              class="testimonials__review"
+              {{ block.shopify_attributes }}
+            >
+              <figure class="testimonials__review-card">
+                <p class="testimonials__stars">
+                  <span class="visually-hidden">{{ rating }} out of 5 stars</span>
+                  {%- for i in (1..5) -%}
+                    <svg
+                      class="testimonials__star{% if i > rating %} testimonials__star--empty{% endif %}"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                      focusable="false"
+                    >
+                      <path d="m12 2.8 2.75 5.73 6.3.8-4.62 4.37 1.17 6.25L12 16.9l-5.6 3.05 1.17-6.25L2.95 9.33l6.3-.8L12 2.8Z"/>
+                    </svg>
+                  {%- endfor -%}
+                </p>
+                <blockquote class="testimonials__review-quote">{{ block.settings.quote }}</blockquote>
+                {%- if block.settings.author != blank -%}
+                  <figcaption class="testimonials__review-author text-small">
+                    <span
+                      class="testimonials__avatar"
+                      aria-hidden="true"
+                    >
+                      {{- block.settings.author | strip | slice: 0 | upcase -}}
+                    </span>
+                    {{ block.settings.author }}
+                  </figcaption>
+                {%- endif -%}
+              </figure>
+            </li>
+          {%- endfor -%}
+        </ul>
+
+        {%- if s.link_label != blank and s.link_url != blank -%}
+          <div class="testimonials__more">
+            {% render 'brand-button',
+              label: s.link_label,
+              url: s.link_url,
+              style: 'secondary',
+              arrow: true,
+              class: 'testimonials__more-button'
+            %}
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+
+{% stylesheet %}
+  .testimonials {
+    padding-block: var(--space-9);
+  }
+
+  .testimonials__container {
+    max-width: var(--page-width);
+    margin-inline: auto;
+    padding-inline: var(--page-margin);
+  }
+
+  /* ---------- Header ---------- */
+
+  .testimonials__header {
+    max-width: 44rem;
+    margin-bottom: var(--space-7);
+  }
+
+  .testimonials__eyebrow {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: 0 0 var(--space-4);
+    color: var(--color-ink-muted);
+  }
+
+  .testimonials__eyebrow::before {
+    content: '';
+    flex: none;
+    width: 8px;
+    aspect-ratio: 1;
+    border-radius: var(--radius-full);
+    background: var(--color-tomato);
+  }
+
+  .testimonials__eyebrow--center {
+    justify-content: center;
+  }
+
+  .testimonials__heading {
+    margin: 0;
+    color: var(--color-ink);
+    text-wrap: balance;
+  }
+
+  .testimonials__heading em,
+  .testimonials__heading i,
+  .testimonials__subheading em,
+  .testimonials__subheading i {
+    font-family: var(--font-accent--family);
+    font-style: var(--font-accent--style);
+    font-weight: var(--font-accent--weight);
+    color: var(--color-grape);
+  }
+
+  /* ---------- Press: featured review + highlights ---------- */
+
+  .testimonials__press {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    align-items: stretch;
+    gap: var(--space-6) var(--space-8);
+  }
+
+  .testimonials__press--no-feature {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .testimonials__feature {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    margin: 0;
+    padding: clamp(var(--space-6), 4.5vw, var(--space-8));
+    overflow: hidden;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+  }
+
+  /* A soft sun glow in the corner, for warmth on the ink. */
+  .testimonials__feature::after {
+    content: '';
+    position: absolute;
+    right: -18%;
+    bottom: -38%;
+    width: 60%;
+    aspect-ratio: 1;
+    border-radius: var(--radius-full);
+    background: radial-gradient(closest-side, rgb(var(--color-sun-rgb) / 0.16), transparent);
+    pointer-events: none;
+  }
+
+  .testimonials__mark {
+    width: 48px;
+    height: auto;
+    color: var(--color-sun);
+  }
+
+  /* Every review sits in the same cell, so the card keeps the tallest one's height. */
+  .testimonials__feature-slides {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    flex: 1;
+  }
+
+  .testimonials__feature-slide {
+    grid-area: 1 / 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--space-6);
+    margin: 0;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(12px);
+    transition: opacity 500ms ease, transform 700ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      visibility 0s linear 700ms;
+  }
+
+  .testimonials__feature-slide.is-active {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition-delay: 150ms, 150ms, 0s;
+  }
+
+  .testimonials__feature-quote {
+    position: relative;
+    margin: 0;
+    font-family: var(--font-heading--family);
+    font-weight: 500;
+    font-size: clamp(22px, 2.3vw, 30px);
+    line-height: 1.4;
+    color: var(--color-on-grape);
+    text-wrap: pretty;
+  }
+
+  .testimonials__feature-quote p {
+    margin: 0;
+  }
+
+  .testimonials__feature-quote em,
+  .testimonials__feature-quote i {
+    font-style: italic;
+    color: var(--color-sun);
+  }
+
+  .testimonials__feature-source {
+    position: relative;
+    max-width: 36rem;
+    padding-top: var(--space-5);
+    color: rgb(var(--color-on-grape-rgb) / 0.72);
+    border-top: var(--stroke-sm) solid rgb(var(--color-on-grape-rgb) / 0.18);
+  }
+
+  .testimonials__feature-source p {
+    margin: 0;
+  }
+
+  .testimonials__feature-source strong {
+    color: var(--color-on-grape);
+  }
+
+  /* ---------- Featured navigation: the active dot fills with the timer ---------- */
+
+  .testimonials__feature-nav {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+  }
+
+  .testimonials__dots {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .testimonials__dot {
+    position: relative;
+    width: 10px;
+    height: 10px;
+    padding: 0;
+    background: rgb(var(--color-on-grape-rgb) / 0.28);
+    border: 0;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: width 400ms cubic-bezier(0.2, 0.8, 0.2, 1), background-color 200ms ease;
+  }
+
+  /* Larger hit area than the visible dot. */
+  .testimonials__dot::before {
+    content: '';
+    position: absolute;
+    inset: -12px -4px;
+  }
+
+  .testimonials__dot:hover {
+    background: rgb(var(--color-on-grape-rgb) / 0.5);
+  }
+
+  .testimonials__dot.is-active {
+    width: 40px;
+  }
+
+  .testimonials__dot::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--color-sun);
+    border-radius: inherit;
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+
+  .testimonials__dot.is-active::after {
+    transform: scaleX(1);
+  }
+
+  .testimonials__feature.is-autoplay .testimonials__dot.is-active::after {
+    animation: testimonials-fill var(--feature-interval, 5000ms) linear forwards;
+  }
+
+  .testimonials__feature[data-paused] .testimonials__dot.is-active::after {
+    animation-play-state: paused;
+  }
+
+  @keyframes testimonials-fill {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  .testimonials__dot:focus-visible,
+  .testimonials__feature-toggle:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-sun);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .testimonials__feature-toggle {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    aspect-ratio: 1;
+    padding: 0;
+    color: var(--color-on-grape);
+    background: transparent;
+    border: var(--stroke-sm) solid rgb(var(--color-on-grape-rgb) / 0.3);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: background-color 150ms ease, border-color 150ms ease;
+  }
+
+  .testimonials__feature-toggle[hidden] {
+    display: none;
+  }
+
+  .testimonials__feature-toggle:hover {
+    background: rgb(var(--color-on-grape-rgb) / 0.1);
+    border-color: rgb(var(--color-on-grape-rgb) / 0.6);
+  }
+
+  .testimonials__feature-toggle .brand-icon--play,
+  .testimonials__feature-toggle[aria-pressed='true'] .brand-icon--pause {
+    display: none;
+  }
+
+  .testimonials__feature-toggle[aria-pressed='true'] .brand-icon--play {
+    display: block;
+  }
+
+  .testimonials__highlights {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .testimonials__highlight {
+    padding-block: var(--space-5);
+    border-top: var(--stroke-sm) solid var(--color-line);
+  }
+
+  .testimonials__highlight:first-child {
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .testimonials__highlight:last-child {
+    padding-bottom: 0;
+  }
+
+  .testimonials__highlight-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: 0;
+    font-family: var(--font-heading--family);
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 1.3;
+    color: var(--color-ink);
+  }
+
+  .testimonials__highlight-title::before {
+    content: '';
+    flex: none;
+    width: 10px;
+    aspect-ratio: 1;
+    border-radius: var(--radius-full);
+    background: var(--dot);
+  }
+
+  .testimonials__highlight-text {
+    margin-top: var(--space-2);
+    padding-left: calc(10px + var(--space-3));
+    font-size: 15.5px;
+    line-height: 1.65;
+    color: var(--color-ink-muted);
+  }
+
+  .testimonials__highlight-text p {
+    margin: 0;
+  }
+
+  .testimonials__highlight-text em {
+    color: var(--color-ink);
+  }
+
+  /* ---------- Families: review cards ---------- */
+
+  .testimonials__families {
+    margin-top: var(--space-9);
+  }
+
+  .testimonials__subheader {
+    margin-bottom: var(--space-7);
+    text-align: center;
+  }
+
+  .testimonials__subheading {
+    margin: 0;
+    font-family: var(--font-heading--family);
+    font-weight: 600;
+    font-size: clamp(28px, 2.8vw, 36px);
+    line-height: 1.2;
+    color: var(--color-ink);
+    text-wrap: balance;
+  }
+
+  .testimonials__reviews {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-5);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .testimonials__review-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    margin: 0;
+    padding: var(--space-6);
+    background: var(--color-card);
+    border: var(--stroke-sm) solid var(--color-line);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    transition: transform 400ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 400ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .testimonials__review-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .testimonials__stars {
+    display: flex;
+    gap: 3px;
+    margin: 0 0 var(--space-4);
+  }
+
+  .testimonials__star {
+    width: 18px;
+    height: 18px;
+    fill: var(--color-sun);
+  }
+
+  .testimonials__star--empty {
+    fill: var(--color-line);
+  }
+
+  .testimonials__review-quote {
+    flex: 1;
+    margin: 0;
+    font-size: 16.5px;
+    line-height: 1.65;
+    color: var(--color-ink);
+  }
+
+  .testimonials__review-quote p {
+    margin: 0;
+  }
+
+  .testimonials__review-author {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-top: var(--space-5);
+    padding-top: var(--space-4);
+    font-weight: 600;
+    color: var(--color-ink-muted);
+    border-top: var(--stroke-sm) solid var(--color-line);
+  }
+
+  .testimonials__avatar {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 32px;
+    aspect-ratio: 1;
+    font-family: var(--font-heading--family);
+    font-size: 14px;
+    color: var(--color-sky-deep);
+    background: var(--color-sky-soft);
+    border-radius: var(--radius-full);
+  }
+
+  .testimonials__review:nth-child(3n + 2) .testimonials__avatar {
+    color: var(--color-sun-deep);
+    background: var(--color-sun-soft);
+  }
+
+  .testimonials__review:nth-child(3n + 3) .testimonials__avatar {
+    color: var(--color-leaf-deep);
+    background: var(--color-leaf-soft);
+  }
+
+  .testimonials__more {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--space-7);
+  }
+
+  /* ---------- Motion ---------- */
+
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .testimonials__feature,
+      .testimonials__review {
+        animation: testimonials-rise linear both;
+        animation-timeline: view();
+        animation-range: entry 0% entry 50%;
+      }
+    }
+  }
+
+  @keyframes testimonials-rise {
+    from {
+      opacity: 0;
+      transform: translateY(32px);
+    }
+  }
+
+  /* ---------- Breakpoints ---------- */
+
+  @media screen and (max-width: 989px) {
+    .testimonials {
+      padding-block: var(--space-8);
+    }
+
+    .testimonials__press {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .testimonials__families {
+      margin-top: var(--space-8);
+    }
+
+    /* Reviews become a swipeable row that bleeds to the screen edges. */
+    .testimonials__reviews {
+      display: flex;
+      gap: var(--space-4);
+      margin-inline: calc(var(--page-margin) * -1);
+      padding: var(--space-2) var(--page-margin) var(--space-4);
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline: var(--page-margin);
+      scrollbar-width: none;
+    }
+
+    .testimonials__reviews::-webkit-scrollbar {
+      display: none;
+    }
+
+    .testimonials__review {
+      flex: none;
+      width: min(380px, 82vw);
+      scroll-snap-align: start;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .testimonials {
+      padding-block: var(--space-7);
+    }
+
+    .testimonials__header {
+      margin-bottom: var(--space-6);
+    }
+
+    .testimonials__feature {
+      border-radius: var(--radius-lg);
+    }
+
+    .testimonials__mark {
+      width: 36px;
+    }
+
+    .testimonials__review-card {
+      padding: var(--space-5);
+    }
+
+    .testimonials__subheader {
+      margin-bottom: var(--space-5);
+    }
+
+    .testimonials__more-button {
+      width: 100%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .testimonials__review-card,
+    .testimonials__feature-slide,
+    .testimonials__dot {
+      transition: none;
+    }
+
+    .testimonials__feature-slide {
+      transform: none;
+    }
+
+    .testimonials__review-card:hover {
+      transform: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Testimonials",
+  "tag": "section",
+  "class": "testimonials-section",
+  "max_blocks": 20,
+  "settings": [
+    {
+      "type": "header",
+      "content": "What parents keep saying"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "What parents keep saying"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "info": "Put a word in italics to give it the accent colour.",
+      "default": "Three decades of <em>reviews</em>"
+    },
+    {
+      "type": "paragraph",
+      "content": "The reviews on the dark card are Featured review blocks."
+    },
+    {
+      "type": "checkbox",
+      "id": "featured_autoplay",
+      "label": "Change featured review automatically",
+      "info": "Pauses on hover. Never moves for visitors who turned off animations.",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "featured_speed",
+      "label": "Change every",
+      "min": 3,
+      "max": 15,
+      "step": 1,
+      "unit": "s",
+      "default": 5
+    },
+    {
+      "type": "text",
+      "id": "featured_label",
+      "label": "Featured reviews name",
+      "info": "Read by screen readers.",
+      "default": "Featured reviews"
+    },
+    {
+      "type": "header",
+      "content": "From families like yours"
+    },
+    {
+      "type": "text",
+      "id": "families_eyebrow",
+      "label": "Eyebrow",
+      "default": "From families like yours"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "families_heading",
+      "label": "Heading",
+      "default": "What parents say after Lesson 20"
+    },
+    {
+      "type": "text",
+      "id": "link_label",
+      "label": "Link label",
+      "default": "Read thousands of parent reviews on Amazon"
+    },
+    {
+      "type": "url",
+      "id": "link_url",
+      "label": "Link",
+      "info": "The link shows once a URL is set."
+    },
+    {
+      "type": "select",
+      "id": "surface",
+      "label": "Background",
+      "options": [
+        { "value": "paper", "label": "Paper" },
+        { "value": "paper-deep", "label": "Paper deep" },
+        { "value": "sun-soft", "label": "Sun soft" },
+        { "value": "sky-soft", "label": "Sky soft" }
+      ],
+      "default": "paper"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "featured",
+      "name": "Featured review",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "quote",
+          "label": "Review",
+          "info": "Italic words turn sun yellow."
+        },
+        {
+          "type": "richtext",
+          "id": "source",
+          "label": "Source",
+          "info": "Bold text shows brighter."
+        }
+      ]
+    },
+    {
+      "type": "highlight",
+      "name": "Press highlight",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Easiest to use"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text"
+        },
+        {
+          "type": "select",
+          "id": "color",
+          "label": "Dot colour",
+          "options": [
+            { "value": "sky", "label": "Sky" },
+            { "value": "sun", "label": "Sun" },
+            { "value": "leaf", "label": "Leaf" },
+            { "value": "grape", "label": "Grape" },
+            { "value": "tomato", "label": "Tomato" }
+          ],
+          "default": "sky"
+        }
+      ]
+    },
+    {
+      "type": "review",
+      "name": "Parent review",
+      "settings": [
+        {
+          "type": "range",
+          "id": "rating",
+          "label": "Stars",
+          "min": 1,
+          "max": 5,
+          "step": 1,
+          "default": 5
+        },
+        {
+          "type": "richtext",
+          "id": "quote",
+          "label": "Review"
+        },
+        {
+          "type": "text",
+          "id": "author",
+          "label": "Reviewer",
+          "default": "Amazon reviewer"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Testimonials"
+    }
+  ]
+}
+{% endschema %}

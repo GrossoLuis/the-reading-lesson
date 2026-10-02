@@ -3,7 +3,8 @@
   brand palette. Used wherever a cover image hasn't been uploaded yet, so a section
   looks right before the real product photos arrive.
 
-  @param {string} design - 'sunshine', 'moon' or 'tree'.
+  @param {string} design - 'sunshine', 'moon' or 'tree'; for the learning path, 'reading',
+    'letters' (writing) or 'dots' (math).
 
   @example
   {% render 'placeholder-book-cover', design: 'moon' %}
@@ -40,6 +41,59 @@
         <tspan x="34">A Tree</tspan>
         <tspan x="34" dy="38">for Olga</tspan>
       </text>
+    {%- when 'reading' -%}
+      <rect width="300" height="400" fill="var(--color-sky)"/>
+      <path d="M246 236 a62 62 0 1 1 -82 -70 a50 50 0 0 0 82 70 Z" fill="var(--color-sun)"/>
+      <g fill="#FFFFFF">
+        <circle cx="70" cy="214" r="6"/>
+        <circle cx="110" cy="262" r="4"/>
+        <circle cx="258" cy="150" r="4.5"/>
+      </g>
+      <path d="M0 318 C 70 300, 210 300, 300 322 V400 H0 Z" fill="var(--color-grape)"/>
+      <text x="34" y="70" class="placeholder-book-cover__title" fill="var(--color-ink)">
+        <tspan x="34">The Reading</tspan>
+        <tspan x="34" dy="38">Lesson</tspan>
+      </text>
+    {%- when 'letters' -%}
+      <rect width="300" height="400" fill="var(--color-sun)"/>
+      <text x="34" y="70" class="placeholder-book-cover__title" fill="var(--color-ink)">
+        <tspan x="34">Handwriting</tspan>
+        <tspan x="34" dy="38">companions</tspan>
+      </text>
+      <g class="placeholder-book-cover__letter" text-anchor="middle">
+        <rect x="70" y="196" width="70" height="70" rx="12" fill="var(--color-sun)" stroke="var(--color-ink)" stroke-opacity="0.15"/>
+        <text x="105" y="246" fill="var(--color-ink)">a</text>
+        <g transform="rotate(8 198 236)">
+          <rect x="160" y="200" width="76" height="76" rx="12" fill="#FFFFFF"/>
+          <text x="198" y="254" fill="var(--color-ink)">b</text>
+        </g>
+        <g transform="rotate(-6 136 314)">
+          <rect x="100" y="278" width="72" height="72" rx="12" fill="var(--color-leaf)"/>
+          <text x="136" y="330" fill="var(--color-ink)">c</text>
+        </g>
+      </g>
+    {%- when 'dots' -%}
+      <rect width="300" height="400" fill="var(--color-leaf)"/>
+      <text x="34" y="70" class="placeholder-book-cover__title" fill="var(--color-ink)">
+        <tspan x="34">The Verbal</tspan>
+        <tspan x="34" dy="38">Math Lesson</tspan>
+      </text>
+      {%- assign dot_colors = 'sun,tomato,card,sky,sun,tomato,sky,card,tomato,sun,card,sky,sky,sun,tomato,card' | split: ',' -%}
+      {%- for color in dot_colors -%}
+        {%- liquid
+          assign col = forloop.index0 | modulo: 4
+          assign row = forloop.index0 | divided_by: 4
+          assign cx = col | times: 52 | plus: 72
+          assign cy = row | times: 46 | plus: 180
+          assign r = forloop.index0 | modulo: 3 | times: 2 | plus: 9
+          if color == 'card'
+            assign fill = '#FFFFFF'
+          else
+            assign fill = 'var(--color-' | append: color | append: ')'
+          endif
+        -%}
+        <circle cx="{{ cx }}" cy="{{ cy }}" r="{{ r }}" fill="{{ fill }}"/>
+      {%- endfor -%}
     {%- else -%}
       <rect width="300" height="400" fill="var(--color-sky)"/>
       <path d="M232 190 a72 72 0 1 1 -96 -82 a58 58 0 0 0 96 82 Z" fill="var(--color-sun)"/>
@@ -74,6 +128,11 @@
     font-weight: 600;
     font-size: 34px;
     letter-spacing: -0.01em;
+  }
+
+  .placeholder-book-cover__letter text {
+    font-family: var(--font-reading--family);
+    font-size: 46px;
   }
 
   .placeholder-book-cover__author {

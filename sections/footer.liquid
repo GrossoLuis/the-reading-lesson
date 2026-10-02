@@ -1,0 +1,1119 @@
+{%- comment -%}
+  Site footer.
+
+  1. Reading club: an ink card with a colour-bar top, the newsletter pitch and a
+     Shopify customer form (tagged "newsletter"), with success and error states.
+  2. Main: logo, tagline and social links, then the columns (blocks): menus picked in
+     the theme editor and a contact column whose heading links to the contact page.
+  3. Bottom bar: copyright, policies, payment methods and "Back to top".
+
+  Horizon scrolls .page-wrapper on desktop and the document on mobile, so "Back to top"
+  scrolls both.
+{%- endcomment -%}
+
+{%- liquid
+  assign s = section.settings
+  assign form_id = 'FooterNewsletter-' | append: section.id
+  assign brand_name = s.brand_name | default: shop.name
+
+  assign socials = 'instagram,facebook,youtube,tiktok,pinterest' | split: ','
+  assign has_social = false
+  for network in socials
+    assign key = 'social_' | append: network
+    if s[key] != blank
+      assign has_social = true
+    endif
+  endfor
+-%}
+
+<footer class="site-footer surface-{{ s.surface }}">
+  <div class="site-footer__container">
+    {%- comment -%} ---------- 1. Reading club ---------- {%- endcomment -%}
+    {%- if s.show_newsletter -%}
+      <div class="site-footer__club surface-ink">
+        <span
+          class="site-footer__club-bar"
+          aria-hidden="true"
+        ></span>
+
+        <div class="site-footer__club-copy">
+          {%- if s.newsletter_eyebrow != blank -%}
+            <p class="site-footer__club-eyebrow text-eyebrow">{{ s.newsletter_eyebrow }}</p>
+          {%- endif -%}
+          {%- if s.newsletter_heading != blank -%}
+            <h2 class="site-footer__club-heading">{{ s.newsletter_heading }}</h2>
+          {%- endif -%}
+          {%- if s.newsletter_text != blank -%}
+            <div class="site-footer__club-text">{{ s.newsletter_text }}</div>
+          {%- endif -%}
+        </div>
+
+        <div class="site-footer__club-form">
+          {%- form 'customer', id: form_id, class: 'site-footer__form' -%}
+            <input
+              type="hidden"
+              name="contact[tags]"
+              value="newsletter"
+            >
+
+            {%- if form.posted_successfully? -%}
+              <p
+                class="site-footer__form-message site-footer__form-message--success"
+                role="status"
+                tabindex="-1"
+                autofocus
+              >
+                {% render 'brand-icon', name: 'star', size: 18 %}
+                {{ s.newsletter_success }}
+              </p>
+            {%- else -%}
+              <div class="site-footer__field">
+                <label
+                  class="visually-hidden"
+                  for="{{ form_id }}-email"
+                >
+                  Email
+                </label>
+                <input
+                  id="{{ form_id }}-email"
+                  class="site-footer__input"
+                  type="email"
+                  name="contact[email]"
+                  value="{{ form.email }}"
+                  autocomplete="email"
+                  autocorrect="off"
+                  autocapitalize="off"
+                  spellcheck="false"
+                  placeholder="{{ s.newsletter_placeholder | escape }}"
+                  required
+                  {% if form.errors %}
+                    aria-invalid="true"
+                    aria-describedby="{{ form_id }}-error"
+                  {% endif %}
+                >
+                <button
+                  type="submit"
+                  class="site-footer__submit"
+                >
+                  <span>{{ s.newsletter_button }}</span>
+                  {% render 'brand-icon', name: 'arrow-right', size: 18 %}
+                </button>
+              </div>
+
+              {%- if form.errors -%}
+                <p
+                  id="{{ form_id }}-error"
+                  class="site-footer__form-message site-footer__form-message--error"
+                  role="alert"
+                >
+                  {{- form.errors.translated_fields.email | capitalize }}
+                  {{ form.errors.messages.email -}}
+                </p>
+              {%- endif -%}
+            {%- endif -%}
+
+            {%- if s.newsletter_note != blank -%}
+              <p class="site-footer__club-note">{{ s.newsletter_note }}</p>
+            {%- endif -%}
+          {%- endform -%}
+        </div>
+      </div>
+    {%- endif -%}
+
+    {%- comment -%} ---------- 2. Main ---------- {%- endcomment -%}
+    <div class="site-footer__main">
+      <div class="site-footer__brand">
+        <a
+          href="{{ routes.root_url }}"
+          class="site-footer__logo"
+        >
+          {%- render 'logo' -%}
+        </a>
+        {%- if s.tagline != blank -%}
+          <div class="site-footer__tagline">{{ s.tagline }}</div>
+        {%- endif -%}
+
+        {%- if has_social -%}
+          <ul
+            class="site-footer__social"
+            role="list"
+          >
+            {%- for network in socials -%}
+              {%- assign key = 'social_' | append: network -%}
+              {%- if s[key] != blank -%}
+                <li>
+                  <a
+                    href="{{ s[key] }}"
+                    class="site-footer__social-link"
+                    target="_blank"
+                    rel="noopener"
+                    aria-label="{{ network | capitalize }}"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="20"
+                      height="20"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                      focusable="false"
+                    >
+                      {%- case network -%}
+                        {%- when 'instagram' -%}
+                          <rect x="4.25" y="4.25" width="15.5" height="15.5" rx="4.5"/><circle cx="12" cy="12" r="3.6"/><circle cx="16.6" cy="7.4" r=".6" fill="currentColor"/>
+                        {%- when 'facebook' -%}
+                          <path d="M14.75 8.25h2v-3h-2.5a3.75 3.75 0 0 0-3.75 3.75v2.25h-2v3h2v6.5h3.25v-6.5h2.4l.6-3h-3V9a.75.75 0 0 1 .75-.75Z"/>
+                        {%- when 'youtube' -%}
+                          <rect x="3.25" y="6" width="17.5" height="12" rx="3.5"/><path d="m10.5 9.5 4.25 2.5-4.25 2.5v-5Z" fill="currentColor"/>
+                        {%- when 'tiktok' -%}
+                          <path d="M13.75 4.25v10.5a3.25 3.25 0 1 1-3.25-3.25M13.75 4.25c.4 2.4 2.1 4 4.5 4.25"/>
+                        {%- when 'pinterest' -%}
+                          <circle cx="12" cy="12" r="8"/><path d="m10.6 19.6 1.9-8.1M10.9 14.4c3.6 1.2 6-1.1 5.4-4-.5-2.6-4.1-3.4-6.3-1.6-1.3 1.1-1.4 3-.4 3.9"/>
+                      {%- endcase -%}
+                    </svg>
+                  </a>
+                </li>
+              {%- endif -%}
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+      </div>
+
+      {%- if section.blocks.size > 0 -%}
+        <div class="site-footer__columns">
+          {%- for block in section.blocks -%}
+            {%- case block.type -%}
+              {%- when 'menu' -%}
+                {%- assign menu = block.settings.menu -%}
+                {%- if menu != blank and menu.links.size > 0 -%}
+                  <nav
+                    class="site-footer__column"
+                    aria-label="{{ block.settings.heading | default: menu.title | escape }}"
+                    {{ block.shopify_attributes }}
+                  >
+                    <h2 class="site-footer__heading">{{ block.settings.heading | default: menu.title }}</h2>
+                    <ul
+                      class="site-footer__links"
+                      role="list"
+                    >
+                      {%- for link in menu.links -%}
+                        <li>
+                          <a
+                            href="{{ link.url }}"
+                            class="site-footer__link"
+                            {% if link.current %}
+                              aria-current="page"
+                            {% endif %}
+                          >
+                            {{- link.title -}}
+                          </a>
+                        </li>
+                      {%- endfor -%}
+                    </ul>
+                  </nav>
+                {%- endif -%}
+
+              {%- when 'contact' -%}
+                <div
+                  class="site-footer__column site-footer__column--contact"
+                  {{ block.shopify_attributes }}
+                >
+                  {%- if block.settings.heading != blank -%}
+                    <h2 class="site-footer__heading">
+                      {%- if block.settings.link != blank -%}
+                        <a
+                          class="site-footer__heading-link"
+                          href="{{ block.settings.link }}"
+                        >
+                          <span>{{ block.settings.heading }}</span>
+                          {% render 'brand-icon', name: 'arrow-right', size: 16 %}
+                        </a>
+                      {%- else -%}
+                        {{ block.settings.heading }}
+                      {%- endif -%}
+                    </h2>
+                  {%- endif -%}
+                  {%- if block.settings.text != blank -%}
+                    <div class="site-footer__contact-text">{{ block.settings.text }}</div>
+                  {%- endif -%}
+                  {%- if block.settings.email != blank -%}
+                    <a
+                      class="site-footer__email"
+                      href="mailto:{{ block.settings.email }}"
+                    >
+                      {{- block.settings.email -}}
+                    </a>
+                  {%- endif -%}
+                  {%- if block.settings.note != blank -%}
+                    <p class="site-footer__note">{{ block.settings.note }}</p>
+                  {%- endif -%}
+                </div>
+            {%- endcase -%}
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+
+  {%- comment -%} ---------- 3. Bottom bar ---------- {%- endcomment -%}
+  <div class="site-footer__bottom">
+    <div class="site-footer__container site-footer__bottom-inner">
+      <p class="site-footer__copyright">
+        © {{ 'now' | date: '%Y' }}
+        {{ brand_name | link_to: routes.root_url }}
+        {%- if s.bottom_note != blank %} · {{ s.bottom_note }}{% endif -%}
+      </p>
+
+      {%- if shop.policies.size > 0 -%}
+        <ul
+          class="site-footer__policies"
+          role="list"
+        >
+          {%- for policy in shop.policies -%}
+            <li>
+              <a
+                href="{{ policy.url }}"
+                class="site-footer__policy"
+              >
+                {{- policy.title -}}
+              </a>
+            </li>
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+
+      <div class="site-footer__end">
+        {%- if s.show_payment_icons and shop.enabled_payment_types.size > 0 -%}
+          <ul
+            class="site-footer__payments"
+            role="list"
+          >
+            {%- for type in shop.enabled_payment_types -%}
+              <li>{{ type | payment_type_svg_tag: class: 'site-footer__payment' }}</li>
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+
+        <button
+          type="button"
+          class="site-footer__top"
+          data-back-to-top
+        >
+          <span>Back to top</span>
+          <svg
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path d="M12 18.25V5.75M7.25 10.5 12 5.75l4.75 4.75"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var button = document.querySelector('#shopify-section-{{ section.id }} [data-back-to-top]');
+    if (!button) return;
+    button.addEventListener('click', function () {
+      var behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+      var wrapper = document.querySelector('.page-wrapper');
+      if (wrapper) wrapper.scrollTo({ top: 0, behavior: behavior });
+      window.scrollTo({ top: 0, behavior: behavior });
+      var target = document.getElementById('MainContent') || document.body;
+      if (target.focus) target.focus({ preventScroll: true });
+    });
+  })();
+</script>
+
+{% stylesheet %}
+  .site-footer {
+    --footer-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+    position: relative;
+    overflow: hidden;
+    padding-top: var(--space-8);
+    border-top: var(--stroke-sm) solid var(--color-line);
+  }
+
+  .site-footer__container {
+    max-width: var(--page-width);
+    margin-inline: auto;
+    padding-inline: var(--page-margin);
+  }
+
+  /* ---------- Reading club ---------- */
+
+  .site-footer__club {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    align-items: center;
+    gap: var(--space-6) var(--space-8);
+    padding: calc(var(--space-7) + 6px) clamp(var(--space-5), 5vw, var(--space-8)) var(--space-7);
+    overflow: hidden;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+  }
+
+  /* Colour bar along the top, in the order of the logo dots plus the path colours. */
+  .site-footer__club-bar {
+    position: absolute;
+    inset: 0 0 auto;
+    height: 8px;
+    background: linear-gradient(
+      90deg,
+      var(--color-tomato) 0 20%,
+      var(--color-sun) 20% 40%,
+      var(--color-sky) 40% 60%,
+      var(--color-leaf) 60% 80%,
+      var(--color-grape) 80% 100%
+    );
+  }
+
+  .site-footer__club-copy,
+  .site-footer__club-form {
+    position: relative;
+    z-index: 1;
+  }
+
+  .site-footer__club-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: 0 0 var(--space-4);
+    color: rgb(var(--color-on-grape-rgb) / 0.75);
+  }
+
+  .site-footer__club-eyebrow::before {
+    content: '';
+    width: 8px;
+    aspect-ratio: 1;
+    border-radius: var(--radius-full);
+    background: var(--color-sun);
+  }
+
+  .site-footer__club-heading {
+    margin: 0;
+    font-family: var(--font-heading--family);
+    font-weight: 600;
+    font-size: clamp(28px, 3.2vw, 42px);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    color: var(--color-on-grape);
+    text-wrap: balance;
+  }
+
+  .site-footer__club-heading em,
+  .site-footer__club-heading i {
+    font-family: var(--font-accent--family);
+    font-style: var(--font-accent--style);
+    font-weight: var(--font-accent--weight);
+    color: var(--color-sun);
+  }
+
+  .site-footer__club-text {
+    max-width: 30rem;
+    margin-top: var(--space-4);
+    font-size: 16.5px;
+    line-height: 1.6;
+    color: rgb(var(--color-on-grape-rgb) / 0.75);
+  }
+
+  .site-footer__club-text p {
+    margin: 0;
+  }
+
+  .site-footer__form {
+    margin: 0;
+  }
+
+  /* Email and button share one pill. */
+  .site-footer__field {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 6px;
+    background: var(--color-card);
+    border-radius: var(--radius-full);
+    transition: box-shadow 200ms ease;
+  }
+
+  .site-footer__field:focus-within {
+    box-shadow: 0 0 0 3px rgb(var(--color-sun-rgb) / 0.55);
+  }
+
+  .site-footer__input {
+    flex: 1;
+    min-width: 0;
+    height: 48px;
+    padding: 0 var(--space-4);
+    font: inherit;
+    font-size: 16px;
+    color: var(--color-ink);
+    background: transparent;
+    border: 0;
+    outline: none;
+  }
+
+  .site-footer__input::placeholder {
+    color: var(--color-ink-muted);
+  }
+
+  .site-footer__submit {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex: none;
+    height: 48px;
+    padding: 0 var(--space-5);
+    font-family: var(--font-button--family);
+    font-size: var(--font-button--size);
+    font-weight: var(--font-button--weight);
+    color: var(--color-ink);
+    background: var(--color-sun);
+    border: 0;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: background-color 150ms ease, transform 150ms ease;
+  }
+
+  .site-footer__submit:hover {
+    background: color-mix(in srgb, var(--color-sun) 88%, #ffffff);
+  }
+
+  .site-footer__submit:active {
+    transform: translateY(1px);
+  }
+
+  .site-footer__submit:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-sun);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .site-footer__submit .brand-icon {
+    transition: transform 150ms ease;
+  }
+
+  .site-footer__submit:hover .brand-icon {
+    transform: translateX(3px);
+  }
+
+  .site-footer__club-note {
+    margin: var(--space-3) 0 0 var(--space-4);
+    font-size: 13px;
+    color: rgb(var(--color-on-grape-rgb) / 0.6);
+  }
+
+  .site-footer__form-message {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .site-footer__form-message--success {
+    padding: var(--space-4) var(--space-5);
+    color: var(--color-ink);
+    background: var(--color-sun);
+    border-radius: var(--radius-full);
+  }
+
+  .site-footer__form-message--error {
+    margin: var(--space-3) 0 0 var(--space-4);
+    color: color-mix(in srgb, var(--color-tomato) 55%, #ffffff);
+  }
+
+  /* ---------- Main ---------- */
+
+  .site-footer__main {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 2fr);
+    gap: var(--space-7) var(--space-8);
+    padding-block: var(--space-8);
+  }
+
+  .site-footer__logo {
+    display: inline-block;
+    color: inherit;
+  }
+
+  .site-footer__logo:focus-visible,
+  .site-footer__link:focus-visible,
+  .site-footer__email:focus-visible,
+  .site-footer__social-link:focus-visible,
+  .site-footer__policy:focus-visible,
+  .site-footer__top:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus-ring, var(--color-grape));
+    outline-offset: var(--focus-ring-offset);
+    border-radius: var(--radius-sm);
+  }
+
+  .site-footer__tagline {
+    max-width: 22rem;
+    margin-top: var(--space-4);
+    font-family: var(--font-heading--family);
+    font-style: italic;
+    font-size: 19px;
+    line-height: 1.5;
+    color: var(--color-ink);
+  }
+
+  .site-footer__tagline p {
+    margin: 0;
+  }
+
+  .site-footer__social {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin: var(--space-5) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .site-footer__social-link {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    aspect-ratio: 1;
+    color: var(--color-ink);
+    border: var(--stroke-sm) solid var(--color-line-strong);
+    border-radius: var(--radius-full);
+    transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease,
+      transform 200ms var(--footer-ease);
+  }
+
+  .site-footer__social-link:hover {
+    color: #ffffff;
+    background: var(--color-ink);
+    border-color: var(--color-ink);
+    transform: translateY(-2px);
+  }
+
+  .site-footer__columns {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--space-6);
+  }
+
+  .site-footer__heading {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0 0 var(--space-4);
+    font-family: var(--font-body--family);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-ink-muted);
+  }
+
+  .site-footer__heading-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--color-ink);
+    text-decoration: none;
+  }
+
+  .site-footer__heading-link span {
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 6px;
+    transition: text-decoration-color 200ms ease;
+  }
+
+  .site-footer__heading-link:hover span {
+    text-decoration-color: var(--color-tomato);
+  }
+
+  .site-footer__heading-link .brand-icon {
+    transition: transform 200ms var(--footer-ease);
+  }
+
+  .site-footer__heading-link:hover .brand-icon {
+    transform: translateX(4px);
+  }
+
+  .site-footer__heading-link:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus-ring, var(--color-grape));
+    outline-offset: var(--focus-ring-offset);
+    border-radius: var(--radius-sm);
+  }
+
+  .site-footer__links {
+    display: grid;
+    gap: var(--space-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .site-footer__link {
+    position: relative;
+    font-size: 15.5px;
+    color: var(--color-ink);
+    text-decoration: none;
+  }
+
+  /* A short hand-drawn-feeling underline that grows on hover. */
+  .site-footer__link::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -3px;
+    height: 2px;
+    background: var(--color-tomato);
+    border-radius: var(--radius-full);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 250ms var(--footer-ease);
+  }
+
+  .site-footer__link:hover::after {
+    transform: scaleX(1);
+  }
+
+  .site-footer__contact-text {
+    font-size: 15.5px;
+    line-height: 1.6;
+    color: var(--color-ink-muted);
+  }
+
+  .site-footer__contact-text p {
+    margin: 0;
+  }
+
+  .site-footer__email {
+    display: block;
+    width: fit-content;
+    margin-top: var(--space-3);
+    font-weight: 600;
+    color: var(--color-ink);
+    text-decoration: underline;
+    text-decoration-color: var(--color-sun);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 5px;
+  }
+
+  .site-footer__email:hover {
+    text-decoration-color: var(--color-tomato);
+  }
+
+  .site-footer__note {
+    margin: var(--space-4) 0 0;
+    font-family: var(--font-heading--family);
+    font-style: italic;
+    font-size: 17px;
+    color: var(--color-ink);
+  }
+
+  /* ---------- Bottom bar ---------- */
+
+  .site-footer__bottom {
+    position: relative;
+    border-top: var(--stroke-sm) solid var(--color-line);
+    background: var(--color-background);
+  }
+
+  .site-footer__bottom-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3) var(--space-6);
+    padding-block: var(--space-5);
+    font-size: 13.5px;
+    color: var(--color-ink-muted);
+  }
+
+  .site-footer__copyright {
+    margin: 0;
+  }
+
+  .site-footer__copyright a {
+    color: var(--color-ink);
+    text-decoration: none;
+  }
+
+  .site-footer__policies {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .site-footer__policy {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .site-footer__policy:hover {
+    color: var(--color-ink);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .site-footer__end {
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+    margin-left: auto;
+  }
+
+  .site-footer__payments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .site-footer__payment {
+    display: block;
+    width: 38px;
+    height: 24px;
+  }
+
+  .site-footer__top {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    height: 36px;
+    padding: 0 var(--space-4);
+    font: inherit;
+    font-weight: 600;
+    color: var(--color-ink);
+    background: transparent;
+    border: var(--stroke-sm) solid var(--color-line-strong);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: background-color 150ms ease;
+  }
+
+  .site-footer__top:hover {
+    background: var(--color-card);
+  }
+
+  .site-footer__top svg {
+    transition: transform 200ms var(--footer-ease);
+  }
+
+  .site-footer__top:hover svg {
+    transform: translateY(-2px);
+  }
+
+  /* ---------- Breakpoints ---------- */
+
+  @media screen and (max-width: 989px) {
+    .site-footer {
+      padding-top: var(--space-7);
+    }
+
+    .site-footer__club {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .site-footer__main {
+      grid-template-columns: minmax(0, 1fr);
+      padding-block: var(--space-7) var(--space-6);
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .site-footer__club {
+      padding: calc(var(--space-6) + 6px) var(--space-5) var(--space-6);
+      border-radius: var(--radius-lg);
+    }
+
+    /* The button drops under the email on narrow screens. */
+    .site-footer__field {
+      flex-direction: column;
+      align-items: stretch;
+      padding: 0;
+      background: transparent;
+      gap: var(--space-3);
+    }
+
+    .site-footer__field:focus-within {
+      box-shadow: none;
+    }
+
+    .site-footer__input {
+      flex: none;
+      height: 52px;
+      background: var(--color-card);
+      border-radius: var(--radius-full);
+    }
+
+    .site-footer__input:focus-visible {
+      box-shadow: 0 0 0 3px rgb(var(--color-sun-rgb) / 0.55);
+    }
+
+    .site-footer__submit {
+      justify-content: center;
+      height: 52px;
+    }
+
+    .site-footer__club-note {
+      margin-left: 0;
+      text-align: center;
+    }
+
+    .site-footer__columns {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-6) var(--space-5);
+    }
+
+    .site-footer__column--contact {
+      grid-column: 1 / -1;
+    }
+
+
+    .site-footer__bottom-inner {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .site-footer__end {
+      width: 100%;
+      justify-content: space-between;
+      margin-left: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-footer__link::after,
+    .site-footer__heading-link span,
+    .site-footer__heading-link .brand-icon,
+    .site-footer__social-link,
+    .site-footer__submit,
+    .site-footer__submit .brand-icon,
+    .site-footer__top svg {
+      transition: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Footer",
+  "tag": "section",
+  "class": "footer-section",
+  "enabled_on": {
+    "groups": ["footer"]
+  },
+  "max_blocks": 6,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Reading club"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_newsletter",
+      "label": "Show the newsletter signup",
+      "info": "Signups are saved as customers who accept marketing, tagged newsletter.",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "newsletter_eyebrow",
+      "label": "Eyebrow",
+      "default": "Reading club"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "newsletter_heading",
+      "label": "Heading",
+      "info": "Italic words turn sun yellow.",
+      "default": "A new story every month, <em>straight to your inbox</em>"
+    },
+    {
+      "type": "richtext",
+      "id": "newsletter_text",
+      "label": "Text",
+      "default": "<p>Age-by-age picks, printable activities and early access to pre-orders.</p>"
+    },
+    {
+      "type": "text",
+      "id": "newsletter_placeholder",
+      "label": "Email placeholder",
+      "default": "you@email.com"
+    },
+    {
+      "type": "text",
+      "id": "newsletter_button",
+      "label": "Button label",
+      "default": "Subscribe"
+    },
+    {
+      "type": "text",
+      "id": "newsletter_note",
+      "label": "Small print",
+      "default": "No spam. Unsubscribe in one click."
+    },
+    {
+      "type": "text",
+      "id": "newsletter_success",
+      "label": "Thank-you message",
+      "default": "You're in! Look out for your first story."
+    },
+    {
+      "type": "header",
+      "content": "Brand"
+    },
+    {
+      "type": "text",
+      "id": "brand_name",
+      "label": "Brand name",
+      "info": "Used in the copyright. Leave empty to use the store name.",
+      "default": "The Reading Lesson"
+    },
+    {
+      "type": "richtext",
+      "id": "tagline",
+      "label": "Tagline",
+      "default": "<p>A small children's bookshop with hand-picked books to read aloud, learn and dream.</p>"
+    },
+    {
+      "type": "url",
+      "id": "social_instagram",
+      "label": "Instagram"
+    },
+    {
+      "type": "url",
+      "id": "social_facebook",
+      "label": "Facebook"
+    },
+    {
+      "type": "url",
+      "id": "social_youtube",
+      "label": "YouTube"
+    },
+    {
+      "type": "url",
+      "id": "social_tiktok",
+      "label": "TikTok"
+    },
+    {
+      "type": "url",
+      "id": "social_pinterest",
+      "label": "Pinterest"
+    },
+    {
+      "type": "header",
+      "content": "Bottom"
+    },
+    {
+      "type": "text",
+      "id": "bottom_note",
+      "label": "Note next to the copyright",
+      "default": "Nationwide shipping · Secure checkout"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_payment_icons",
+      "label": "Show payment methods",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "surface",
+      "label": "Background",
+      "options": [
+        { "value": "paper", "label": "Paper" },
+        { "value": "paper-deep", "label": "Paper deep" }
+      ],
+      "default": "paper-deep"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "menu",
+      "name": "Menu",
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "info": "Leave empty to use the menu name."
+        },
+        {
+          "type": "link_list",
+          "id": "menu",
+          "label": "Menu",
+          "info": "Menus are made in Online Store › Navigation. Hidden while empty."
+        }
+      ]
+    },
+    {
+      "type": "contact",
+      "name": "Contact",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Say hello"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "<p>Questions about a lesson, an order or where to start? Write to us.</p>"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Heading link",
+          "info": "Usually your Contact page. The heading gets an arrow and links there."
+        },
+        {
+          "type": "text",
+          "id": "email",
+          "label": "Email",
+          "info": "Optional. Shown under the text."
+        },
+        {
+          "type": "text",
+          "id": "note",
+          "label": "Handwritten note",
+          "default": "read together, every day"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Footer",
+      "blocks": [
+        { "type": "menu", "settings": { "heading": "Shop", "menu": "main-menu" } },
+        { "type": "menu", "settings": { "heading": "Help", "menu": "footer" } },
+        { "type": "contact" }
+      ]
+    }
+  ]
+}
+{% endschema %}

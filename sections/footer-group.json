@@ -1,6 +1,71 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "type": "footer",
   "name": "t:names.footer",
-  "sections": {},
-  "order": []
+  "sections": {
+    "footer": {
+      "type": "footer",
+      "blocks": {
+        "menu_shop": {
+          "type": "menu",
+          "settings": {
+            "heading": "Shop",
+            "menu": "main-menu"
+          }
+        },
+        "menu_help": {
+          "type": "menu",
+          "settings": {
+            "heading": "Help",
+            "menu": "footer"
+          }
+        },
+        "contact": {
+          "type": "contact",
+          "settings": {
+            "heading": "Say hello",
+            "text": "<p>Questions about a lesson, an order or where to start? Write to us.</p>",
+            "email": "",
+            "note": "read together, every day",
+            "link": "shopify://pages/contact"
+          }
+        }
+      },
+      "block_order": [
+        "menu_shop",
+        "menu_help",
+        "contact"
+      ],
+      "settings": {
+        "show_newsletter": true,
+        "newsletter_eyebrow": "Reading club",
+        "newsletter_heading": "A new story every month, <em>straight to your inbox</em>",
+        "newsletter_text": "<p>Age-by-age picks, printable activities and early access to pre-orders.</p>",
+        "newsletter_placeholder": "you@email.com",
+        "newsletter_button": "Subscribe",
+        "newsletter_note": "No spam. Unsubscribe in one click.",
+        "newsletter_success": "You're in! Look out for your first story.",
+        "tagline": "<p>A small children's bookshop with hand-picked books to read aloud, learn and dream.</p>",
+        "social_instagram": "",
+        "social_facebook": "",
+        "social_youtube": "",
+        "social_tiktok": "",
+        "social_pinterest": "",
+        "bottom_note": "Nationwide shipping · Secure checkout",
+        "show_payment_icons": true,
+        "surface": "paper-deep"
+      }
+    }
+  },
+  "order": [
+    "footer"
+  ]
 }

@@ -1,0 +1,849 @@
+{%- comment -%}
+  Carousel CTA: photos of children reading and learning with the books, under a
+  display headline, a lead and a button.
+
+  - Header: eyebrow with the tomato dot, display heading (italic words take the grape
+    accent), lead and buttons.
+  - Track: photo cards (blocks) that bleed off the right edge of the page, snap one by
+    one and can be swiped, dragged with the mouse or moved with the arrows. Every other
+    card sits lower on desktop, so the row reads like snapshots laid on a table.
+  - Each card has a coloured tag (sky reading, sun writing, leaf math, grape) and a
+    handwritten-style caption. The progress bar under the track takes the tag colour
+    of the card in view.
+  - Optional autoplay, with a pause button; it stops while hovered or focused, when
+    off screen, and never runs with reduced motion or in the theme editor.
+
+  Behaviour lives in assets/carousel-cta.js. Without JS the track is still a native,
+  swipeable scroll-snap row.
+{%- endcomment -%}
+
+{%- liquid
+  assign s = section.settings
+  assign slides = section.blocks | where: 'type', 'slide'
+
+  case s.slide_size
+    when 'small'
+      assign slide_px = 280
+    when 'large'
+      assign slide_px = 420
+    else
+      assign slide_px = 340
+  endcase
+  assign image_sizes = '(min-width: 750px) ' | append: slide_px | append: 'px, 78vw'
+
+  case s.image_ratio
+    when 'square'
+      assign ratio = '1 / 1'
+    when 'landscape'
+      assign ratio = '4 / 3'
+    else
+      assign ratio = '4 / 5'
+  endcase
+
+  assign autoplay = false
+  if s.autoplay and request.design_mode == false
+    assign autoplay = true
+  endif
+-%}
+
+<script
+  type="module"
+  src="{{ 'carousel-cta.js' | asset_url }}"
+></script>
+
+<carousel-cta
+  class="carousel-cta surface-{{ s.surface }}{% if s.stagger %} carousel-cta--stagger{% endif %}"
+  style="--cc-slide-width: {{ slide_px }}px; --cc-ratio: {{ ratio }};"
+  {% if autoplay %}
+    data-autoplay="{{ s.autoplay_speed | times: 1000 }}"
+  {% endif %}
+>
+  <div class="carousel-cta__top">
+    <div class="carousel-cta__header">
+      {%- if s.eyebrow != blank -%}
+        <p class="carousel-cta__eyebrow text-eyebrow">{{ s.eyebrow }}</p>
+      {%- endif -%}
+      {%- if s.heading != blank -%}
+        <h2 class="carousel-cta__heading text-display">{{ s.heading }}</h2>
+      {%- endif -%}
+      {%- if s.text != blank -%}
+        <div class="carousel-cta__text text-lead">{{ s.text }}</div>
+      {%- endif -%}
+    </div>
+
+    {%- if s.primary_label != blank or s.secondary_label != blank -%}
+      <div class="carousel-cta__buttons">
+        {%- if s.primary_label != blank -%}
+          {% render 'brand-button',
+            label: s.primary_label,
+            url: s.primary_url,
+            style: 'primary',
+            arrow: true,
+            class: 'carousel-cta__button'
+          %}
+        {%- endif -%}
+        {%- if s.secondary_label != blank -%}
+          {% render 'brand-button',
+            label: s.secondary_label,
+            url: s.secondary_url,
+            style: 'secondary',
+            class: 'carousel-cta__button'
+          %}
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  </div>
+
+  {%- if slides.size > 0 -%}
+    <ul
+      id="CarouselCtaTrack-{{ section.id }}"
+      class="carousel-cta__track"
+      role="list"
+      tabindex="0"
+      aria-roledescription="carousel"
+      aria-label="{{ s.carousel_label | default: 'Photos' | escape }}"
+      data-track
+    >
+      {%- for block in slides -%}
+        {%- liquid
+          assign b = block.settings
+          assign card_tag = 'div'
+          if b.link != blank
+            assign card_tag = 'a'
+          endif
+          assign placeholder_index = forloop.index0 | modulo: 2 | plus: 1
+          assign placeholder_name = 'lifestyle-' | append: placeholder_index
+        -%}
+        <li
+          class="carousel-cta__slide"
+          style="--i: {{ forloop.index0 }};"
+          role="group"
+          aria-roledescription="slide"
+          aria-label="{{ forloop.index }} / {{ forloop.length }}"
+          data-slide
+          data-color="{{ b.color }}"
+          {{ block.shopify_attributes }}
+        >
+          <{{ card_tag }}
+            class="carousel-cta__card"
+            {% if b.link != blank %}
+              href="{{ b.link }}"
+            {% endif %}
+          >
+            <div class="carousel-cta__media">
+              {%- if b.image != blank -%}
+                {{
+                  b.image
+                  | image_url: width: 1200
+                  | image_tag:
+                    class: 'carousel-cta__image',
+                    widths: '320, 480, 640, 840, 1000, 1200',
+                    sizes: image_sizes,
+                    loading: 'lazy',
+                    draggable: 'false',
+                    alt: b.image.alt
+                }}
+              {%- else -%}
+                {{ placeholder_name | placeholder_svg_tag: 'carousel-cta__placeholder' }}
+              {%- endif -%}
+            </div>
+
+            {%- if b.tag != blank or b.caption != blank -%}
+              <div class="carousel-cta__caption">
+                {%- if b.tag != blank -%}
+                  <span class="carousel-cta__tag">{{ b.tag }}</span>
+                {%- endif -%}
+                {%- if b.caption != blank -%}
+                  <p class="carousel-cta__note text-note">{{ b.caption }}</p>
+                {%- endif -%}
+              </div>
+            {%- endif -%}
+          </{{ card_tag }}>
+        </li>
+      {%- endfor -%}
+    </ul>
+
+    <div class="carousel-cta__controls">
+      <div
+        class="carousel-cta__progress"
+        aria-hidden="true"
+      >
+        <span
+          class="carousel-cta__thumb"
+          data-thumb
+        ></span>
+      </div>
+
+      <p
+        class="carousel-cta__count text-small"
+        aria-hidden="true"
+      >
+        <span data-current>01</span>
+        <span class="carousel-cta__count-sep">/</span>
+        <span>{{ slides.size | prepend: '0' | slice: -2, 2 }}</span>
+      </p>
+
+      <div class="carousel-cta__arrows">
+        {%- if autoplay -%}
+          <button
+            type="button"
+            class="carousel-cta__arrow carousel-cta__arrow--toggle"
+            aria-controls="CarouselCtaTrack-{{ section.id }}"
+            aria-pressed="false"
+            aria-label="{{ s.pause_label | default: 'Pause' | escape }}"
+            data-label-pause="{{ s.pause_label | default: 'Pause' | escape }}"
+            data-label-play="{{ s.play_label | default: 'Play' | escape }}"
+            data-toggle
+          >
+            {% render 'brand-icon', name: 'pause', size: 18 %}
+            {% render 'brand-icon', name: 'play', size: 18 %}
+          </button>
+        {%- endif -%}
+        <button
+          type="button"
+          class="carousel-cta__arrow"
+          aria-controls="CarouselCtaTrack-{{ section.id }}"
+          aria-label="Previous"
+          data-prev
+          disabled
+        >
+          {% render 'brand-icon', name: 'arrow-left', size: 20 %}
+        </button>
+        <button
+          type="button"
+          class="carousel-cta__arrow"
+          aria-controls="CarouselCtaTrack-{{ section.id }}"
+          aria-label="Next"
+          data-next
+        >
+          {% render 'brand-icon', name: 'arrow-right', size: 20 %}
+        </button>
+      </div>
+    </div>
+  {%- endif -%}
+</carousel-cta>
+
+{% stylesheet %}
+  .carousel-cta {
+    /* Left edge of the page content, so the track lines up with the header and
+       bleeds off the right edge. 100% is the full section width here. */
+    --cc-gutter: max(
+      var(--page-margin),
+      calc((100% - var(--page-width)) / 2 + var(--page-margin))
+    );
+    --cc-gap: var(--space-5);
+    --cc-stagger: var(--space-7);
+    --cc-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+    display: block;
+    padding-block: var(--space-8) var(--space-8);
+    overflow: hidden;
+  }
+
+  /* ---------- Header ---------- */
+
+  .carousel-cta__top {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-6) var(--space-8);
+    max-width: var(--page-width);
+    margin-inline: auto;
+    padding-inline: var(--page-margin);
+  }
+
+  .carousel-cta__header {
+    max-width: 44rem;
+  }
+
+  .carousel-cta__eyebrow {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: 0 0 var(--space-4);
+    color: var(--color-ink-muted);
+  }
+
+  .carousel-cta__eyebrow::before {
+    content: '';
+    flex: none;
+    width: 8px;
+    aspect-ratio: 1;
+    border-radius: var(--radius-full);
+    background: var(--color-tomato);
+  }
+
+  .carousel-cta__heading {
+    margin: 0;
+    color: var(--color-ink);
+    text-wrap: balance;
+  }
+
+  .carousel-cta__heading em,
+  .carousel-cta__heading i {
+    font-family: var(--font-accent--family);
+    font-style: var(--font-accent--style);
+    font-weight: var(--font-accent--weight);
+    color: var(--color-grape);
+  }
+
+  .carousel-cta__text {
+    max-width: 36rem;
+    margin-top: var(--space-4);
+    color: var(--color-ink-muted);
+  }
+
+  .carousel-cta__text p {
+    margin: 0;
+  }
+
+  .carousel-cta__buttons {
+    display: flex;
+    flex: none;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  /* ---------- Track ---------- */
+
+  .carousel-cta__track {
+    position: relative;
+    display: flex;
+    gap: var(--cc-gap);
+    margin: var(--space-7) 0 0;
+    padding: var(--space-3) var(--cc-gutter) var(--space-5);
+    list-style: none;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--cc-gutter);
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .carousel-cta__track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .carousel-cta__track:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus-ring, var(--color-grape));
+    outline-offset: calc(var(--focus-ring-offset) * -1 - var(--focus-ring-width));
+  }
+
+  .carousel-cta__track.is-dragging {
+    scroll-snap-type: none;
+    cursor: grabbing;
+    user-select: none;
+  }
+
+  .carousel-cta__track.is-dragging .carousel-cta__card {
+    pointer-events: none;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .carousel-cta__track {
+      cursor: grab;
+    }
+  }
+
+  .carousel-cta__slide {
+    --cc-soft: var(--color-sky-soft);
+    --cc-deep: var(--color-sky-deep);
+    --cc-accent: var(--color-sky);
+
+    flex: none;
+    width: var(--cc-slide-width);
+    scroll-snap-align: start;
+  }
+
+  .carousel-cta__slide[data-color='sun'] {
+    --cc-soft: var(--color-sun-soft);
+    --cc-deep: var(--color-sun-deep);
+    --cc-accent: var(--color-sun);
+  }
+
+  .carousel-cta__slide[data-color='leaf'] {
+    --cc-soft: var(--color-leaf-soft);
+    --cc-deep: var(--color-leaf-deep);
+    --cc-accent: var(--color-leaf);
+  }
+
+  .carousel-cta__slide[data-color='grape'] {
+    --cc-soft: var(--color-grape-soft);
+    --cc-deep: var(--color-grape);
+    --cc-accent: var(--color-grape);
+  }
+
+  .carousel-cta--stagger .carousel-cta__slide:nth-child(even) {
+    padding-top: var(--cc-stagger);
+  }
+
+  /* ---------- Card ---------- */
+
+  .carousel-cta__card {
+    --cc-tilt: -0.8deg;
+
+    display: block;
+    height: auto;
+    padding: var(--space-3);
+    color: var(--color-ink);
+    text-decoration: none;
+    background: var(--color-card);
+    border: var(--stroke-sm) solid var(--color-line);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    transition: transform 400ms var(--cc-ease), box-shadow 400ms var(--cc-ease);
+  }
+
+  .carousel-cta__slide:nth-child(even) .carousel-cta__card {
+    --cc-tilt: 0.8deg;
+  }
+
+  .carousel-cta__card:hover {
+    transform: translateY(-6px) rotate(var(--cc-tilt));
+    box-shadow: var(--shadow-lg);
+  }
+
+  a.carousel-cta__card:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus-ring, var(--color-grape));
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .carousel-cta__media {
+    position: relative;
+    aspect-ratio: var(--cc-ratio);
+    overflow: hidden;
+    background: var(--cc-soft);
+    border-radius: var(--radius-image);
+  }
+
+  .carousel-cta__image,
+  .carousel-cta__placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    -webkit-user-drag: none;
+    transition: transform 700ms var(--cc-ease);
+  }
+
+  .carousel-cta__placeholder {
+    fill: rgb(var(--color-ink-rgb) / 0.22);
+  }
+
+  .carousel-cta__card:hover .carousel-cta__image {
+    transform: scale(1.04);
+  }
+
+  .carousel-cta__caption {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-2);
+    padding: var(--space-4) var(--space-2) var(--space-2);
+  }
+
+  .carousel-cta__tag {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 4px 10px 4px 8px;
+    font-family: var(--font-eyebrow--family, var(--font-body--family));
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--cc-deep);
+    background: var(--cc-soft);
+    border-radius: var(--radius-full);
+  }
+
+  .carousel-cta__tag::before {
+    content: '';
+    width: 7px;
+    aspect-ratio: 1;
+    border-radius: var(--radius-full);
+    background: var(--cc-accent);
+  }
+
+  .carousel-cta__note {
+    margin: 0;
+    font-style: italic;
+    color: var(--color-ink);
+    text-wrap: pretty;
+  }
+
+  /* ---------- Controls ---------- */
+
+  .carousel-cta__controls {
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+    max-width: var(--page-width);
+    margin: var(--space-5) auto 0;
+    padding-inline: var(--page-margin);
+  }
+
+  .carousel-cta__progress {
+    position: relative;
+    flex: 1;
+    height: 4px;
+    overflow: hidden;
+    background: var(--color-rule);
+    border-radius: var(--radius-full);
+  }
+
+  .carousel-cta__thumb {
+    position: absolute;
+    inset-block: 0;
+    left: 0;
+    width: calc(var(--cc-thumb-size, 0.3) * 100%);
+    background: var(--cc-thumb-color, var(--color-ink));
+    border-radius: inherit;
+    transform: translateX(calc(var(--cc-thumb-offset, 0) * 100%));
+    transition: background-color 400ms ease;
+  }
+
+  .carousel-cta__count {
+    flex: none;
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-ink-muted);
+  }
+
+  .carousel-cta__count [data-current] {
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+
+  .carousel-cta__count-sep {
+    margin-inline: 2px;
+    opacity: 0.6;
+  }
+
+  .carousel-cta__arrows {
+    display: flex;
+    flex: none;
+    gap: var(--space-2);
+  }
+
+  .carousel-cta__arrow {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    aspect-ratio: 1;
+    padding: 0;
+    color: var(--color-ink);
+    background: transparent;
+    border: var(--stroke-sm) solid var(--color-line-strong);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease,
+      opacity 150ms ease;
+  }
+
+  .carousel-cta__arrow:hover:not(:disabled) {
+    color: #ffffff;
+    background: var(--color-ink);
+    border-color: var(--color-ink);
+  }
+
+  .carousel-cta__arrow:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus-ring, var(--color-grape));
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .carousel-cta__arrow:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  .carousel-cta__arrow--toggle .brand-icon--play,
+  .carousel-cta__arrow--toggle[aria-pressed='true'] .brand-icon--pause {
+    display: none;
+  }
+
+  .carousel-cta__arrow--toggle[aria-pressed='true'] .brand-icon--play {
+    display: block;
+  }
+
+  /* Everything fits: nothing to scroll, so no controls. */
+  .carousel-cta.is-static .carousel-cta__controls {
+    display: none;
+  }
+
+  /* ---------- Reveal (set by carousel-cta.js when the section starts below the fold) ---------- */
+
+  .carousel-cta.is-hidden .carousel-cta__top,
+  .carousel-cta.is-hidden .carousel-cta__slide {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+
+  .carousel-cta.is-revealing .carousel-cta__top,
+  .carousel-cta.is-revealing .carousel-cta__slide {
+    transition: opacity 700ms var(--cc-ease), transform 900ms var(--cc-ease);
+  }
+
+  .carousel-cta.is-revealing .carousel-cta__slide {
+    transition-delay: calc(120ms + min(var(--i), 5) * 80ms);
+  }
+
+  /* ---------- Breakpoints ---------- */
+
+  @media screen and (max-width: 989px) {
+    .carousel-cta {
+      --cc-stagger: var(--space-6);
+
+      padding-block: var(--space-7);
+    }
+
+    .carousel-cta__top {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .carousel-cta {
+      --cc-gap: var(--space-4);
+      --cc-slide-width: 78vw !important;
+      --cc-stagger: 0px;
+    }
+
+    .carousel-cta__top {
+      gap: var(--space-5);
+    }
+
+    .carousel-cta__track {
+      margin-top: var(--space-5);
+    }
+
+    .carousel-cta__buttons {
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .carousel-cta__button {
+      width: 100%;
+    }
+
+    .carousel-cta__controls {
+      gap: var(--space-4);
+    }
+
+    .carousel-cta__arrow {
+      width: 44px;
+    }
+
+    /* Swiping is the way on phones; keep the toggle (autoplay) only. */
+    .carousel-cta__arrow:not(.carousel-cta__arrow--toggle) {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .carousel-cta__card,
+    .carousel-cta__image,
+    .carousel-cta__thumb,
+    .carousel-cta__arrow {
+      transition: none;
+    }
+
+    .carousel-cta__card:hover {
+      transform: none;
+    }
+
+    .carousel-cta__card:hover .carousel-cta__image {
+      transform: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Carousel CTA",
+  "tag": "section",
+  "class": "carousel-cta-section",
+  "max_blocks": 12,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Reading together"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "info": "Put the heartfelt word in italics to give it the accent colour.",
+      "default": "Little readers, <em>big</em> discoveries"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Subtitle",
+      "default": "<p>Real families, real progress. Children sounding out their first words, tracing letters and finding the joy of a story they can read on their own.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Buttons"
+    },
+    {
+      "type": "text",
+      "id": "primary_label",
+      "label": "Primary button label",
+      "default": "Start reading together"
+    },
+    {
+      "type": "url",
+      "id": "primary_url",
+      "label": "Primary button link",
+      "default": "/collections/all"
+    },
+    {
+      "type": "text",
+      "id": "secondary_label",
+      "label": "Secondary button label"
+    },
+    {
+      "type": "url",
+      "id": "secondary_url",
+      "label": "Secondary button link"
+    },
+    {
+      "type": "header",
+      "content": "Carousel"
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Photo shape",
+      "options": [
+        { "value": "portrait", "label": "Portrait (4:5)" },
+        { "value": "square", "label": "Square" },
+        { "value": "landscape", "label": "Landscape (4:3)" }
+      ],
+      "default": "portrait"
+    },
+    {
+      "type": "select",
+      "id": "slide_size",
+      "label": "Card size",
+      "info": "On phones each card takes most of the screen.",
+      "options": [
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "checkbox",
+      "id": "stagger",
+      "label": "Stagger the cards",
+      "info": "Every other card sits lower on desktop.",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Autoplay",
+      "info": "Adds a pause button. Never runs in the theme editor or for visitors who turned off animations.",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "autoplay_speed",
+      "label": "Change photo every",
+      "min": 3,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "default": 5
+    },
+    {
+      "type": "text",
+      "id": "carousel_label",
+      "label": "Carousel name",
+      "info": "Read by screen readers.",
+      "default": "Children reading with The Reading Lesson"
+    },
+    {
+      "type": "select",
+      "id": "surface",
+      "label": "Background",
+      "options": [
+        { "value": "paper", "label": "Paper" },
+        { "value": "paper-deep", "label": "Paper deep" },
+        { "value": "sky-soft", "label": "Sky soft" },
+        { "value": "sun-soft", "label": "Sun soft" },
+        { "value": "leaf-soft", "label": "Leaf soft" },
+        { "value": "grape-soft", "label": "Grape soft" }
+      ],
+      "default": "paper"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Photo",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Photo",
+          "info": "At least 1000px wide. Add alt text that describes the moment."
+        },
+        {
+          "type": "text",
+          "id": "tag",
+          "label": "Tag",
+          "default": "Reading"
+        },
+        {
+          "type": "select",
+          "id": "color",
+          "label": "Tag colour",
+          "options": [
+            { "value": "sky", "label": "Sky (reading)" },
+            { "value": "sun", "label": "Sun (writing)" },
+            { "value": "leaf", "label": "Leaf (math)" },
+            { "value": "grape", "label": "Grape" }
+          ],
+          "default": "sky"
+        },
+        {
+          "type": "text",
+          "id": "caption",
+          "label": "Caption",
+          "default": "Her first word, sounded out loud"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Carousel CTA",
+      "blocks": [
+        { "type": "slide", "settings": { "tag": "Reading", "color": "sky", "caption": "Her first word, sounded out loud" } },
+        { "type": "slide", "settings": { "tag": "Writing", "color": "sun", "caption": "Tracing letters, one curve at a time" } },
+        { "type": "slide", "settings": { "tag": "Reading", "color": "grape", "caption": "Bedtime stories, read together" } },
+        { "type": "slide", "settings": { "tag": "Math", "color": "leaf", "caption": "Counting the ducks on every page" } },
+        { "type": "slide", "settings": { "tag": "Reading", "color": "sky", "caption": "The book he asks for every night" } },
+        { "type": "slide", "settings": { "tag": "Writing", "color": "sun", "caption": "My name, written all by myself" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
