@@ -14,14 +14,16 @@
       "settings": {
         "eyebrow": "Collection",
         "show_description": true,
-        "note": "chosen one by one",
+        "note": "",
         "products_per_page": 24,
         "columns": 4,
         "new_days": 30,
         "enable_filters": true,
-        "enable_sorting": true
+        "enable_sorting": false
       }
     }
   },
-  "order": ["main"]
+  "order": [
+    "main"
+  ]
 }
