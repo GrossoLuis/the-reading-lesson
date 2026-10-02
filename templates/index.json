@@ -329,7 +329,7 @@
           "settings": {
             "category": "reading",
             "other_label": "More",
-            "collection": "",
+            "collection": "first-grade",
             "product": "",
             "step_label": "Start here",
             "title": "The Reading Lesson",
@@ -343,7 +343,7 @@
           "settings": {
             "category": "writing",
             "other_label": "More",
-            "collection": "",
+            "collection": "kindergarten",
             "product": "",
             "step_label": "Alongside it",
             "title": "Handwriting companions",
@@ -357,7 +357,7 @@
           "settings": {
             "category": "math",
             "other_label": "More",
-            "collection": "",
+            "collection": "third-grade",
             "product": "",
             "step_label": "Then",
             "title": "The Verbal Math Lesson",
