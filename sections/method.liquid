@@ -1,0 +1,943 @@
+{%- comment -%}
+  The method: how the book teaches reading. A quieter, editorial section, more
+  explanation than sales.
+
+  - Header: eyebrow, display heading (italic words take the grape accent) and, beside
+    it, the intro plus a small "sight + sounding out = fluent reader" line.
+  - Steps (blocks): number, title, text and up to two key figures, next to a lesson
+    page from the book in a page frame with a caption. Rows alternate sides on desktop.
+    With no image yet, the frame shows a typeset stand-in of the lesson page
+    (letters with picture slots, sounds with bars, or a first story) in Andika.
+  - Closing: a short paragraph and a closing statement, with an optional button.
+
+  No JS. Where the browser supports scroll-driven animations, the page frames ease in
+  as they scroll into view; with reduced motion they don't move.
+{%- endcomment -%}
+
+{%- liquid
+  assign s = section.settings
+  assign steps = section.blocks | where: 'type', 'step'
+  assign tile_colors = 'sky,sun,leaf,grape,tomato' | split: ','
+-%}
+
+<div
+  class="method surface-{{ s.surface }}"
+  style="--method-image-height: {{ s.image_height | default: 480 }}px;"
+>
+  <div class="method__container">
+    <header class="method__header">
+      <div class="method__title">
+        {%- if s.eyebrow != blank -%}
+          <p class="method__eyebrow text-eyebrow">{{ s.eyebrow }}</p>
+        {%- endif -%}
+        {%- if s.heading != blank -%}
+          <h2 class="method__heading text-display">{{ s.heading }}</h2>
+        {%- endif -%}
+      </div>
+
+      <div class="method__intro">
+        {%- if s.intro != blank -%}
+          <div class="method__intro-text text-lead">{{ s.intro }}</div>
+        {%- endif -%}
+
+        {%- if s.show_equation -%}
+          <p class="method__equation">
+            <span class="method__term">{{ s.term_one }}</span>
+            <span
+              class="method__operator"
+              aria-hidden="true"
+              >+</span
+            >
+            <span class="visually-hidden">and</span>
+            <span class="method__term">{{ s.term_two }}</span>
+            <span
+              class="method__operator"
+              aria-hidden="true"
+              >=</span
+            >
+            <span class="visually-hidden">make a</span>
+            <span class="method__term method__term--result">{{ s.term_result }}</span>
+          </p>
+        {%- endif -%}
+      </div>
+    </header>
+
+    {%- if steps.size > 0 -%}
+      <ol
+        class="method__steps"
+        role="list"
+      >
+        {%- for block in steps -%}
+          {%- liquid
+            assign b = block.settings
+            assign number = forloop.index | prepend: '0' | slice: -2, 2
+            assign alt = b.image.alt | default: b.image_alt
+          -%}
+          <li
+            class="method__step"
+            {{ block.shopify_attributes }}
+          >
+            <div class="method__copy">
+              <p
+                class="method__number"
+                aria-hidden="true"
+              >
+                {{ number }}
+              </p>
+              <h3 class="method__step-title">
+                <span class="visually-hidden">{{ forloop.index }}.</span>
+                {{ b.title }}
+              </h3>
+              {%- if b.text != blank -%}
+                <div class="method__text">{{ b.text }}</div>
+              {%- endif -%}
+
+              {%- if b.stat_value != blank or b.stat_two_value != blank -%}
+                <dl class="method__stats">
+                  {%- if b.stat_value != blank -%}
+                    <div class="method__stat">
+                      <dt class="method__stat-label text-small">{{ b.stat_label }}</dt>
+                      <dd class="method__stat-value">{{ b.stat_value }}</dd>
+                    </div>
+                  {%- endif -%}
+                  {%- if b.stat_two_value != blank -%}
+                    <div class="method__stat">
+                      <dt class="method__stat-label text-small">{{ b.stat_two_label }}</dt>
+                      <dd class="method__stat-value">{{ b.stat_two_value }}</dd>
+                    </div>
+                  {%- endif -%}
+                </dl>
+              {%- endif -%}
+            </div>
+
+            <figure class="method__figure">
+              <div class="method__page">
+                {%- if b.image != blank -%}
+                  {{
+                    b.image
+                    | image_url: width: 1400
+                    | image_tag:
+                      class: 'method__image',
+                      widths: '480, 640, 800, 1000, 1200, 1400',
+                      sizes: '(min-width: 990px) 46vw, 100vw',
+                      loading: 'lazy',
+                      alt: alt
+                  }}
+                {%- else -%}
+                  {%- comment -%} Typeset stand-in of the lesson page. {%- endcomment -%}
+                  <div
+                    class="method-page method-page--{{ b.sample_style }}"
+                    role="img"
+                    aria-label="{{ b.image_alt | escape }}"
+                  >
+                    {%- if b.page_label != blank -%}
+                      <p class="method-page__running-head">{{ b.page_label }}</p>
+                    {%- endif -%}
+
+                    {%- case b.sample_style -%}
+                      {%- when 'letters' -%}
+                        {%- assign letters = b.sample_text | split: ' ' -%}
+                        <div class="method-page__tiles">
+                          {%- for letter in letters -%}
+                            {%- assign color_index = forloop.index0 | modulo: tile_colors.size -%}
+                            <span
+                              class="method-page__tile"
+                              style="--tile: var(--color-{{ tile_colors[color_index] }}-soft);"
+                            >
+                              <span class="method-page__picture"></span>
+                              <span class="method-page__letter">{{ letter }}</span>
+                            </span>
+                          {%- endfor -%}
+                        </div>
+                      {%- when 'blend' -%}
+                        {%- assign sounds = b.sample_text | split: ' ' -%}
+                        <div class="method-page__blend">
+                          <span class="method-page__sounds">
+                            {%- for sound in sounds -%}
+                              <span class="method-page__sound">{{ sound }}</span>
+                            {%- endfor -%}
+                          </span>
+                          <svg
+                            class="method-page__arrow"
+                            viewBox="0 0 64 16"
+                            fill="none"
+                          >
+                            <path
+                              d="M2 8h56M52 3l6 5-6 5"
+                              stroke="currentColor"
+                              stroke-width="1.5"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-dasharray="0.5 5"
+                            />
+                          </svg>
+                          <span class="method-page__word">{{ sounds | join: '' }}</span>
+                        </div>
+                      {%- else -%}
+                        {%- assign lines = b.sample_text | split: '/' -%}
+                        <div class="method-page__story">
+                          {%- for line in lines -%}
+                            <p>{{ line | strip }}</p>
+                          {%- endfor -%}
+                        </div>
+                    {%- endcase -%}
+                  </div>
+                {%- endif -%}
+              </div>
+
+              {%- if b.caption != blank -%}
+                <figcaption class="method__caption text-small">{{ b.caption }}</figcaption>
+              {%- endif -%}
+            </figure>
+          </li>
+        {%- endfor -%}
+      </ol>
+    {%- endif -%}
+
+    {%- if s.closing_text != blank or s.closing_statement != blank -%}
+      <footer class="method__closing">
+        {%- if s.closing_text != blank -%}
+          <div class="method__closing-text text-lead">{{ s.closing_text }}</div>
+        {%- endif -%}
+        {%- if s.closing_statement != blank -%}
+          <p class="method__statement">{{ s.closing_statement }}</p>
+        {%- endif -%}
+        {%- if s.button_label != blank -%}
+          {% render 'brand-button',
+            label: s.button_label,
+            url: s.button_url,
+            style: 'primary',
+            arrow: true,
+            class: 'method__button'
+          %}
+        {%- endif -%}
+      </footer>
+    {%- endif -%}
+  </div>
+</div>
+
+{% stylesheet %}
+  .method {
+    --method-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+    padding-block: var(--space-9);
+  }
+
+  .method__container {
+    max-width: var(--page-width);
+    margin-inline: auto;
+    padding-inline: var(--page-margin);
+  }
+
+  /* ---------- Header ---------- */
+
+  .method__header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: end;
+    gap: var(--space-6) var(--space-8);
+    padding-bottom: var(--space-7);
+    border-bottom: var(--stroke-sm) solid var(--color-line-strong);
+  }
+
+  .method__eyebrow {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: 0 0 var(--space-4);
+    color: var(--color-ink-muted);
+  }
+
+  .method__eyebrow::before {
+    content: '';
+    flex: none;
+    width: 24px;
+    height: var(--stroke-md);
+    background: var(--color-ink);
+  }
+
+  .method__heading {
+    margin: 0;
+    color: var(--color-ink);
+    text-wrap: balance;
+  }
+
+  .method__heading em,
+  .method__heading i,
+  .method__statement em,
+  .method__statement i {
+    font-family: var(--font-accent--family);
+    font-style: var(--font-accent--style);
+    font-weight: var(--font-accent--weight);
+    color: var(--color-grape);
+  }
+
+  .method__intro-text {
+    color: var(--color-ink-muted);
+  }
+
+  .method__intro-text p {
+    margin: 0;
+  }
+
+  .method__intro-text p + p {
+    margin-top: var(--space-4);
+  }
+
+  .method__equation {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+    margin: var(--space-5) 0 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+
+  .method__term {
+    padding: 6px var(--space-3);
+    border: var(--stroke-sm) solid var(--color-line-strong);
+    border-radius: var(--radius-full);
+  }
+
+  .method__term--result {
+    color: var(--color-on-grape);
+    background: var(--color-grape);
+    border-color: var(--color-grape);
+  }
+
+  .method__operator {
+    font-family: var(--font-heading--family);
+    font-size: 20px;
+    color: var(--color-ink-muted);
+  }
+
+  /* ---------- Steps ---------- */
+
+  .method__steps {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .method__step {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    align-items: center;
+    gap: var(--space-8);
+    padding-block: var(--space-8);
+    border-bottom: var(--stroke-sm) solid var(--color-line);
+  }
+
+  .method__step:nth-child(even) {
+    grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+  }
+
+  .method__step:nth-child(even) .method__figure {
+    order: -1;
+  }
+
+  .method__number {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    margin: 0 0 var(--space-5);
+    font-family: var(--font-heading--family);
+    font-weight: 600;
+    font-size: clamp(40px, 4vw, 56px);
+    line-height: 1;
+    font-variant-numeric: lining-nums tabular-nums;
+    color: var(--color-grape);
+  }
+
+  .method__number::after {
+    content: '';
+    width: 48px;
+    height: var(--stroke-md);
+    background: var(--color-line-strong);
+  }
+
+  .method__step-title {
+    margin: 0;
+    font-family: var(--font-heading--family);
+    font-weight: 600;
+    font-size: clamp(24px, 2.4vw, 32px);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    color: var(--color-ink);
+    text-wrap: balance;
+  }
+
+  .method__text {
+    max-width: 34rem;
+    margin-top: var(--space-4);
+    font-size: 16.5px;
+    line-height: 1.7;
+    color: var(--color-ink-muted);
+  }
+
+  .method__text p {
+    margin: 0;
+  }
+
+  .method__text p + p {
+    margin-top: var(--space-4);
+  }
+
+  .method__stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-5) var(--space-7);
+    max-width: 34rem;
+    margin: var(--space-6) 0 0;
+    padding-top: var(--space-5);
+    border-top: var(--stroke-sm) solid var(--color-line);
+  }
+
+  .method__stat {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: var(--space-1);
+    max-width: 14rem;
+  }
+
+  .method__stat-value {
+    margin: 0;
+    font-family: var(--font-heading--family);
+    font-weight: 600;
+    font-size: 32px;
+    line-height: 1.1;
+    color: var(--color-ink);
+  }
+
+  .method__stat-label {
+    color: var(--color-ink-muted);
+  }
+
+  /* ---------- Lesson page ---------- */
+
+  /* The frame hugs the lesson page, so tall pages are capped by height and stay centred. */
+  .method__figure {
+    justify-self: center;
+    width: fit-content;
+    max-width: 100%;
+    margin: 0;
+  }
+
+  .method__page {
+    padding: var(--space-4);
+    background: var(--color-card);
+    border: var(--stroke-sm) solid var(--color-line);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-book);
+  }
+
+  .method__image {
+    display: block;
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    max-height: var(--method-image-height);
+    border-radius: var(--radius-image);
+  }
+
+  .method__caption {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+    color: var(--color-ink-muted);
+  }
+
+  .method__caption::before {
+    content: '';
+    flex: none;
+    width: 24px;
+    height: var(--stroke-sm);
+    background: var(--color-line-strong);
+  }
+
+  /* Typeset stand-in: a quiet page with lots of white space, like the book. */
+  .method-page {
+    position: relative;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 4 / 3;
+    padding: var(--space-7) var(--space-6);
+    font-family: var(--font-reading--family);
+    color: var(--color-ink);
+    background: var(--color-paper);
+    border-radius: var(--radius-image);
+  }
+
+  .method-page__running-head {
+    position: absolute;
+    top: var(--space-4);
+    left: var(--space-5);
+    right: var(--space-5);
+    margin: 0;
+    padding-bottom: var(--space-2);
+    font-family: var(--font-body--family);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-ink-muted);
+    border-bottom: var(--stroke-sm) solid var(--color-line);
+  }
+
+  .method-page__tiles {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-4);
+  }
+
+  .method-page__tile {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-2);
+  }
+
+  .method-page__picture {
+    width: clamp(48px, 6vw, 72px);
+    aspect-ratio: 1;
+    background: var(--tile);
+    border-radius: var(--radius-sm);
+  }
+
+  .method-page__letter {
+    font-size: clamp(36px, 4.4vw, 56px);
+    line-height: 1;
+  }
+
+  .method-page__blend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-5);
+    font-size: clamp(48px, 6vw, 80px);
+    line-height: 1;
+  }
+
+  .method-page__sounds {
+    display: flex;
+    gap: 0.35em;
+  }
+
+  .method-page__sound {
+    position: relative;
+    padding-bottom: 0.32em;
+  }
+
+  .method-page__sound::after {
+    content: '';
+    position: absolute;
+    left: 0.04em;
+    right: 0.04em;
+    bottom: 0;
+    height: 0.09em;
+    background: var(--color-ink);
+    border-radius: var(--radius-full);
+  }
+
+  .method-page__arrow {
+    width: clamp(40px, 5vw, 64px);
+    color: var(--color-ink-muted);
+  }
+
+  .method-page__word {
+    padding-bottom: 0.32em;
+  }
+
+  .method-page__story {
+    width: min(100%, 22rem);
+    font-size: clamp(26px, 3vw, 36px);
+    line-height: 2;
+    word-spacing: 0.35em;
+    /* Ruled lines, like the notebook divider. */
+    background-image: linear-gradient(transparent calc(100% - 1px), var(--color-rule) 0);
+    background-size: 100% 2em;
+  }
+
+  .method-page__story p {
+    margin: 0;
+  }
+
+  /* ---------- Closing ---------- */
+
+  .method__closing {
+    display: grid;
+    justify-items: center;
+    max-width: 46rem;
+    margin: 0 auto;
+    padding-top: var(--space-8);
+    text-align: center;
+  }
+
+  .method__closing-text {
+    color: var(--color-ink-muted);
+  }
+
+  .method__closing-text p {
+    margin: 0;
+  }
+
+  .method__statement {
+    margin: var(--space-5) 0 0;
+    font-family: var(--font-heading--family);
+    font-weight: 600;
+    font-size: clamp(28px, 3.4vw, 40px);
+    line-height: 1.2;
+    color: var(--color-ink);
+    text-wrap: balance;
+  }
+
+  .method__button {
+    margin-top: var(--space-6);
+  }
+
+  /* ---------- Motion ---------- */
+
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .method__figure {
+        animation: method-rise linear both;
+        animation-timeline: view();
+        animation-range: entry 0% entry 60%;
+      }
+    }
+  }
+
+  @keyframes method-rise {
+    from {
+      opacity: 0;
+      transform: translateY(40px);
+    }
+  }
+
+  /* ---------- Breakpoints ---------- */
+
+  @media screen and (max-width: 989px) {
+    .method {
+      padding-block: var(--space-8);
+    }
+
+    .method__header {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-5);
+      padding-bottom: var(--space-6);
+    }
+
+    .method__step,
+    .method__step:nth-child(even) {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-6);
+      padding-block: var(--space-7);
+    }
+
+    .method__step:nth-child(even) .method__figure {
+      order: 0;
+    }
+
+    .method__closing {
+      padding-top: var(--space-7);
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .method {
+      padding-block: var(--space-7);
+    }
+
+    .method__page {
+      padding: var(--space-3);
+    }
+
+    .method__image {
+      max-height: min(var(--method-image-height), 420px);
+    }
+
+    .method-page {
+      padding: var(--space-7) var(--space-4) var(--space-5);
+    }
+
+    .method-page__tiles {
+      flex-wrap: nowrap;
+      gap: var(--space-2);
+    }
+
+    .method-page__picture {
+      width: 40px;
+    }
+
+    .method-page__letter {
+      font-size: 32px;
+    }
+
+    .method__stats {
+      gap: var(--space-4) var(--space-6);
+    }
+
+    .method__stat-value {
+      font-size: 28px;
+    }
+
+    .method__closing {
+      justify-items: stretch;
+    }
+
+    .method__button {
+      width: 100%;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "The method",
+  "tag": "section",
+  "class": "method-section",
+  "max_blocks": 6,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "The method"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "info": "Put the key word in italics to give it the accent colour.",
+      "default": "Built on how reading <em>actually</em> works"
+    },
+    {
+      "type": "richtext",
+      "id": "intro",
+      "label": "Intro",
+      "default": "<p>Phonics and whole-language are usually argued about as opposites. They aren't! A fluent reader recognizes most words on sight and falls back on sounding out the unfamiliar ones. So we teach both, in the order a child's brain can absorb them.</p>"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_equation",
+      "label": "Show the summary line",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "term_one",
+      "label": "First term",
+      "default": "Words on sight"
+    },
+    {
+      "type": "text",
+      "id": "term_two",
+      "label": "Second term",
+      "default": "Sounding out"
+    },
+    {
+      "type": "text",
+      "id": "term_result",
+      "label": "Result",
+      "default": "A fluent reader"
+    },
+    {
+      "type": "header",
+      "content": "Closing"
+    },
+    {
+      "type": "richtext",
+      "id": "closing_text",
+      "label": "Text",
+      "default": "<p>Which is why there are no games here, and no animation competing with the words. What the book offers instead is the thing that actually keeps a four-year-old going: reading a real sentence, out loud, on the first day.</p>"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "closing_statement",
+      "label": "Statement",
+      "default": "We are not teaching phonics. We are teaching <em>reading</em>."
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Shop the program"
+    },
+    {
+      "type": "url",
+      "id": "button_url",
+      "label": "Button link",
+      "default": "/collections/all"
+    },
+    {
+      "type": "range",
+      "id": "image_height",
+      "label": "Lesson image height",
+      "info": "Maximum height on desktop. On phones it stays at 420px or less.",
+      "min": 280,
+      "max": 720,
+      "step": 20,
+      "unit": "px",
+      "default": 480
+    },
+    {
+      "type": "select",
+      "id": "surface",
+      "label": "Background",
+      "options": [
+        { "value": "paper", "label": "Paper" },
+        { "value": "paper-deep", "label": "Paper deep" },
+        { "value": "card", "label": "White" }
+      ],
+      "default": "paper-deep"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "step",
+      "name": "Step",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Every sound arrives with a picture"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text"
+        },
+        {
+          "type": "header",
+          "content": "Key figures"
+        },
+        {
+          "type": "text",
+          "id": "stat_value",
+          "label": "Figure",
+          "info": "Short, e.g. 95%"
+        },
+        {
+          "type": "text",
+          "id": "stat_label",
+          "label": "Figure description"
+        },
+        {
+          "type": "text",
+          "id": "stat_two_value",
+          "label": "Second figure"
+        },
+        {
+          "type": "text",
+          "id": "stat_two_label",
+          "label": "Second figure description"
+        },
+        {
+          "type": "header",
+          "content": "Lesson page"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image of the lesson page"
+        },
+        {
+          "type": "text",
+          "id": "image_alt",
+          "label": "Image description",
+          "info": "Read by screen readers. Used when the image has no alt text of its own."
+        },
+        {
+          "type": "text",
+          "id": "caption",
+          "label": "Caption",
+          "default": "Lesson 1 · sounds paired with pictures"
+        },
+        {
+          "type": "paragraph",
+          "content": "Until an image is added, a typeset stand-in of the page is shown."
+        },
+        {
+          "type": "select",
+          "id": "sample_style",
+          "label": "Stand-in style",
+          "options": [
+            { "value": "letters", "label": "Letters with pictures" },
+            { "value": "blend", "label": "Sounds blending" },
+            { "value": "story", "label": "First story" }
+          ],
+          "default": "letters"
+        },
+        {
+          "type": "text",
+          "id": "sample_text",
+          "label": "Stand-in text",
+          "info": "Letters or sounds separated by spaces (c o s a t). For a story, separate lines with / (cat / a cat).",
+          "default": "c o s a t"
+        },
+        {
+          "type": "text",
+          "id": "page_label",
+          "label": "Stand-in page label",
+          "default": "Lesson 1"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "The method",
+      "blocks": [
+        {
+          "type": "step",
+          "settings": {
+            "title": "Every sound arrives with a picture",
+            "text": "<p>Each new letter is paired with an image: s with a snake, t with a turtle. Paired-associative learning is among the most effective mnemonic tools available for a young memory, and it costs the child no extra effort.</p><p>Lessons don't follow the alphabet. They start with the most common letters in English, so a child reads real words in the first lesson instead of waiting until letter W.</p>",
+            "image_alt": "Lesson one page: the letters c, o, s, a, t each paired with an animal picture",
+            "caption": "Lesson 1 · sounds paired with pictures",
+            "sample_style": "letters",
+            "sample_text": "c o s a t"
+          }
+        },
+        {
+          "type": "step",
+          "settings": {
+            "title": "Bars under the letters are training wheels",
+            "text": "<p>To young readers, letters in a word all melt together. A bar under each sound unit separates what the eye can't. The program is designed so that the child touches each bar, says the sound, then slides across and blends. It takes most children about five lessons to sound out a word alone.</p><p>Then the bars start disappearing. The visual helpers in this book are designed to be removed, on purpose, before the child notices that they're leaning on them.</p>",
+            "stat_value": "~5 lessons",
+            "stat_label": "for most children to sound out a word alone",
+            "image_alt": "Lesson one page: a and t blending into at, with bars under each sound",
+            "caption": "Lesson 1 · blending two sounds",
+            "sample_style": "blend",
+            "sample_text": "a t"
+          }
+        },
+        {
+          "type": "step",
+          "settings": {
+            "title": "Pages are designed to be distraction-free",
+            "text": "<p>Large letters shrink as the child's reading grows. Words sit far apart, with almost nothing else on the page. The first ten lessons are lower-case only, because ninety-five percent of printed letters are lower-case, and that's what a new reader meets most. Special marks handle the b-and-d confusion, then quietly leave.</p><p>Roughly 500 key words carry the course, chosen from the most common words in English — including the ones like <em>you</em>, <em>do</em>, and <em>to</em> that no phonics rule can explain.</p>",
+            "stat_value": "95%",
+            "stat_label": "of printed letters are lower-case",
+            "stat_two_value": "~500",
+            "stat_two_label": "key words carry the course",
+            "image_alt": "Lesson one page: a child's first story, cat, a cat, a cat sat",
+            "caption": "Lesson 1 · a first story, page 15",
+            "sample_style": "story",
+            "sample_text": "cat / a cat / a cat sat"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
