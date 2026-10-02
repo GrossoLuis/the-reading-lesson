@@ -54,7 +54,8 @@
         "show_search": false,
         "search_placeholder": "Search for a story",
         "show_account": true,
-        "show_wishlist": true
+        "show_wishlist": true,
+        "wishlist_url": ""
       }
     }
   },
