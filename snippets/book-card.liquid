@@ -1,0 +1,592 @@
+{%- doc -%}
+  Product card from the brand guidelines ("Fresh on the shelf"): the cover on a soft
+  tint, a badge and a wishlist heart over it, then ages and rating, the title in
+  Besley, the author, and the price with a round "+" to add to cart.
+
+  - Tint: each product keeps the same soft colour everywhere (picked from its id).
+  - Ages: metafield custom.age_range, else the product type, else its first collection.
+  - Author: metafield custom.author. Rating: the standard reviews.rating metafields.
+  - Badges, in order: Sold out, sale (-25%), Staff pick (tag "staff-pick"), New.
+  - "+" adds straight to the cart (assets/book-card.js): the product's selected or first
+    available variant, the same one its product page opens with.
+
+  @param {product} product
+  @param {string} [sizes] - The image sizes attribute. Defaults to a 4-column grid.
+  @param {boolean} [eager] - Loads the image eagerly (first row).
+  @param {number} [new_days] - Products published within this many days get "New". Defaults to 30.
+
+  @example
+  {% render 'book-card', product: product, eager: true %}
+{%- enddoc -%}
+
+{%- liquid
+  assign sizes = sizes | default: '(min-width: 1200px) 300px, (min-width: 750px) 30vw, 50vw'
+  assign new_days = new_days | default: 30
+
+  assign tints = 'sky,sun,tomato,grape,leaf' | split: ','
+  assign tint_index = product.id | modulo: 5
+  assign tint = tints[tint_index]
+
+  assign variant = product.selected_or_first_available_variant
+  assign on_sale = false
+  if product.compare_at_price > product.price
+    assign on_sale = true
+    assign discount = product.compare_at_price | minus: product.price | times: 100.0 | divided_by: product.compare_at_price | round
+  endif
+
+  assign ages = product.metafields.custom.age_range.value
+  if ages == blank
+    assign ages = product.type
+  endif
+  if ages == blank
+    for c in product.collections
+      unless c.handle == 'frontpage' or c.handle == 'all'
+        assign ages = c.title
+        break
+      endunless
+    endfor
+  endif
+
+  assign author = product.metafields.custom.author.value
+
+  assign badge = blank
+  assign badge_style = ''
+  assign published_seconds = 'now' | date: '%s' | plus: 0
+  assign product_seconds = product.published_at | date: '%s' | plus: 0
+  assign age_days = published_seconds | minus: product_seconds | divided_by: 86400
+
+  if product.available == false
+    assign badge = 'Sold out'
+    assign badge_style = 'muted'
+  elsif on_sale
+    assign badge = '-' | append: discount | append: '%'
+    assign badge_style = 'sale'
+  elsif product.tags contains 'staff-pick'
+    assign badge = 'Staff pick'
+    assign badge_style = 'pick'
+  elsif age_days <= new_days
+    assign badge = 'New'
+    assign badge_style = 'new'
+  endif
+
+  assign rating = product.metafields.reviews.rating.value
+  assign second_media = product.media[1]
+
+  assign loading = 'lazy'
+  if eager
+    assign loading = 'eager'
+  endif
+-%}
+
+<script
+  type="module"
+  src="{{ 'book-card.js' | asset_url }}"
+></script>
+
+<article
+  class="book-card{% unless product.available %} book-card--sold-out{% endunless %}"
+  style="--card-tint: var(--color-{{ tint }}-soft);"
+>
+  <div class="book-card__media">
+    <a
+      href="{{ product.url }}"
+      class="book-card__media-link"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      {%- if product.featured_media -%}
+        {{-
+          product.featured_media.preview_image
+          | image_url: width: 800
+          | image_tag:
+            class: 'book-card__image',
+            widths: '240, 360, 480, 640, 800',
+            sizes: sizes,
+            loading: loading,
+            alt: ''
+        -}}
+        {%- if second_media -%}
+          {{-
+            second_media.preview_image
+            | image_url: width: 800
+            | image_tag:
+              class: 'book-card__image book-card__image--hover',
+              widths: '240, 360, 480, 640, 800',
+              sizes: sizes,
+              loading: 'lazy',
+              alt: ''
+          -}}
+        {%- endif -%}
+      {%- else -%}
+        <span class="book-card__placeholder">
+          {%- render 'placeholder-book-cover', design: 'moon' -%}
+        </span>
+      {%- endif -%}
+    </a>
+
+    {%- if badge != blank -%}
+      <span class="book-card__badge book-card__badge--{{ badge_style }}">{{ badge }}</span>
+    {%- endif -%}
+
+    <button
+      type="button"
+      class="book-card__wishlist"
+      data-wishlist
+      data-product-handle="{{ product.handle }}"
+      aria-pressed="false"
+      aria-label="Save {{ product.title | escape }} to wishlist"
+    >
+      {% render 'brand-icon', name: 'heart', size: 18 %}
+    </button>
+  </div>
+
+  <div class="book-card__body">
+    {%- if ages != blank or rating != blank -%}
+      <div class="book-card__meta">
+        {%- if ages != blank -%}
+          <span class="book-card__ages">{{ ages }}</span>
+        {%- endif -%}
+        {%- if rating != blank -%}
+          {%- assign rating_count = product.metafields.reviews.rating_count.value | default: 0 -%}
+          <span class="book-card__rating">
+            <span
+              class="book-card__stars"
+              style="--rating: {{ rating.rating | divided_by: rating.scale_max | times: 100 }}%;"
+              aria-hidden="true"
+            ></span>
+            <span class="visually-hidden">Rated {{ rating.rating | round: 1 }} out of {{ rating.scale_max }}</span>
+            <span aria-hidden="true">{{ rating_count }}</span>
+          </span>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    <h3 class="book-card__title">
+      <a
+        href="{{ product.url }}"
+        class="book-card__link"
+      >
+        {{- product.title -}}
+      </a>
+    </h3>
+
+    {%- if author != blank -%}
+      <p class="book-card__author">{{ author }}</p>
+    {%- endif -%}
+
+    <div class="book-card__footer">
+      <p class="book-card__price{% if on_sale %} book-card__price--sale{% endif %}">
+        {%- if product.price_varies -%}
+          <span class="book-card__price-from">From</span>
+        {%- endif -%}
+        <span class="book-card__price-current">{{ product.price | money }}</span>
+        {%- if on_sale -%}
+          <s class="book-card__price-compare">{{ product.compare_at_price | money }}</s>
+        {%- endif -%}
+      </p>
+
+      {%- if product.available == false -%}
+        <span
+          class="book-card__add book-card__add--disabled"
+          aria-hidden="true"
+        >
+          {%- render 'brand-icon', name: 'close', size: 16 -%}
+        </span>
+      {%- else -%}
+        {%- liquid
+          assign add_label = 'Add ' | append: product.title | append: ' to cart'
+          unless product.has_only_default_variant
+            assign add_label = 'Add ' | append: product.title | append: ', ' | append: variant.title | append: ', to cart'
+          endunless
+        -%}
+        <button
+          type="button"
+          class="book-card__add"
+          data-quick-add
+          data-variant-id="{{ variant.id }}"
+          data-product-id="{{ product.id }}"
+          aria-label="{{ add_label | escape }}"
+          {% unless product.has_only_default_variant %}
+            title="{{ variant.title | escape }}"
+          {% endunless %}
+        >
+          <span class="book-card__add-icon" aria-hidden="true"></span>
+        </button>
+      {%- endif -%}
+    </div>
+  </div>
+</article>
+
+{% stylesheet %}
+  .book-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    min-width: 0;
+    color: var(--color-ink);
+  }
+
+  /* ---------- Media ---------- */
+
+  .book-card__media {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    background: var(--card-tint, var(--color-paper-deep));
+    border-radius: var(--radius-image);
+  }
+
+  .book-card__media-link {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 12% 14%;
+  }
+
+  .book-card__image {
+    grid-area: 1 / 1;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    /* White photo backgrounds take the card's tint, so covers sit on it. */
+    mix-blend-mode: multiply;
+    transition: transform 500ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 300ms ease;
+  }
+
+  .book-card__image--hover {
+    opacity: 0;
+  }
+
+  .book-card__placeholder {
+    width: 72%;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    border-radius: var(--radius-image);
+    box-shadow: var(--shadow-book);
+  }
+
+  @media (hover: hover) {
+    .book-card:hover .book-card__image {
+      transform: translateY(-4px) scale(1.03);
+    }
+
+    .book-card:hover .book-card__image--hover {
+      opacity: 1;
+    }
+
+    .book-card:hover .book-card__image:not(.book-card__image--hover):has(+ .book-card__image--hover) {
+      opacity: 0;
+    }
+  }
+
+  .book-card__badge {
+    position: absolute;
+    top: var(--space-3);
+    left: var(--space-3);
+    z-index: 2;
+    padding: 4px 9px;
+    font-family: var(--font-body--family);
+    font-size: 10.5px;
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: var(--color-card);
+    border-radius: var(--radius-full);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .book-card__badge--new,
+  .book-card__badge--sale {
+    color: var(--color-tomato-deep);
+  }
+
+  .book-card__badge--pick {
+    color: var(--color-grape);
+  }
+
+  .book-card__badge--muted {
+    color: var(--color-ink-muted);
+  }
+
+  .book-card__wishlist {
+    position: absolute;
+    top: var(--space-3);
+    right: var(--space-3);
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    color: var(--color-ink);
+    background: var(--color-card);
+    border: 0;
+    border-radius: var(--radius-full);
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    transition: transform 150ms ease, color 150ms ease;
+  }
+
+  .book-card__wishlist:hover {
+    transform: scale(1.06);
+  }
+
+  .book-card__wishlist[aria-pressed='true'] {
+    color: var(--color-tomato);
+  }
+
+  .book-card__wishlist[aria-pressed='true'] path {
+    fill: currentColor;
+  }
+
+  /* ---------- Body ---------- */
+
+  .book-card__body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .book-card__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    min-height: 16px;
+    font-family: var(--font-body--family);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-ink-muted);
+  }
+
+  .book-card__ages {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .book-card__rating {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: var(--space-1);
+    letter-spacing: 0;
+  }
+
+  .book-card__stars {
+    --star: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m12 2.5 2.9 6 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.2 1.3-6.6L2.5 9.3l6.6-.8z'/%3E%3C/svg%3E");
+
+    width: 60px;
+    height: 12px;
+    background: linear-gradient(90deg, var(--color-sun) var(--rating), var(--color-line) var(--rating));
+    -webkit-mask: var(--star) left / 12px 12px repeat-x;
+    mask: var(--star) left / 12px 12px repeat-x;
+  }
+
+  .book-card__title {
+    margin: var(--space-1) 0 0;
+    font-family: var(--font-heading--family);
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -0.005em;
+  }
+
+  .book-card__link {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  /* The whole card opens the product; buttons sit above this layer. */
+  .book-card__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+
+  .book-card__link:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+
+  .book-card__link:focus-visible {
+    outline: none;
+  }
+
+  .book-card:has(.book-card__link:focus-visible) {
+    outline: var(--focus-ring-width) solid var(--color-focus-ring, var(--color-grape));
+    outline-offset: var(--focus-ring-offset);
+    border-radius: var(--radius-image);
+  }
+
+  .book-card__author {
+    margin: 0;
+    font-size: 13.5px;
+    color: var(--color-ink-muted);
+  }
+
+  .book-card__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-top: auto;
+    padding-top: var(--space-3);
+  }
+
+  .book-card__price {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 var(--space-2);
+    margin: 0;
+    font-family: var(--font-price--family, var(--font-heading--family));
+    font-size: 17px;
+    font-weight: 600;
+  }
+
+  .book-card__price-from {
+    font-family: var(--font-body--family);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-ink-muted);
+  }
+
+  .book-card__price--sale .book-card__price-current {
+    color: var(--color-tomato-deep);
+  }
+
+  .book-card__price-compare {
+    font-family: var(--font-body--family);
+    font-size: 12.5px;
+    font-weight: 400;
+    color: var(--color-ink-muted);
+  }
+
+  .book-card__add {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    color: #fff;
+    background: var(--color-ink);
+    border: 0;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: background-color 150ms ease, transform 150ms ease;
+  }
+
+  .book-card__add:hover {
+    background: var(--color-tomato);
+    transform: scale(1.06);
+  }
+
+  .book-card__add:focus-visible,
+  .book-card__wishlist:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus-ring, var(--color-grape));
+    outline-offset: 2px;
+  }
+
+  /* Plus drawn in CSS so it can turn into a tick when added. */
+  .book-card__add-icon {
+    position: relative;
+    width: 12px;
+    height: 12px;
+  }
+
+  .book-card__add-icon::before,
+  .book-card__add-icon::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 12px;
+    height: 1.75px;
+    background: currentColor;
+    border-radius: var(--radius-full);
+    transform: translate(-50%, -50%);
+    transition: transform 200ms ease, width 200ms ease;
+  }
+
+  .book-card__add-icon::after {
+    transform: translate(-50%, -50%) rotate(90deg);
+  }
+
+  .book-card__add.is-loading {
+    pointer-events: none;
+    opacity: 0.7;
+  }
+
+  .book-card__add.is-added {
+    background: var(--color-leaf-deep);
+  }
+
+  .book-card__add.is-added .book-card__add-icon::before {
+    width: 6px;
+    transform: translate(-95%, 10%) rotate(45deg);
+  }
+
+  .book-card__add.is-added .book-card__add-icon::after {
+    width: 11px;
+    transform: translate(-30%, -30%) rotate(-45deg);
+  }
+
+  .book-card__add--disabled {
+    color: var(--color-ink-muted);
+    background: var(--color-line);
+    cursor: not-allowed;
+  }
+
+  .book-card--sold-out .book-card__image {
+    opacity: 0.6;
+  }
+
+  @media screen and (max-width: 749px) {
+    .book-card__title {
+      font-size: 15.5px;
+    }
+
+    .book-card__price {
+      font-size: 15.5px;
+    }
+
+    .book-card__badge {
+      top: var(--space-2);
+      left: var(--space-2);
+      font-size: 9.5px;
+    }
+
+    .book-card__wishlist {
+      top: var(--space-2);
+      right: var(--space-2);
+      width: 32px;
+      height: 32px;
+    }
+
+    .book-card__add {
+      width: 32px;
+      height: 32px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .book-card__image,
+    .book-card__add,
+    .book-card__wishlist {
+      transition: none;
+    }
+  }
+{% endstylesheet %}
