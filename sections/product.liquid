@@ -1,0 +1,1749 @@
+{%- comment -%}
+  Product page (PDP).
+
+  Left: a sticky gallery. As the page scrolls, the main image advances through the
+  product's media (crossfade, counter and progress bar); the vertical thumbnail rail
+  jumps straight to an image, and the image opens full size in a zoom dialog.
+  Right: title, price, variant pills, quantity, Add to cart (tomato: purchase),
+  stock, trust points and accordions. It sticks too, adapting to its height, so
+  neither column leaves an empty gap while the images change.
+
+  Below 990px the gallery becomes a swipeable carousel and the info follows it.
+
+  Add to cart posts to /cart/add.js and dispatches the same CartLinesUpdateEvent as
+  Horizon's product form, so the cart drawer and the header count update with it.
+  Behaviour lives in assets/product-page.js.
+{%- endcomment -%}
+
+<script
+  type="module"
+  src="{{ 'product-page.js' | asset_url }}"
+></script>
+
+{%- liquid
+  assign s = section.settings
+  assign current_variant = product.selected_or_first_available_variant
+  assign media_count = product.media.size
+  assign has_only_default_variant = product.has_only_default_variant
+
+  assign featured_index = 0
+  if current_variant.featured_media
+    for media in product.media
+      if media.id == current_variant.featured_media.id
+        assign featured_index = forloop.index0
+        break
+      endif
+    endfor
+  endif
+
+  comment
+    Scroll length the gallery uses to step through its images: 45vh per image,
+    capped at 8 steps so a product with many photos doesn't turn into a long page.
+  endcomment
+  assign scroll_steps = media_count | minus: 1
+  if scroll_steps > 7
+    assign scroll_steps = 7
+  endif
+  if scroll_steps < 0
+    assign scroll_steps = 0
+  endif
+
+  assign accordions = section.blocks | where: 'type', 'collapsible'
+  assign description_blocks = section.blocks | where: 'type', 'description'
+  assign trust_items = section.blocks | where: 'type', 'trust'
+
+  assign low_stock_threshold = s.low_stock_threshold
+-%}
+
+<product-page
+  class="pdp"
+  data-section-id="{{ section.id }}"
+  data-product-id="{{ product.id }}"
+  data-product-url="{{ product.url }}"
+  data-money-format="{{ shop.money_format | escape }}"
+  data-currency="{{ cart.currency.iso_code }}"
+  data-low-stock="{{ low_stock_threshold }}"
+  data-text-add="{{ 'products.product.add_to_cart' | t | escape }}"
+  data-text-sold-out="{{ 'products.product.sold_out' | t | escape }}"
+  data-text-unavailable="{{ 'products.product.unavailable' | t | escape }}"
+>
+  <div class="pdp__container">
+    {%- if s.show_breadcrumbs -%}
+      <nav
+        class="pdp__breadcrumbs text-small"
+        aria-label="Breadcrumb"
+      >
+        <ol role="list">
+          <li><a href="{{ routes.root_url }}">Home</a></li>
+          {%- if collection != blank -%}
+            <li><a href="{{ collection.url }}">{{ collection.title }}</a></li>
+          {%- else -%}
+            <li><a href="{{ routes.all_products_collection_url }}">Shop</a></li>
+          {%- endif -%}
+          <li aria-current="page">{{ product.title }}</li>
+        </ol>
+      </nav>
+    {%- endif -%}
+
+    <div class="pdp__grid">
+      {%- comment -%} ---------- Gallery ---------- {%- endcomment -%}
+      <div
+        class="pdp__gallery{% if media_count < 2 %} pdp__gallery--single{% endif %}"
+        style="--pdp-scroll-steps: {{ scroll_steps }};"
+        data-gallery
+        data-media-count="{{ media_count }}"
+        data-initial-index="{{ featured_index }}"
+      >
+        <div class="pdp__gallery-sticky">
+          {%- if media_count > 1 -%}
+            <ul
+              class="pdp__thumbs"
+              role="list"
+              data-thumbs
+            >
+              {%- for media in product.media -%}
+                <li>
+                  <button
+                    type="button"
+                    class="pdp__thumb"
+                    data-thumb
+                    data-index="{{ forloop.index0 }}"
+                    aria-label="Show image {{ forloop.index }} of {{ media_count }}"
+                    {% if forloop.index0 == featured_index %}
+                      aria-current="true"
+                    {% endif %}
+                  >
+                    {{-
+                      media.preview_image
+                      | image_url: width: 160
+                      | image_tag: loading: 'lazy', alt: '', width: 80, height: 80, class: 'pdp__thumb-image'
+                    -}}
+                    {%- if media.media_type == 'video' or media.media_type == 'external_video' -%}
+                      <span class="pdp__thumb-badge" aria-hidden="true">▶</span>
+                    {%- endif -%}
+                  </button>
+                </li>
+              {%- endfor -%}
+            </ul>
+          {%- endif -%}
+
+          <div class="pdp__stage{% if s.image_fit == 'cover' %} pdp__stage--cover{% endif %}">
+            <ul
+              class="pdp__slides"
+              role="list"
+              data-slides
+              aria-label="{{ product.title | escape }} images"
+            >
+              {%- for media in product.media -%}
+                <li
+                  class="pdp__slide{% if forloop.index0 == featured_index %} is-active{% endif %}"
+                  data-slide
+                  data-index="{{ forloop.index0 }}"
+                  data-media-id="{{ media.id }}"
+                  {% unless forloop.index0 == featured_index %}
+                    aria-hidden="true"
+                  {% endunless %}
+                >
+                  {%- case media.media_type -%}
+                    {%- when 'video' -%}
+                      {{ media | video_tag: controls: true, playsinline: true, preload: 'metadata', class: 'pdp__media' }}
+                    {%- when 'external_video' -%}
+                      {{ media | external_video_tag: class: 'pdp__media pdp__media--iframe', loading: 'lazy' }}
+                    {%- else -%}
+                      <button
+                        type="button"
+                        class="pdp__zoom-trigger"
+                        data-zoom-open
+                        data-index="{{ forloop.index0 }}"
+                        aria-label="Zoom image {{ forloop.index }}"
+                      >
+                        {%- liquid
+                          if forloop.index0 == featured_index
+                            assign loading = 'eager'
+                            assign priority = 'high'
+                          else
+                            assign loading = 'lazy'
+                            assign priority = 'auto'
+                          endif
+                        -%}
+                        {{-
+                          media.preview_image
+                          | image_url: width: 1600
+                          | image_tag:
+                            class: 'pdp__media',
+                            widths: '480, 720, 960, 1200, 1600',
+                            sizes: '(min-width: 990px) 52vw, 100vw',
+                            loading: loading,
+                            fetchpriority: priority,
+                            alt: media.alt
+                        -}}
+                      </button>
+                  {%- endcase -%}
+                </li>
+              {%- else -%}
+                <li class="pdp__slide is-active">
+                  <div class="pdp__media pdp__media--placeholder">
+                    {% render 'placeholder-book-cover', design: 'moon' %}
+                  </div>
+                </li>
+              {%- endfor -%}
+            </ul>
+
+            {%- if media_count > 1 -%}
+              <div
+                class="pdp__stage-meta"
+                aria-hidden="true"
+              >
+                <span class="pdp__counter">
+                  <span data-counter-current>{{ featured_index | plus: 1 | prepend: '0' | slice: -2, 2 }}</span>
+                  <span class="pdp__counter-sep">/</span>
+                  <span>{{ media_count | prepend: '0' | slice: -2, 2 }}</span>
+                </span>
+                <span class="pdp__progress">
+                  <span
+                    class="pdp__progress-bar"
+                    data-progress
+                    style="--progress: {{ featured_index | plus: 1 | times: 100.0 | divided_by: media_count }}%;"
+                  ></span>
+                </span>
+              </div>
+
+              <div class="pdp__dots" data-dots aria-hidden="true">
+                {%- for media in product.media -%}
+                  <span class="pdp__dot{% if forloop.index0 == featured_index %} is-active{% endif %}"></span>
+                {%- endfor -%}
+              </div>
+            {%- endif -%}
+          </div>
+        </div>
+      </div>
+
+      {%- comment -%} ---------- Product information ---------- {%- endcomment -%}
+      <div class="pdp__info">
+        <div
+          class="pdp__info-inner"
+          data-info
+        >
+          {%- liquid
+            assign eyebrow = blank
+            case s.eyebrow_source
+              when 'vendor'
+                assign eyebrow = product.vendor
+              when 'type'
+                assign eyebrow = product.type
+              when 'collection'
+                if collection != blank
+                  assign eyebrow = collection.title
+                else
+                  assign eyebrow = product.collections.first.title
+                endif
+            endcase
+          -%}
+          {%- if eyebrow != blank -%}
+            <p class="pdp__eyebrow text-eyebrow">{{ eyebrow }}</p>
+          {%- endif -%}
+
+          <h1 class="pdp__title h3">{{ product.title }}</h1>
+
+          {%- assign rating = product.metafields.reviews.rating.value -%}
+          {%- if rating != blank -%}
+            {%- assign rating_count = product.metafields.reviews.rating_count.value | default: 0 -%}
+            <div class="pdp__rating text-small">
+              <span
+                class="pdp__stars"
+                style="--rating: {{ rating.rating | divided_by: rating.scale_max | times: 100 }}%;"
+                aria-hidden="true"
+              ></span>
+              <span>
+                {{ rating.rating | round: 1 }}
+                <span class="pdp__rating-count">({{ rating_count }} reviews)</span>
+              </span>
+            </div>
+          {%- endif -%}
+
+          <div
+            class="pdp__price"
+            data-price
+          >
+            <span
+              class="pdp__price-current text-price"
+              data-price-current
+            >
+              {{- current_variant.price | money -}}
+            </span>
+            <s
+              class="pdp__price-compare"
+              data-price-compare
+              {% unless current_variant.compare_at_price > current_variant.price %}
+                hidden
+              {% endunless %}
+            >
+              {{- current_variant.compare_at_price | money -}}
+            </s>
+            <span
+              class="pdp__badge pdp__badge--sale"
+              data-price-badge
+              {% unless current_variant.compare_at_price > current_variant.price %}
+                hidden
+              {% endunless %}
+            >
+              Save
+              <span data-price-saving>
+                {{- current_variant.compare_at_price | minus: current_variant.price | money -}}
+              </span>
+            </span>
+          </div>
+
+          {%- if s.price_note != blank -%}
+            <p class="pdp__price-note text-small">{{ s.price_note }}</p>
+          {%- endif -%}
+
+          {%- if s.show_excerpt and product.description != blank -%}
+            <p class="pdp__excerpt text-lead">
+              {%- comment -%} A space before each closing tag keeps a heading from running into the next paragraph. {%- endcomment -%}
+              {{-
+                product.description
+                | replace: '</', ' </'
+                | replace: '<br', ' <br'
+                | strip_html
+                | strip_newlines
+                | truncatewords: s.excerpt_words
+              -}}
+            </p>
+          {%- endif -%}
+
+          {%- assign product_form_id = 'ProductForm-' | append: section.id -%}
+          {%- form 'product', product, id: product_form_id, class: 'pdp__form', novalidate: 'novalidate' -%}
+            <input
+              type="hidden"
+              name="id"
+              value="{{ current_variant.id }}"
+              data-variant-id
+            >
+
+            {%- unless has_only_default_variant -%}
+              {%- for option in product.options_with_values -%}
+                <fieldset
+                  class="pdp__option"
+                  data-option
+                  data-option-position="{{ option.position }}"
+                >
+                  <legend class="pdp__option-legend">
+                    {{ option.name }}:
+                    <span
+                      class="pdp__option-selected"
+                      data-option-selected
+                      >{{ option.selected_value }}</span
+                    >
+                  </legend>
+                  <div class="pdp__option-values">
+                    {%- for value in option.values -%}
+                      <label class="pdp__pill{% unless value.available %} is-unavailable{% endunless %}">
+                        <input
+                          type="radio"
+                          class="pdp__pill-input"
+                          name="option-{{ section.id }}-{{ option.position }}"
+                          value="{{ value | escape }}"
+                          data-option-input
+                          {% if value.selected %}
+                            checked
+                          {% endif %}
+                        >
+                        <span>{{ value }}</span>
+                      </label>
+                    {%- endfor -%}
+                  </div>
+                </fieldset>
+              {%- endfor -%}
+            {%- endunless -%}
+
+            <div class="pdp__buy">
+              {%- if s.show_quantity -%}
+                <div class="pdp__quantity">
+                  <label
+                    class="visually-hidden"
+                    for="Quantity-{{ section.id }}"
+                  >
+                    {{- 'products.product.quantity' | t -}}
+                  </label>
+                  <button
+                    type="button"
+                    class="pdp__qty-button"
+                    data-qty="-1"
+                    aria-label="Decrease quantity"
+                  >
+                    −
+                  </button>
+                  <input
+                    id="Quantity-{{ section.id }}"
+                    class="pdp__qty-input"
+                    type="number"
+                    name="quantity"
+                    value="1"
+                    min="1"
+                    inputmode="numeric"
+                    data-qty-input
+                  >
+                  <button
+                    type="button"
+                    class="pdp__qty-button"
+                    data-qty="1"
+                    aria-label="Increase quantity"
+                  >
+                    +
+                  </button>
+                </div>
+              {%- endif -%}
+
+              <button
+                type="submit"
+                name="add"
+                class="brand-button brand-button--purchase pdp__add"
+                data-add-button
+                {% unless current_variant.available %}
+                  disabled
+                {% endunless %}
+              >
+                {% render 'brand-icon', name: 'bag', size: 20 %}
+                <span data-add-text>
+                  {%- if current_variant.available -%}
+                    {{ 'products.product.add_to_cart' | t }}
+                  {%- else -%}
+                    {{ 'products.product.sold_out' | t }}
+                  {%- endif -%}
+                </span>
+              </button>
+            </div>
+
+            {%- if s.show_dynamic_checkout -%}
+              <div class="pdp__dynamic-checkout">
+                {{ form | payment_button }}
+              </div>
+            {%- endif -%}
+
+            <p
+              class="pdp__error text-small"
+              role="alert"
+              data-error
+              hidden
+            ></p>
+          {%- endform -%}
+
+          <p
+            class="pdp__stock text-small"
+            data-stock
+          >
+            {%- liquid
+              assign stock_state = 'in'
+              if current_variant.available == false
+                assign stock_state = 'out'
+              elsif current_variant.inventory_management == 'shopify' and current_variant.inventory_quantity <= low_stock_threshold and current_variant.inventory_quantity > 0
+                assign stock_state = 'low'
+              endif
+            -%}
+            <span
+              class="pdp__stock-dot pdp__stock-dot--{{ stock_state }}"
+              data-stock-dot
+            ></span>
+            <span data-stock-text>
+              {%- case stock_state -%}
+                {%- when 'out' -%}
+                  Sold out
+                {%- when 'low' -%}
+                  Only {{ current_variant.inventory_quantity }} left
+                {%- else -%}
+                  In stock
+              {%- endcase -%}
+            </span>
+            {%- if s.stock_note != blank -%}
+              <span class="pdp__stock-note">· {{ s.stock_note }}</span>
+            {%- endif -%}
+          </p>
+
+          {%- if trust_items.size > 0 -%}
+            <ul
+              class="pdp__trust"
+              role="list"
+            >
+              {%- for block in trust_items -%}
+                <li
+                  class="pdp__trust-item"
+                  {{ block.shopify_attributes }}
+                >
+                  <span class="pdp__trust-icon">{% render 'brand-icon', name: block.settings.icon, size: 20 %}</span>
+                  <span>
+                    <strong>{{ block.settings.title }}</strong>
+                    {%- if block.settings.text != blank -%}
+                      <span class="pdp__trust-text">{{ block.settings.text }}</span>
+                    {%- endif -%}
+                  </span>
+                </li>
+              {%- endfor -%}
+            </ul>
+          {%- endif -%}
+
+          {%- if description_blocks.size > 0 or accordions.size > 0 -%}
+            <div class="pdp__accordions">
+              {%- for block in section.blocks -%}
+                {%- case block.type -%}
+                  {%- when 'description' -%}
+                    {%- if product.description != blank -%}
+                      <details
+                        class="pdp__accordion"
+                        {% if block.settings.open %}
+                          open
+                        {% endif %}
+                        {{ block.shopify_attributes }}
+                      >
+                        <summary>
+                          {{- block.settings.title -}}
+                          <span class="pdp__accordion-icon" aria-hidden="true"></span>
+                        </summary>
+                        <div class="pdp__accordion-content pdp__rte">{{ product.description }}</div>
+                      </details>
+                    {%- endif -%}
+                  {%- when 'collapsible' -%}
+                    {%- if block.settings.content != blank or block.settings.page != blank -%}
+                      <details
+                        class="pdp__accordion"
+                        {% if block.settings.open %}
+                          open
+                        {% endif %}
+                        {{ block.shopify_attributes }}
+                      >
+                        <summary>
+                          {{- block.settings.title -}}
+                          <span class="pdp__accordion-icon" aria-hidden="true"></span>
+                        </summary>
+                        <div class="pdp__accordion-content pdp__rte">
+                          {{ block.settings.content }}
+                          {{ block.settings.page.content }}
+                        </div>
+                      </details>
+                    {%- endif -%}
+                {%- endcase -%}
+              {%- endfor -%}
+            </div>
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {%- comment -%} ---------- Zoom ---------- {%- endcomment -%}
+  {%- if media_count > 0 -%}
+    <dialog
+      class="pdp-zoom"
+      aria-label="{{ product.title | escape }} images"
+      data-zoom
+    >
+      <button
+        type="button"
+        class="pdp-zoom__close"
+        data-zoom-close
+        aria-label="Close"
+      >
+        {% render 'brand-icon', name: 'close' %}
+      </button>
+      {%- if media_count > 1 -%}
+        <button
+          type="button"
+          class="pdp-zoom__nav pdp-zoom__nav--prev"
+          data-zoom-step="-1"
+          aria-label="Previous image"
+        >
+          {% render 'brand-icon', name: 'chevron-right' %}
+        </button>
+        <button
+          type="button"
+          class="pdp-zoom__nav pdp-zoom__nav--next"
+          data-zoom-step="1"
+          aria-label="Next image"
+        >
+          {% render 'brand-icon', name: 'chevron-right' %}
+        </button>
+      {%- endif -%}
+      <img
+        class="pdp-zoom__image"
+        data-zoom-image
+        width="1600"
+        height="1600"
+        alt=""
+      >
+      <template data-zoom-sources>
+        {%- for media in product.media -%}
+          <span
+            data-src="{{ media.preview_image | image_url: width: 2400 }}"
+            data-alt="{{ media.alt | escape }}"
+          ></span>
+        {%- endfor -%}
+      </template>
+    </dialog>
+  {%- endif -%}
+
+  <script
+    type="application/json"
+    data-variants
+  >
+    [
+      {%- for variant in product.variants -%}
+        {
+          "id": {{ variant.id }},
+          "options": {{ variant.options | json }},
+          "available": {{ variant.available | json }},
+          "price": {{ variant.price }},
+          "compare_at_price": {{ variant.compare_at_price | default: 0 }},
+          "inventory_tracked": {% if variant.inventory_management == 'shopify' %}true{% else %}false{% endif %},
+          "inventory_quantity": {{ variant.inventory_quantity | default: 0 }},
+          "featured_media_id": {{ variant.featured_media.id | default: 'null' }}
+        }{% unless forloop.last %},{% endunless %}
+      {%- endfor -%}
+    ]
+  </script>
+</product-page>
+
+<script type="application/ld+json">
+  {{ product | structured_data }}
+</script>
+
+{% stylesheet %}
+  .pdp {
+    --pdp-sticky-top: calc(var(--sticky-header-offset, 0px) + var(--space-5));
+
+    display: block;
+    padding-block: var(--space-4) var(--space-8);
+  }
+
+  .pdp__container {
+    max-width: var(--page-width);
+    margin-inline: auto;
+    padding-inline: var(--page-margin);
+  }
+
+  /* ---------- Breadcrumbs ---------- */
+
+  .pdp__breadcrumbs ol {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin: 0 0 var(--space-5);
+    padding: 0;
+    list-style: none;
+    color: var(--color-ink-muted);
+  }
+
+  .pdp__breadcrumbs li + li::before {
+    content: '/';
+    margin-right: var(--space-2);
+    color: var(--color-line-strong);
+  }
+
+  .pdp__breadcrumbs a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .pdp__breadcrumbs a:hover {
+    color: var(--color-ink);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .pdp__breadcrumbs [aria-current] {
+    color: var(--color-ink);
+  }
+
+  /* ---------- Layout ---------- */
+
+  .pdp__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: clamp(var(--space-6), 4vw, var(--space-8));
+  }
+
+  .pdp__gallery {
+    /* The scroll the gallery steps through: one viewport plus 45vh per extra image. */
+    min-height: calc(100svh + var(--pdp-scroll-steps) * 45vh);
+  }
+
+  .pdp__gallery--single {
+    min-height: 0;
+  }
+
+  .pdp__gallery-sticky {
+    position: sticky;
+    top: var(--pdp-sticky-top);
+    display: grid;
+    grid-template-columns: 76px minmax(0, 1fr);
+    gap: var(--space-4);
+    height: calc(100svh - var(--pdp-sticky-top) - var(--space-5));
+    max-height: 820px;
+  }
+
+  .pdp__gallery--single .pdp__gallery-sticky {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* ---------- Thumbnails ---------- */
+
+  .pdp__thumbs {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    margin: 0;
+    padding: 2px;
+    overflow-y: auto;
+    list-style: none;
+    scrollbar-width: none;
+  }
+
+  .pdp__thumbs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .pdp__thumb {
+    position: relative;
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    padding: 0;
+    overflow: hidden;
+    background: var(--color-paper-deep);
+    border: var(--stroke-sm) solid var(--color-line);
+    border-radius: var(--radius-image);
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+  }
+
+  .pdp__thumb:hover {
+    opacity: 1;
+  }
+
+  .pdp__thumb[aria-current='true'] {
+    opacity: 1;
+    border-color: var(--color-ink);
+    box-shadow: 0 0 0 1px var(--color-ink);
+  }
+
+  .pdp__thumb:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus-ring, var(--color-grape));
+    outline-offset: 2px;
+  }
+
+  .pdp__thumb-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .pdp__thumb-badge {
+    position: absolute;
+    inset: auto 6px 6px auto;
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    font-size: 8px;
+    color: #fff;
+    background: rgb(var(--color-ink-rgb) / 0.8);
+    border-radius: var(--radius-full);
+  }
+
+  /* ---------- Stage ---------- */
+
+  .pdp__stage {
+    position: relative;
+    min-height: 0;
+    overflow: hidden;
+    background: var(--color-paper-deep);
+    border: var(--stroke-sm) solid var(--color-line);
+    border-radius: var(--radius-image);
+  }
+
+  .pdp__slides {
+    position: relative;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .pdp__slide {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: clamp(var(--space-5), 4vw, var(--space-7));
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.985);
+    transition: opacity 420ms ease, transform 520ms cubic-bezier(0.2, 0.8, 0.2, 1), visibility 0s linear 420ms;
+  }
+
+  .pdp__slide.is-active {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition: opacity 420ms ease, transform 520ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .pdp__zoom-trigger {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    background: none;
+    border: 0;
+    cursor: zoom-in;
+    border-radius: var(--radius-image);
+  }
+
+  .pdp__zoom-trigger:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus-ring, var(--color-grape));
+    outline-offset: 2px;
+  }
+
+  .pdp__media {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: var(--radius-image);
+    filter: drop-shadow(0 10px 20px rgb(var(--color-ink-rgb) / 0.14));
+  }
+
+  .pdp__stage--cover .pdp__slide {
+    padding: 0;
+  }
+
+  .pdp__stage--cover .pdp__media {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0;
+    filter: none;
+  }
+
+  .pdp__media--iframe,
+  video.pdp__media {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    filter: none;
+  }
+
+  .pdp__media--placeholder {
+    width: min(60%, 320px);
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+  }
+
+  .pdp__stage-meta {
+    position: absolute;
+    left: var(--space-5);
+    right: var(--space-5);
+    bottom: var(--space-4);
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    pointer-events: none;
+  }
+
+  .pdp__counter {
+    display: inline-flex;
+    gap: var(--space-1);
+    font-family: var(--font-body--family);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--color-ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .pdp__counter-sep {
+    color: var(--color-ink-muted);
+  }
+
+  .pdp__progress {
+    flex: 1;
+    height: 3px;
+    overflow: hidden;
+    background: rgb(var(--color-ink-rgb) / 0.12);
+    border-radius: var(--radius-full);
+  }
+
+  .pdp__progress-bar {
+    display: block;
+    width: var(--progress, 0%);
+    height: 100%;
+    background: var(--color-ink);
+    border-radius: inherit;
+    transition: width 420ms ease;
+  }
+
+  .pdp__dots {
+    display: none;
+  }
+
+  /* ---------- Info ---------- */
+
+  .pdp__info-inner {
+    position: sticky;
+    top: var(--pdp-info-top, var(--pdp-sticky-top));
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    padding-bottom: var(--space-5);
+  }
+
+  .pdp__eyebrow {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: 0;
+    color: var(--color-ink-muted);
+  }
+
+  .pdp__eyebrow::before {
+    content: '';
+    width: 8px;
+    aspect-ratio: 1;
+    border-radius: var(--radius-full);
+    background: var(--color-sky);
+  }
+
+  .pdp__title {
+    margin: 0;
+    color: var(--color-ink);
+    text-wrap: balance;
+  }
+
+  .pdp__rating {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--color-ink);
+  }
+
+  .pdp__rating-count {
+    color: var(--color-ink-muted);
+  }
+
+  .pdp__stars {
+    --star: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m12 2.5 2.9 6 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.2 1.3-6.6L2.5 9.3l6.6-.8z'/%3E%3C/svg%3E");
+
+    width: 90px;
+    height: 18px;
+    background: linear-gradient(90deg, var(--color-sun) var(--rating), var(--color-line) var(--rating));
+    -webkit-mask: var(--star) left / 18px 18px repeat-x;
+    mask: var(--star) left / 18px 18px repeat-x;
+  }
+
+  .pdp__price {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+    margin-top: var(--space-1);
+  }
+
+  .pdp__price-current {
+    font-size: 28px;
+    color: var(--color-ink);
+  }
+
+  .pdp__price-compare {
+    font-size: 17px;
+    color: var(--color-ink-muted);
+  }
+
+  .pdp__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3em;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    border-radius: var(--radius-full);
+  }
+
+  .pdp__badge--sale {
+    color: var(--color-tomato-deep);
+    background: var(--color-tomato-soft);
+  }
+
+  [hidden].pdp__badge,
+  .pdp__price-compare[hidden] {
+    display: none;
+  }
+
+  .pdp__price-note {
+    margin: calc(var(--space-3) * -1) 0 0;
+    color: var(--color-ink-muted);
+  }
+
+  .pdp__excerpt {
+    margin: 0;
+    color: var(--color-ink-muted);
+  }
+
+  /* ---------- Form ---------- */
+
+  .pdp__form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    margin-top: var(--space-3);
+    padding-top: var(--space-5);
+    border-top: var(--stroke-sm) solid var(--color-line);
+  }
+
+  .pdp__option {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+  }
+
+  .pdp__option-legend {
+    margin-bottom: var(--space-3);
+    padding: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+
+  .pdp__option-selected {
+    font-weight: 400;
+    color: var(--color-ink-muted);
+  }
+
+  .pdp__option-values {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .pdp__pill {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 var(--space-5);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--color-ink);
+    background: var(--color-card);
+    border: var(--stroke-sm) solid var(--color-line-strong);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+  }
+
+  /* The radio stays in the accessibility tree and keyboard order but is never
+     painted, in any state (Horizon's .visually-hidden reveals on :focus/:active). */
+  .pdp__pill-input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .pdp__pill:hover {
+    border-color: var(--color-ink);
+  }
+
+  .pdp__pill:has(input:checked) {
+    color: #fff;
+    background: var(--color-ink);
+    border-color: var(--color-ink);
+  }
+
+  .pdp__pill:has(input:focus-visible) {
+    outline: var(--focus-ring-width) solid var(--color-focus-ring, var(--color-grape));
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .pdp__pill.is-unavailable {
+    color: var(--color-ink-muted);
+    background: transparent;
+    border-style: dashed;
+  }
+
+  .pdp__pill.is-unavailable span {
+    text-decoration: line-through;
+  }
+
+  .pdp__pill.is-unavailable:has(input:checked) {
+    color: var(--color-ink);
+    background: var(--color-paper-deep);
+    border-color: var(--color-ink);
+  }
+
+  .pdp__buy {
+    display: flex;
+    gap: var(--space-3);
+  }
+
+  .pdp__quantity {
+    display: inline-flex;
+    align-items: center;
+    flex: none;
+    height: 56px;
+    background: var(--color-card);
+    border: var(--stroke-sm) solid var(--color-line-strong);
+    border-radius: var(--radius-full);
+  }
+
+  .pdp__qty-button {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 100%;
+    padding: 0;
+    font-size: 20px;
+    color: var(--color-ink);
+    background: none;
+    border: 0;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+  }
+
+  .pdp__qty-button:hover {
+    background: var(--color-paper-deep);
+  }
+
+  .pdp__qty-button:focus-visible,
+  .pdp__qty-input:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus-ring, var(--color-grape));
+    outline-offset: 2px;
+  }
+
+  .pdp__qty-input {
+    width: 40px;
+    padding: 0;
+    font-family: var(--font-body--family);
+    font-size: 16px;
+    font-weight: 600;
+    text-align: center;
+    color: var(--color-ink);
+    background: none;
+    border: 0;
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+
+  .pdp__qty-input::-webkit-outer-spin-button,
+  .pdp__qty-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  .pdp__add {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .pdp__add[disabled] {
+    --brand-button-bg: var(--color-line);
+    --brand-button-border: var(--color-line);
+    --brand-button-fg: var(--color-ink-muted);
+    --brand-button-hover-bg: var(--color-line);
+
+    cursor: not-allowed;
+  }
+
+  .pdp__add.is-loading {
+    pointer-events: none;
+    opacity: 0.8;
+  }
+
+  .pdp__add.is-added {
+    --brand-button-bg: var(--color-leaf-deep);
+    --brand-button-border: var(--color-leaf-deep);
+    --brand-button-hover-bg: var(--color-leaf-deep);
+  }
+
+  .pdp__dynamic-checkout {
+    margin-top: calc(var(--space-2) * -1);
+  }
+
+  .pdp__dynamic-checkout .shopify-payment-button__button {
+    min-height: 56px;
+    border-radius: var(--radius-full);
+    overflow: hidden;
+  }
+
+  .pdp__dynamic-checkout .shopify-payment-button__more-options {
+    margin-top: var(--space-3);
+    font-size: 14px;
+    color: var(--color-ink-muted);
+  }
+
+  .pdp__error {
+    margin: 0;
+    padding: var(--space-3) var(--space-4);
+    color: var(--color-tomato-deep);
+    background: var(--color-tomato-soft);
+    border-radius: var(--radius-md);
+  }
+
+  .pdp__error[hidden] {
+    display: none;
+  }
+
+  .pdp__stock {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0;
+    color: var(--color-ink);
+  }
+
+  .pdp__stock-dot {
+    width: 8px;
+    aspect-ratio: 1;
+    border-radius: var(--radius-full);
+    background: var(--color-leaf);
+    box-shadow: 0 0 0 4px var(--color-leaf-soft);
+  }
+
+  .pdp__stock-dot--low {
+    background: var(--color-sun);
+    box-shadow: 0 0 0 4px var(--color-sun-soft);
+  }
+
+  .pdp__stock-dot--out {
+    background: var(--color-tomato);
+    box-shadow: 0 0 0 4px var(--color-tomato-soft);
+  }
+
+  .pdp__stock-note {
+    color: var(--color-ink-muted);
+  }
+
+  /* ---------- Trust ---------- */
+
+  .pdp__trust {
+    display: grid;
+    gap: var(--space-4);
+    margin: var(--space-2) 0 0;
+    padding: var(--space-5);
+    list-style: none;
+    background: var(--color-card);
+    border: var(--stroke-sm) solid var(--color-line);
+    border-radius: var(--radius-lg);
+  }
+
+  .pdp__trust-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--color-ink);
+  }
+
+  .pdp__trust-icon {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    color: var(--color-ink);
+    background: var(--color-paper-deep);
+    border-radius: var(--radius-full);
+  }
+
+  .pdp__trust-item strong {
+    display: block;
+    font-weight: 600;
+  }
+
+  .pdp__trust-text {
+    display: block;
+    color: var(--color-ink-muted);
+  }
+
+  /* ---------- Accordions ---------- */
+
+  .pdp__accordions {
+    margin-top: var(--space-2);
+    border-top: var(--stroke-sm) solid var(--color-line);
+  }
+
+  .pdp__accordion {
+    border-bottom: var(--stroke-sm) solid var(--color-line);
+  }
+
+  .pdp__accordion summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding-block: var(--space-4);
+    font-family: var(--font-heading--family);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--color-ink);
+    list-style: none;
+    cursor: pointer;
+  }
+
+  .pdp__accordion summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .pdp__accordion summary:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus-ring, var(--color-grape));
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Plus that turns into a minus. */
+  .pdp__accordion-icon {
+    position: relative;
+    flex: none;
+    width: 14px;
+    height: 14px;
+  }
+
+  .pdp__accordion-icon::before,
+  .pdp__accordion-icon::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 6.25px;
+    width: 14px;
+    height: 1.5px;
+    border-radius: var(--radius-full);
+    background: currentColor;
+    transition: transform 200ms ease;
+  }
+
+  .pdp__accordion-icon::after {
+    transform: rotate(90deg);
+  }
+
+  .pdp__accordion[open] .pdp__accordion-icon::after {
+    transform: rotate(0deg);
+  }
+
+  .pdp__accordion-content {
+    padding-bottom: var(--space-5);
+    color: var(--color-ink-muted);
+  }
+
+  .pdp__rte > :first-child {
+    margin-top: 0;
+  }
+
+  .pdp__rte > :last-child {
+    margin-bottom: 0;
+  }
+
+  .pdp__rte :is(p, ul, ol) {
+    margin-block: 0 var(--space-3);
+  }
+
+  .pdp__rte :is(h2, h3, h4, h5, h6) {
+    margin-block: var(--space-4) var(--space-2);
+    font-size: 16px;
+    color: var(--color-ink);
+  }
+
+  .pdp__rte a {
+    color: var(--color-link);
+  }
+
+  .pdp__rte img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius-image);
+  }
+
+  /* ---------- Zoom ---------- */
+
+  .pdp-zoom {
+    width: 100vw;
+    max-width: 100vw;
+    height: 100svh;
+    max-height: 100svh;
+    margin: 0;
+    padding: var(--space-6);
+    background: var(--color-paper);
+    border: 0;
+  }
+
+  .pdp-zoom[open] {
+    display: grid;
+    place-items: center;
+  }
+
+  .pdp-zoom::backdrop {
+    background: rgb(var(--color-ink-rgb) / 0.5);
+  }
+
+  .pdp-zoom__image {
+    max-width: 100%;
+    max-height: calc(100svh - var(--space-6) * 2);
+    object-fit: contain;
+    border-radius: var(--radius-image);
+  }
+
+  .pdp-zoom__close,
+  .pdp-zoom__nav {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    color: var(--color-ink);
+    background: var(--color-card);
+    border: var(--stroke-sm) solid var(--color-line);
+    border-radius: var(--radius-full);
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+  }
+
+  .pdp-zoom__close {
+    top: var(--space-5);
+    right: var(--space-5);
+  }
+
+  .pdp-zoom__nav {
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .pdp-zoom__nav--prev {
+    left: var(--space-5);
+  }
+
+  .pdp-zoom__nav--prev .brand-icon {
+    transform: rotate(180deg);
+  }
+
+  .pdp-zoom__nav--next {
+    right: var(--space-5);
+  }
+
+  .pdp-zoom :is(button):focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus-ring, var(--color-grape));
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  /* ---------- Mobile and tablet: swipe carousel ---------- */
+
+  @media screen and (max-width: 989px) {
+    .pdp {
+      padding-top: var(--space-3);
+    }
+
+    .pdp__grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-5);
+    }
+
+    .pdp__gallery,
+    .pdp__gallery--single {
+      min-height: 0;
+    }
+
+    .pdp__gallery-sticky {
+      position: static;
+      display: block;
+      height: auto;
+      max-height: none;
+    }
+
+    .pdp__thumbs {
+      display: none;
+    }
+
+    .pdp__stage {
+      margin-inline: calc(var(--page-margin) * -1);
+      border-radius: 0;
+      border-inline: 0;
+    }
+
+    .pdp__slides {
+      display: flex;
+      height: auto;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      overscroll-behavior-x: contain;
+    }
+
+    .pdp__slides::-webkit-scrollbar {
+      display: none;
+    }
+
+    .pdp__slide {
+      position: relative;
+      flex: 0 0 100%;
+      aspect-ratio: 1;
+      scroll-snap-align: center;
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+      transition: none;
+    }
+
+    .pdp__stage-meta {
+      display: none;
+    }
+
+    .pdp__dots {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: var(--space-4);
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      pointer-events: none;
+    }
+
+    .pdp__dot {
+      width: 6px;
+      height: 6px;
+      border-radius: var(--radius-full);
+      background: rgb(var(--color-ink-rgb) / 0.25);
+      transition: width 200ms ease, background-color 200ms ease;
+    }
+
+    .pdp__dot.is-active {
+      width: 18px;
+      background: var(--color-ink);
+    }
+
+    .pdp__info-inner {
+      position: static;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .pdp__breadcrumbs {
+      display: none;
+    }
+
+    .pdp__price-current {
+      font-size: 24px;
+    }
+
+    .pdp-zoom {
+      padding: var(--space-4);
+    }
+
+    .pdp-zoom__nav {
+      top: auto;
+      bottom: var(--space-5);
+      transform: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pdp__slide,
+    .pdp__slide.is-active,
+    .pdp__progress-bar,
+    .pdp__thumb {
+      transition: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Product",
+  "tag": "section",
+  "class": "product-section",
+  "blocks": [
+    {
+      "type": "description",
+      "name": "Description",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "About this book"
+        },
+        {
+          "type": "checkbox",
+          "id": "open",
+          "label": "Open by default",
+          "default": true
+        }
+      ]
+    },
+    {
+      "type": "collapsible",
+      "name": "Collapsible tab",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Shipping & returns"
+        },
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "Content"
+        },
+        {
+          "type": "page",
+          "id": "page",
+          "label": "Content from a page"
+        },
+        {
+          "type": "checkbox",
+          "id": "open",
+          "label": "Open by default",
+          "default": false
+        }
+      ]
+    },
+    {
+      "type": "trust",
+      "name": "Trust point",
+      "limit": 4,
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "truck", "label": "Shipping" },
+            { "value": "gift", "label": "Gift" },
+            { "value": "returns", "label": "Returns" },
+            { "value": "book", "label": "Book" },
+            { "value": "heart", "label": "Heart" },
+            { "value": "star", "label": "Star" }
+          ],
+          "default": "truck"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Free shipping over $40"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text"
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "type": "header",
+      "content": "Gallery"
+    },
+    {
+      "type": "select",
+      "id": "image_fit",
+      "label": "Image fit",
+      "options": [
+        { "value": "contain", "label": "Whole image on paper" },
+        { "value": "cover", "label": "Fill the frame" }
+      ],
+      "default": "contain"
+    },
+    {
+      "type": "header",
+      "content": "Information"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_breadcrumbs",
+      "label": "Show breadcrumbs",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "eyebrow_source",
+      "label": "Eyebrow",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "vendor", "label": "Vendor" },
+        { "value": "type", "label": "Product type" },
+        { "value": "collection", "label": "Collection" }
+      ],
+      "default": "collection"
+    },
+    {
+      "type": "text",
+      "id": "price_note",
+      "label": "Note under the price",
+      "default": "Shipping calculated at checkout."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_excerpt",
+      "label": "Show a short excerpt of the description",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "excerpt_words",
+      "label": "Excerpt length",
+      "min": 15,
+      "max": 60,
+      "step": 5,
+      "unit": "w",
+      "default": 30
+    },
+    {
+      "type": "header",
+      "content": "Buying"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_quantity",
+      "label": "Show quantity",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_dynamic_checkout",
+      "label": "Show dynamic checkout buttons",
+      "info": "Shop Pay and other express payment buttons.",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "stock_note",
+      "label": "Note next to the stock status",
+      "default": "Ships in 1–2 business days"
+    },
+    {
+      "type": "range",
+      "id": "low_stock_threshold",
+      "label": "Show “Only X left” from",
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "default": 5
+    }
+  ]
+}
+{% endschema %}

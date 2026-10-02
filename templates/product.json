@@ -1,10 +1,62 @@
 {
   "sections": {
     "main": {
-      "type": "blank"
+      "type": "product",
+      "blocks": {
+        "trust_shipping": {
+          "type": "trust",
+          "settings": {
+            "icon": "truck",
+            "title": "Free shipping over $40",
+            "text": "Nationwide, wrapped with care."
+          }
+        },
+        "trust_gift": {
+          "type": "trust",
+          "settings": {
+            "icon": "gift",
+            "title": "Ready to gift",
+            "text": "Add free gift wrapping at checkout."
+          }
+        },
+        "trust_returns": {
+          "type": "trust",
+          "settings": {
+            "icon": "returns",
+            "title": "Easy 30-day returns",
+            "text": "If it's not the right book, send it back."
+          }
+        },
+        "description": {
+          "type": "description",
+          "settings": {
+            "title": "About this book",
+            "open": true
+          }
+        },
+        "shipping": {
+          "type": "collapsible",
+          "settings": {
+            "title": "Shipping & returns",
+            "content": "<p>Orders ship in 1–2 business days. Shipping is free on orders over $40.</p><p>Not the right fit? Return it within 30 days for a full refund.</p>",
+            "open": false
+          }
+        }
+      },
+      "block_order": ["trust_shipping", "trust_gift", "trust_returns", "description", "shipping"],
+      "settings": {
+        "image_fit": "contain",
+        "show_breadcrumbs": true,
+        "eyebrow_source": "collection",
+        "price_note": "Shipping calculated at checkout.",
+        "show_excerpt": true,
+        "excerpt_words": 30,
+        "show_quantity": true,
+        "show_dynamic_checkout": true,
+        "stock_note": "Ships in 1–2 business days",
+        "low_stock_threshold": 5
+      }
     }
   },
-  "order": [
-    "main"
-  ]
+  "order": ["main"]
 }
