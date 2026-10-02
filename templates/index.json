@@ -1,23 +1,36 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
-    "hero": {
+    "main": {
+      "type": "blank",
+      "settings": {}
+    },
+    "hero_k6yc4U": {
       "type": "hero",
       "blocks": {
-        "trust_shipping": {
+        "trust_Kix83g": {
           "type": "trust",
           "settings": {
             "icon": "truck",
             "text": "Nationwide shipping"
           }
         },
-        "trust_gift": {
+        "trust_7p78VU": {
           "type": "trust",
           "settings": {
             "icon": "gift",
             "text": "Ready to gift"
           }
         },
-        "trust_returns": {
+        "trust_fdpQ8d": {
           "type": "trust",
           "settings": {
             "icon": "returns",
@@ -25,7 +38,12 @@
           }
         }
       },
-      "block_order": ["trust_shipping", "trust_gift", "trust_returns"],
+      "block_order": [
+        "trust_Kix83g",
+        "trust_7p78VU",
+        "trust_fdpQ8d"
+      ],
+      "name": "Hero",
       "settings": {
         "eyebrow": "Hand-picked children’s books",
         "heading_start": "Every book is an",
@@ -35,9 +53,12 @@
         "heading_accent": "together",
         "text": "<p>Picture books, early readers and books for learning letters. For children ages 3 to 8, and for the grown-ups who read with them.</p>",
         "primary_label": "Shop the program",
-        "primary_url": "/collections/all",
+        "primary_url": "shopify://collections/all",
         "secondary_label": "Get Lesson One free",
         "secondary_url": "",
+        "cover_left": "shopify://shop_images/61kb8rMtyaL._SL1294.avif",
+        "cover_center": "shopify://shop_images/9780913063132_1_cf06a8e3-c151-4dd2-aa68-a77a054d56fc.jpg",
+        "cover_right": "shopify://shop_images/81KA2blr9OL._SL1500__1_eea9ba8a-c081-4fd4-94a8-9e304198464e.avif",
         "media_link": "",
         "media_link_label": "Shop the books",
         "badge_number": "3–8",
@@ -47,5 +68,8 @@
       }
     }
   },
-  "order": ["hero"]
+  "order": [
+    "main",
+    "hero_k6yc4U"
+  ]
 }
