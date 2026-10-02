@@ -1,0 +1,118 @@
+{%- doc -%}
+  Pill button from the brand guidelines: Public Sans 600 · 15px, sentence case.
+
+  - primary: ink fill, white text. The main action of a section.
+  - secondary: transparent with a line-strong hairline.
+  - purchase: tomato. Only for buying (cart, Add to cart, sale).
+
+  @param {string} label - Button text.
+  @param {string} [url] - Renders a link when set, a <button> otherwise.
+  @param {string} [style] - 'primary' (default), 'secondary' or 'purchase'.
+  @param {boolean} [arrow] - Adds the arrow after the label.
+  @param {string} [class] - Extra classes.
+
+  @example
+  {% render 'brand-button', label: 'Shop the program', url: '/collections/all', arrow: true %}
+{%- enddoc -%}
+
+{%- liquid
+  assign style = style | default: 'primary'
+  assign classes = 'brand-button brand-button--' | append: style
+  if class != blank
+    assign classes = classes | append: ' ' | append: class
+  endif
+-%}
+
+{%- capture inner -%}
+  <span>{{ label }}</span>
+  {%- if arrow -%}
+    {% render 'brand-icon', name: 'arrow-right', size: 18 %}
+  {%- endif -%}
+{%- endcapture -%}
+
+{%- if url != blank -%}
+  <a
+    href="{{ url }}"
+    class="{{ classes }}"
+  >
+    {{- inner -}}
+  </a>
+{%- else -%}
+  <button
+    type="button"
+    class="{{ classes }}"
+  >
+    {{- inner -}}
+  </button>
+{%- endif -%}
+
+{% stylesheet %}
+  .brand-button {
+    --brand-button-bg: var(--color-ink);
+    --brand-button-fg: #ffffff;
+    --brand-button-border: var(--color-ink);
+    --brand-button-hover-bg: rgb(var(--color-ink-rgb) / 0.88);
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    min-height: 56px;
+    padding: 0 var(--space-6);
+    font-family: var(--font-button--family);
+    font-size: var(--font-button--size);
+    font-weight: var(--font-button--weight);
+    line-height: var(--font-button--line-height);
+    color: var(--brand-button-fg);
+    text-decoration: none;
+    white-space: nowrap;
+    background: var(--brand-button-bg);
+    border: var(--stroke-sm) solid var(--brand-button-border);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: background-color 150ms ease, border-color 150ms ease, transform 150ms ease;
+  }
+
+  .brand-button:hover {
+    background: var(--brand-button-hover-bg);
+  }
+
+  .brand-button:active {
+    transform: translateY(1px);
+  }
+
+  .brand-button:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus-ring, var(--color-grape));
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .brand-button .brand-icon {
+    flex: none;
+    transition: transform 150ms ease;
+  }
+
+  .brand-button:hover .brand-icon--arrow-right {
+    transform: translateX(3px);
+  }
+
+  .brand-button--secondary {
+    --brand-button-bg: transparent;
+    --brand-button-fg: var(--color-ink);
+    --brand-button-border: var(--color-line-strong);
+    --brand-button-hover-bg: var(--color-card);
+  }
+
+  .brand-button--purchase {
+    --brand-button-bg: var(--color-tomato);
+    --brand-button-fg: var(--color-on-tomato);
+    --brand-button-border: var(--color-tomato);
+    --brand-button-hover-bg: var(--color-tomato-deep);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .brand-button,
+    .brand-button .brand-icon {
+      transition: none;
+    }
+  }
+{% endstylesheet %}

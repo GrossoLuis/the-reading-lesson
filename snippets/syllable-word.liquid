@@ -1,0 +1,144 @@
+{%- doc -%}
+  Syllable headline, a signature element of the brand: one key word per page, split
+  into syllables, each with a colour bar underneath, a mid-dot between syllables and
+  a dotted arc that carries the eye across the word.
+
+  Inherits its size from the heading it sits in. Screen readers hear the whole word.
+
+  @param {string} word - The word with its syllables split by hyphens, e.g. "ad-ven-ture".
+  @param {boolean} [arc] - Shows the dotted arc. Defaults to true.
+
+  @example
+  <h1>Every book is an {% render 'syllable-word', word: 'ad-ven-ture' %} to read</h1>
+{%- enddoc -%}
+
+{%- liquid
+  assign syllables = word | split: '-'
+  assign whole_word = syllables | join: ''
+  assign bar_colors = 'tomato,sky,grape,sun,leaf' | split: ','
+  assign show_arc = true
+  if arc == false
+    assign show_arc = false
+  endif
+-%}
+
+<span class="syllable-word{% if show_arc %} syllable-word--arc{% endif %}">
+  <span class="visually-hidden">{{ whole_word }}</span>
+  <span
+    class="syllable-word__visual"
+    aria-hidden="true"
+  >
+    {%- for syllable in syllables -%}
+      {%- assign color_index = forloop.index0 | modulo: bar_colors.size -%}
+      <span
+        class="syllable-word__syllable"
+        style="--syllable-bar: var(--color-{{ bar_colors[color_index] }});"
+      >
+        {{- syllable | strip -}}
+      </span>
+      {%- unless forloop.last -%}
+        <span class="syllable-word__dot"></span>
+      {%- endunless -%}
+    {%- endfor -%}
+
+    {%- if show_arc -%}
+      <span class="syllable-word__arc">
+        <svg
+          class="syllable-word__arc-line"
+          viewBox="0 0 300 16"
+          preserveAspectRatio="none"
+          fill="none"
+        >
+          <path
+            d="M2 4 C 80 15, 220 15, 296 7"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-dasharray="0.5 5"
+            vector-effect="non-scaling-stroke"
+          />
+        </svg>
+        <svg
+          class="syllable-word__arc-head"
+          viewBox="0 0 20 12"
+          fill="none"
+        >
+          <path
+            d="M2 2.5 18 6 2 9.5"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </span>
+    {%- endif -%}
+  </span>
+</span>
+
+{% stylesheet %}
+  .syllable-word {
+    display: inline-block;
+    position: relative;
+    /* Room under the word for the bars and the arc; widens only this line. */
+    padding-bottom: 0.18em;
+  }
+
+  .syllable-word--arc {
+    padding-bottom: 0.42em;
+  }
+
+  .syllable-word__visual {
+    display: inline-flex;
+    align-items: baseline;
+  }
+
+  .syllable-word__syllable {
+    position: relative;
+  }
+
+  .syllable-word__syllable::after {
+    content: '';
+    position: absolute;
+    left: 0.04em;
+    right: 0.04em;
+    bottom: -0.16em;
+    height: max(3px, 0.065em);
+    border-radius: var(--radius-full);
+    background: var(--syllable-bar);
+  }
+
+  .syllable-word__dot {
+    align-self: center;
+    width: 0.09em;
+    height: 0.09em;
+    margin: 0.2em 0.07em 0;
+    border-radius: var(--radius-full);
+    background: var(--color-ink-muted);
+    opacity: 0.7;
+  }
+
+  .syllable-word__arc {
+    position: absolute;
+    left: 0.06em;
+    right: -0.12em;
+    bottom: 0.02em;
+    height: 0.22em;
+    color: var(--color-ink-muted);
+  }
+
+  .syllable-word__arc-line {
+    position: absolute;
+    inset: 0 0.2em 0 0;
+    width: calc(100% - 0.2em);
+    height: 100%;
+  }
+
+  .syllable-word__arc-head {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 0.3em;
+    height: 0.18em;
+  }
+{% endstylesheet %}

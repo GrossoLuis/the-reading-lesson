@@ -77,8 +77,21 @@
     }
   }
 
+  /* Drawers overlay the page at every width (assets/theme-drawer.js): ink-tinted
+     backdrop like the header menu drawer, fading in, and a soft shadow on the panel. */
   .theme-drawer__dialog::backdrop {
-    background: rgb(var(--backdrop-color-rgb) / var(--backdrop-opacity));
+    background: rgb(var(--color-ink-rgb, var(--backdrop-color-rgb)) / 0.4);
+    animation: drawer-backdrop-in var(--animation-speed) var(--animation-timing-fade-in);
+  }
+
+  .theme-drawer__dialog[open] {
+    box-shadow: var(--shadow-lg);
+  }
+
+  @keyframes drawer-backdrop-in {
+    from {
+      opacity: 0;
+    }
   }
 
   /* Exclude open drawers from the page navigation cross-fade so they

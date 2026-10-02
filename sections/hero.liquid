@@ -1,0 +1,686 @@
+{%- comment -%}
+  Homepage hero, from the brand guidelines' homepage preview.
+
+  - Colour-bar frame (signature element, one per page): sky top, grape right,
+    tomato bottom, sun left, around a paper-deep card.
+  - Eyebrow, syllable headline with an italic accent word, lead, two pill buttons,
+    a hairline and a row of trust points (blocks).
+  - Three book covers fanned out over a soft sky circle, an age badge and a
+    handwritten note. Empty cover slots show the illustrated stand-ins.
+
+  Mobile stacks the books above the copy, makes the buttons full width and lists
+  the trust points one per line.
+{%- endcomment -%}
+
+{%- liquid
+  assign s = section.settings
+  assign trust_items = section.blocks | where: 'type', 'trust'
+  assign covers = 'sunshine,moon,tree' | split: ','
+
+  case s.badge_color
+    when 'sky'
+      assign badge_bg = 'var(--color-age-3-5, var(--color-sky))'
+    when 'leaf'
+      assign badge_bg = 'var(--color-age-6-8, var(--color-leaf))'
+    when 'grape'
+      assign badge_bg = 'var(--color-age-9-12, var(--color-grape))'
+    else
+      assign badge_bg = 'var(--color-sun)'
+  endcase
+  assign badge_fg = 'var(--color-ink)'
+  if s.badge_color == 'grape'
+    assign badge_fg = 'var(--color-on-grape)'
+  endif
+-%}
+
+<div class="hero">
+  <div class="hero__container">
+    <div class="hero__frame">
+      <div class="hero__content">
+        {%- if s.eyebrow != blank -%}
+          <p class="hero__eyebrow text-eyebrow">{{ s.eyebrow }}</p>
+        {%- endif -%}
+
+        <h1 class="hero__heading text-hero">
+          {%- if s.heading_start != blank -%}
+            {{ s.heading_start }}
+          {% endif -%}
+          {%- if s.syllable_word != blank -%}
+            {% render 'syllable-word', word: s.syllable_word, arc: s.show_arc %}
+          {% endif -%}
+          {%- if s.heading_end != blank -%}
+            {{ s.heading_end }}
+          {% endif -%}
+          {%- if s.heading_accent != blank -%}
+            <em class="hero__accent text-accent">{{ s.heading_accent }}</em>
+          {%- endif -%}
+        </h1>
+
+        {%- if s.text != blank -%}
+          <div class="hero__text text-lead">{{ s.text }}</div>
+        {%- endif -%}
+
+        {%- if s.primary_label != blank or s.secondary_label != blank -%}
+          <div class="hero__buttons">
+            {%- if s.primary_label != blank -%}
+              {% render 'brand-button',
+                label: s.primary_label,
+                url: s.primary_url,
+                style: 'primary',
+                arrow: true,
+                class: 'hero__button'
+              %}
+            {%- endif -%}
+            {%- if s.secondary_label != blank -%}
+              {% render 'brand-button',
+                label: s.secondary_label,
+                url: s.secondary_url,
+                style: 'secondary',
+                class: 'hero__button'
+              %}
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+
+        {%- if trust_items.size > 0 -%}
+          <ul
+            class="hero__trust"
+            role="list"
+          >
+            {%- for block in trust_items -%}
+              <li
+                class="hero__trust-item text-small"
+                {{ block.shopify_attributes }}
+              >
+                {% render 'brand-icon', name: block.settings.icon, size: 18 %}
+                <span>{{ block.settings.text }}</span>
+              </li>
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+      </div>
+
+      <div class="hero__media">
+        {%- liquid
+          assign books_tag = 'div'
+          if s.media_link != blank
+            assign books_tag = 'a'
+          endif
+        -%}
+        <{{ books_tag }}
+          class="hero__books"
+          {% if s.media_link != blank %}
+            href="{{ s.media_link }}"
+            aria-label="{{ s.media_link_label | default: 'Shop the books' | escape }}"
+          {% endif %}
+        >
+
+        <span
+          class="hero__halo"
+          aria-hidden="true"
+        ></span>
+
+        {%- for design in covers -%}
+          {%- liquid
+            case forloop.index
+              when 1
+                assign cover = s.cover_left
+              when 2
+                assign cover = s.cover_center
+              else
+                assign cover = s.cover_right
+            endcase
+          -%}
+          <span class="hero__book hero__book--{{ forloop.index }}">
+            {%- if cover != blank -%}
+              {{
+                cover
+                | image_url: width: 640
+                | image_tag:
+                  class: 'hero__book-image',
+                  widths: '240, 320, 480, 640',
+                  sizes: '(min-width: 990px) 240px, 34vw',
+                  loading: 'eager',
+                  alt: cover.alt
+              }}
+            {%- else -%}
+              {% render 'placeholder-book-cover', design: design %}
+            {%- endif -%}
+          </span>
+        {%- endfor -%}
+
+        {%- if s.badge_number != blank -%}
+          <span
+            class="hero__badge"
+            style="--badge-bg: {{ badge_bg }}; --badge-fg: {{ badge_fg }};"
+          >
+            <span class="hero__badge-number">{{ s.badge_number }}</span>
+            <span class="hero__badge-label">{{ s.badge_label }}</span>
+          </span>
+        {%- endif -%}
+
+        </{{ books_tag }}>
+
+        {%- if s.note != blank -%}
+          <p class="hero__note text-note">
+            <svg
+              class="hero__note-arrow"
+              viewBox="0 0 40 44"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path d="M34 42 C 36 24, 26 10, 6 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M13 2 5 8l7 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            {{ s.note }}
+          </p>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+  .hero {
+    padding-block: var(--space-5) var(--space-7);
+  }
+
+  .hero__container {
+    max-width: var(--page-width);
+    margin-inline: auto;
+    padding-inline: var(--page-margin);
+  }
+
+  /* Colour-bar frame: sky top, grape right, tomato bottom, sun left. */
+  .hero__frame {
+    display: grid;
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
+    align-items: center;
+    gap: var(--space-7);
+    padding: clamp(var(--space-6), 5vw, var(--space-8)) clamp(var(--space-5), 4.5vw, var(--space-8));
+    background: var(--color-paper-deep);
+    border-style: solid;
+    border-width: var(--colour-bar-thickness);
+    border-color: var(--color-sky) var(--color-grape) var(--color-tomato) var(--color-sun);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* ---------- Copy ---------- */
+
+  .hero__eyebrow {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: 0 0 var(--space-5);
+    color: var(--color-ink-muted);
+  }
+
+  .hero__eyebrow::before {
+    content: '';
+    flex: none;
+    width: 8px;
+    aspect-ratio: 1;
+    border-radius: var(--radius-full);
+    background: var(--color-tomato);
+  }
+
+  .hero__heading {
+    margin: 0;
+    color: var(--color-ink);
+  }
+
+  .hero__accent {
+    color: var(--color-grape);
+  }
+
+  .hero__text {
+    max-width: 34rem;
+    margin-top: var(--space-5);
+    color: var(--color-ink-muted);
+  }
+
+  .hero__text p {
+    margin: 0;
+  }
+
+  .hero__buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+  }
+
+  .hero__trust {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3) var(--space-6);
+    margin: var(--space-6) 0 0;
+    padding: var(--space-5) 0 0;
+    list-style: none;
+    border-top: var(--stroke-sm) solid var(--color-line);
+    color: var(--color-ink-muted);
+  }
+
+  .hero__trust-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .hero__trust-item .brand-icon {
+    flex: none;
+    color: var(--color-ink);
+  }
+
+  /* ---------- Books ---------- */
+
+  .hero__media {
+    position: relative;
+    display: grid;
+    justify-items: center;
+  }
+
+  .hero__books {
+    --book-width: clamp(140px, 15vw, 210px);
+
+    position: relative;
+    display: block;
+    width: 100%;
+    max-width: 480px;
+    aspect-ratio: 1.3;
+    color: inherit;
+    text-decoration: none;
+    border-radius: var(--radius-lg);
+  }
+
+  .hero__books:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus-ring, var(--color-grape));
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .hero__halo {
+    position: absolute;
+    left: 50%;
+    top: 46%;
+    width: 64%;
+    aspect-ratio: 1;
+    border-radius: var(--radius-full);
+    background: var(--color-sky-soft);
+    transform: translate(-50%, -50%);
+  }
+
+  .hero__book {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: var(--book-width);
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    border-radius: var(--radius-image);
+    box-shadow: var(--shadow-book);
+    transition: transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .hero__book--1 {
+    z-index: 1;
+    transform: translate(-112%, -40%) rotate(-7deg);
+  }
+
+  .hero__book--2 {
+    z-index: 3;
+    transform: translate(-46%, -60%) rotate(1deg);
+  }
+
+  .hero__book--3 {
+    z-index: 2;
+    transform: translate(18%, -36%) rotate(7deg);
+  }
+
+  .hero__books:hover .hero__book--1 {
+    transform: translate(-118%, -42%) rotate(-9deg);
+  }
+
+  .hero__books:hover .hero__book--2 {
+    transform: translate(-46%, -64%) rotate(0deg);
+  }
+
+  .hero__books:hover .hero__book--3 {
+    transform: translate(24%, -38%) rotate(9deg);
+  }
+
+  .hero__book-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Age badge: sun disc with a fine inner ring. */
+  .hero__badge {
+    position: absolute;
+    z-index: 4;
+    left: 8%;
+    bottom: -6%;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    width: clamp(84px, 8vw, 104px);
+    aspect-ratio: 1;
+    color: var(--badge-fg);
+    background: var(--badge-bg);
+    border-radius: var(--radius-full);
+    box-shadow: var(--shadow-md);
+    transform: rotate(-4deg);
+  }
+
+  .hero__badge::before {
+    content: '';
+    position: absolute;
+    inset: 7px;
+    border: var(--stroke-sm) solid currentColor;
+    border-radius: inherit;
+    opacity: 0.55;
+  }
+
+  .hero__badge-number {
+    font-family: var(--font-heading--family);
+    font-weight: 600;
+    font-size: clamp(26px, 2.6vw, 34px);
+    line-height: 1;
+  }
+
+  .hero__badge-label {
+    margin-top: 4px;
+    font-family: var(--font-body--family);
+    font-weight: 700;
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .hero__note {
+    position: relative;
+    z-index: 5;
+    justify-self: end;
+    margin: calc(var(--space-7) + var(--space-3)) 4% 0 0;
+    font-style: italic;
+    color: var(--color-ink);
+  }
+
+  .hero__note-arrow {
+    position: absolute;
+    right: 12%;
+    bottom: calc(100% + 4px);
+    width: 30px;
+    height: 34px;
+    color: var(--color-ink-muted);
+  }
+
+  /* ---------- Breakpoints ---------- */
+
+  @media screen and (max-width: 989px) {
+    .hero {
+      padding-block: var(--space-4) var(--space-6);
+    }
+
+    .hero__frame {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-5);
+      border-radius: var(--radius-lg);
+      border-width: calc(var(--colour-bar-thickness) * 0.8);
+    }
+
+    .hero__media {
+      order: -1;
+      /* Room for the badge, which hangs below the books. */
+      margin-bottom: var(--space-6);
+    }
+
+    .hero__books {
+      --book-width: clamp(110px, 30vw, 190px);
+
+      max-width: 440px;
+    }
+
+    .hero__badge {
+      bottom: -8%;
+    }
+
+    .hero__note {
+      display: none;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    /* Tighter gutters so the hero headline keeps the guideline's line breaks at 390px. */
+    .hero__container {
+      padding-inline: var(--space-3);
+    }
+
+    .hero__frame {
+      padding: var(--space-5) var(--space-4) var(--space-6);
+    }
+
+    /* Hero is 40px on mobile; scaling with the viewport below that keeps
+       "to read together" on one line down to 360px screens. */
+    .hero__heading {
+      font-size: min(var(--font-hero--size), 9.8vw);
+    }
+
+    .hero__buttons {
+      flex-direction: column;
+    }
+
+    .hero__button {
+      width: 100%;
+    }
+
+    .hero__trust {
+      flex-direction: column;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero__book {
+      transition: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Hero",
+  "tag": "section",
+  "class": "hero-section",
+  "max_blocks": 4,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Headline"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Hand-picked children’s books"
+    },
+    {
+      "type": "text",
+      "id": "heading_start",
+      "label": "Heading, before the key word",
+      "default": "Every book is an"
+    },
+    {
+      "type": "text",
+      "id": "syllable_word",
+      "label": "Key word, split into syllables",
+      "info": "Separate syllables with hyphens: ad-ven-ture. Each syllable gets a colour bar. Use one per page.",
+      "default": "ad-ven-ture"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_arc",
+      "label": "Show the dotted arc under the key word",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "heading_end",
+      "label": "Heading, after the key word",
+      "default": "to read"
+    },
+    {
+      "type": "text",
+      "id": "heading_accent",
+      "label": "Heartfelt word, in italics",
+      "default": "together"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text",
+      "default": "<p>Picture books, early readers and books for learning letters. For children ages 3 to 8, and for the grown-ups who read with them.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Buttons"
+    },
+    {
+      "type": "text",
+      "id": "primary_label",
+      "label": "Primary button label",
+      "default": "Shop the program"
+    },
+    {
+      "type": "url",
+      "id": "primary_url",
+      "label": "Primary button link",
+      "default": "/collections/all"
+    },
+    {
+      "type": "text",
+      "id": "secondary_label",
+      "label": "Secondary button label",
+      "default": "Get Lesson One free"
+    },
+    {
+      "type": "url",
+      "id": "secondary_url",
+      "label": "Secondary button link"
+    },
+    {
+      "type": "header",
+      "content": "Books"
+    },
+    {
+      "type": "paragraph",
+      "content": "Upload cover images in a 3:4 ratio. Empty slots show the illustrated stand-in covers."
+    },
+    {
+      "type": "image_picker",
+      "id": "cover_left",
+      "label": "Left cover"
+    },
+    {
+      "type": "image_picker",
+      "id": "cover_center",
+      "label": "Centre cover"
+    },
+    {
+      "type": "image_picker",
+      "id": "cover_right",
+      "label": "Right cover"
+    },
+    {
+      "type": "url",
+      "id": "media_link",
+      "label": "Books link"
+    },
+    {
+      "type": "text",
+      "id": "media_link_label",
+      "label": "Books link label",
+      "info": "Read by screen readers.",
+      "default": "Shop the books"
+    },
+    {
+      "type": "header",
+      "content": "Age badge"
+    },
+    {
+      "type": "text",
+      "id": "badge_number",
+      "label": "Ages",
+      "default": "3–8"
+    },
+    {
+      "type": "text",
+      "id": "badge_label",
+      "label": "Label",
+      "default": "Years"
+    },
+    {
+      "type": "select",
+      "id": "badge_color",
+      "label": "Colour",
+      "options": [
+        { "value": "sun", "label": "Sun" },
+        { "value": "sky", "label": "Sky (ages 3–5)" },
+        { "value": "leaf", "label": "Leaf (ages 6–8)" },
+        { "value": "grape", "label": "Grape (ages 9–12)" }
+      ],
+      "default": "sun"
+    },
+    {
+      "type": "header",
+      "content": "Note"
+    },
+    {
+      "type": "text",
+      "id": "note",
+      "label": "Handwritten note",
+      "info": "Shown on desktop, under the books.",
+      "default": "new books every week"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "trust",
+      "name": "Trust point",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "truck", "label": "Shipping" },
+            { "value": "gift", "label": "Gift" },
+            { "value": "returns", "label": "Returns" },
+            { "value": "book", "label": "Book" },
+            { "value": "heart", "label": "Heart" },
+            { "value": "star", "label": "Star" }
+          ],
+          "default": "truck"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "Nationwide shipping"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero",
+      "blocks": [
+        { "type": "trust", "settings": { "icon": "truck", "text": "Nationwide shipping" } },
+        { "type": "trust", "settings": { "icon": "gift", "text": "Ready to gift" } },
+        { "type": "trust", "settings": { "icon": "returns", "text": "Hassle-free returns" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

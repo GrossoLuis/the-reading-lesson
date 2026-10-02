@@ -1,0 +1,64 @@
+{
+  "sections": {
+    "story": {
+      "type": "our-story",
+      "blocks": {
+        "chapter_problem": {
+          "type": "chapter",
+          "settings": {
+            "label": "Early 1990s",
+            "title": "",
+            "text": "<p>In the early 1990s, two parents had a problem thousands of families know well: they had a curious child, and no reading program they actually liked. The popular options were cluttered, rigid, or ignored the messy reality that English isn't perfectly phonetic.</p>",
+            "stat": "1990s",
+            "caption": "Two parents, one curious four-year-old"
+          }
+        },
+        "chapter_kitchen": {
+          "type": "chapter",
+          "settings": {
+            "label": "The kitchen table",
+            "title": "",
+            "text": "<p>So they wrote their own, at the kitchen table, one lesson at a time. Dad brought his pediatric expertise, where he specialized in learning and attention challenges in young children. Mom brought an engineer's insistence that every page earn its place.</p>",
+            "stat": "1 lesson",
+            "caption": "at a time, at the kitchen table"
+          }
+        },
+        "chapter_families": {
+          "type": "chapter",
+          "settings": {
+            "label": "Family to family",
+            "title": "",
+            "text": "<p>The result was tested first on us, their kids, and then with patients from the practice, including many children with attention and developmental differences. It worked, so they printed it. The program grew the way small things do, one family telling another. Homeschooling families found it first and passed it around their co-ops. Then came classroom teachers, tutors, speech therapists, grandparents, and parents who had simply run out of other things to try.</p>",
+            "stat": "Word of mouth",
+            "caption": "homeschool co-ops, classrooms, therapists"
+          }
+        },
+        "chapter_today": {
+          "type": "chapter",
+          "settings": {
+            "label": "Thirty years later",
+            "title": "",
+            "text": "<p>Thirty years later, The Reading Lesson has taught over 200,000 children to read — and the child it was written for runs the company. We're still a small family business. We still answer our own email. And we still believe a calm page and fifteen patient minutes a day beat every app ever made.</p>",
+            "stat": "200,000+",
+            "count_to": 200000,
+            "caption": "children taught to read"
+          }
+        }
+      },
+      "block_order": ["chapter_problem", "chapter_kitchen", "chapter_families", "chapter_today"],
+      "settings": {
+        "eyebrow": "Our story",
+        "headline": "A pediatrician, an engineer, and a four-year-old who wanted to",
+        "headline_accent": "read",
+        "intro": "",
+        "quote": "A calm page and fifteen patient minutes a day beat every app ever made.",
+        "quote_accent": "calm",
+        "quote_caption": "what we still believe",
+        "image_caption": "",
+        "button_label": "Shop the program",
+        "button_url": "/collections/all"
+      }
+    }
+  },
+  "order": ["story"]
+}

@@ -1,0 +1,85 @@
+{%- doc -%}
+  Illustrated stand-in book covers from the homepage preview, drawn in SVG with the
+  brand palette. Used wherever a cover image hasn't been uploaded yet, so a section
+  looks right before the real product photos arrive.
+
+  @param {string} design - 'sunshine', 'moon' or 'tree'.
+
+  @example
+  {% render 'placeholder-book-cover', design: 'moon' %}
+{%- enddoc -%}
+
+<svg
+  class="placeholder-book-cover"
+  viewBox="0 0 300 400"
+  role="img"
+  aria-label="Placeholder book cover"
+  preserveAspectRatio="xMidYMid slice"
+>
+  {%- case design -%}
+    {%- when 'sunshine' -%}
+      <rect width="300" height="400" fill="var(--color-grape)"/>
+      <g fill="var(--color-sun)" transform="translate(200 215)">
+        <circle r="52"/>
+        {%- for angle in (0..7) -%}
+          <rect x="-7" y="-96" width="14" height="30" rx="7" transform="rotate({{ angle | times: 45 }})"/>
+        {%- endfor -%}
+      </g>
+      <path d="M0 300 C 70 255, 170 250, 300 290 V400 H0 Z" fill="var(--color-leaf)"/>
+      <text x="34" y="78" class="placeholder-book-cover__title" fill="#FFFFFF">
+        <tspan x="34">Sunday</tspan>
+        <tspan x="34" dy="38">Sunshine</tspan>
+      </text>
+    {%- when 'tree' -%}
+      <rect width="300" height="400" fill="var(--color-tomato)"/>
+      <circle cx="225" cy="150" r="34" fill="#FFFFFF"/>
+      <path d="M0 260 C 80 230, 130 330, 300 300 V400 H0 Z" fill="var(--color-sun)"/>
+      <rect x="64" y="200" width="10" height="70" rx="3" fill="var(--color-ink)"/>
+      <circle cx="69" cy="190" r="34" fill="var(--color-leaf)"/>
+      <text x="34" y="78" class="placeholder-book-cover__title" fill="#FFFFFF">
+        <tspan x="34">A Tree</tspan>
+        <tspan x="34" dy="38">for Olga</tspan>
+      </text>
+    {%- else -%}
+      <rect width="300" height="400" fill="var(--color-sky)"/>
+      <path d="M232 190 a72 72 0 1 1 -96 -82 a58 58 0 0 0 96 82 Z" fill="var(--color-sun)"/>
+      <g fill="#FFFFFF">
+        <circle cx="62" cy="232" r="6"/>
+        <circle cx="104" cy="278" r="4"/>
+        <circle cx="262" cy="300" r="5"/>
+        <circle cx="160" cy="194" r="3.5"/>
+      </g>
+      <path d="M0 312 C 70 296, 210 296, 300 318 V400 H0 Z" fill="var(--color-grape)"/>
+      <text x="34" y="66" class="placeholder-book-cover__title" fill="var(--color-ink)">
+        <tspan x="34">The Moon</tspan>
+        <tspan x="34" dy="36">Who</tspan>
+        <tspan x="34" dy="36">Wouldn’t</tspan>
+        <tspan x="34" dy="36">Sleep</tspan>
+      </text>
+      <text x="34" y="366" class="placeholder-book-cover__author" fill="var(--color-ink)">S. ALDEN</text>
+  {%- endcase -%}
+  <rect width="12" height="400" fill="#000000" opacity="0.12"/>
+  <rect x="12" width="2" height="400" fill="#FFFFFF" opacity="0.18"/>
+</svg>
+
+{% stylesheet %}
+  .placeholder-book-cover {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .placeholder-book-cover__title {
+    font-family: var(--font-heading--family);
+    font-weight: 600;
+    font-size: 34px;
+    letter-spacing: -0.01em;
+  }
+
+  .placeholder-book-cover__author {
+    font-family: var(--font-body--family);
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.14em;
+  }
+{% endstylesheet %}
