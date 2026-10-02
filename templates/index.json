@@ -164,11 +164,91 @@
         "link_url": "",
         "surface": "paper"
       }
+    },
+    "carousel_cta_iJt7VN": {
+      "type": "carousel-cta",
+      "blocks": {
+        "slide_aeJg6g": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/reader-1.jpg",
+            "tag": "Reading",
+            "color": "sky",
+            "caption": "Her first word, sounded out loud",
+            "link": ""
+          }
+        },
+        "slide_6dBTVG": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/reader-2.jpg",
+            "tag": "Writing",
+            "color": "sun",
+            "caption": "Tracing letters, one curve at a time",
+            "link": ""
+          }
+        },
+        "slide_jiRBQq": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/reader-3.jpg",
+            "tag": "Reading",
+            "color": "grape",
+            "caption": "Bedtime stories, read together",
+            "link": ""
+          }
+        },
+        "slide_fVnDCe": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/reader-5.jpg",
+            "tag": "Math",
+            "color": "leaf",
+            "caption": "Counting the ducks on every page",
+            "link": ""
+          }
+        },
+        "slide_xMWeN4": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/492224038_1355999062650410_2217300621250377203_n.jpg",
+            "tag": "Reading",
+            "color": "sky",
+            "caption": "The book he asks for every night",
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "slide_aeJg6g",
+        "slide_6dBTVG",
+        "slide_jiRBQq",
+        "slide_fVnDCe",
+        "slide_xMWeN4"
+      ],
+      "name": "Carousel CTA",
+      "settings": {
+        "eyebrow": "Reading together",
+        "heading": "Little readers, <em>big</em> discoveries",
+        "text": "<p>Real families, real progress. Children sounding out their first words, tracing letters and finding the joy of a story they can read on their own.</p>",
+        "primary_label": "Start reading together",
+        "primary_url": "shopify://collections/all",
+        "secondary_label": "",
+        "secondary_url": "",
+        "image_ratio": "portrait",
+        "slide_size": "medium",
+        "stagger": true,
+        "autoplay": false,
+        "autoplay_speed": 5,
+        "carousel_label": "Children reading with The Reading Lesson",
+        "surface": "paper"
+      }
     }
   },
   "order": [
     "main",
     "hero_k6yc4U",
-    "testimonials_GA6aE9"
+    "testimonials_GA6aE9",
+    "carousel_cta_iJt7VN"
   ]
 }
