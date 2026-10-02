@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "story": {
@@ -45,7 +54,12 @@
           }
         }
       },
-      "block_order": ["chapter_problem", "chapter_kitchen", "chapter_families", "chapter_today"],
+      "block_order": [
+        "chapter_problem",
+        "chapter_kitchen",
+        "chapter_families",
+        "chapter_today"
+      ],
       "settings": {
         "eyebrow": "Our story",
         "headline": "A pediatrician, an engineer, and a four-year-old who wanted to",
@@ -54,11 +68,14 @@
         "quote": "A calm page and fifteen patient minutes a day beat every app ever made.",
         "quote_accent": "calm",
         "quote_caption": "what we still believe",
-        "image_caption": "",
+        "image": "shopify://shop_images/family.jpg",
+        "image_caption": "Three generations of our family. The little ones are just getting started.",
         "button_label": "Shop the program",
         "button_url": "/collections/all"
       }
     }
   },
-  "order": ["story"]
+  "order": [
+    "story"
+  ]
 }
