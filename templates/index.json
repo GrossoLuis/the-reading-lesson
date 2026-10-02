@@ -11,6 +11,7 @@
   "sections": {
     "main": {
       "type": "blank",
+      "disabled": true,
       "settings": {}
     },
     "hero_k6yc4U": {
