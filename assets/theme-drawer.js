@@ -3,13 +3,18 @@ import { trapFocus, removeTrapFocus } from '@theme/focus';
 import { isClickedOutside, lockScroll, onAnimationEnd, unlockScroll } from '@theme/utilities';
 import { getScrollTop, scrollTo } from '@theme/scroll-container';
 
-/** Viewport width below which the drawer opens as a modal overlay (no squeeze). */
-const MODAL_BREAKPOINT = 990;
+/**
+ * Media query under which the drawer opens as a modal overlay (no squeeze).
+ * The Reading Lesson overlays at every width, so this always matches; the squeeze
+ * branch below is kept from Horizon but never runs. snippets/theme-drawer.liquid
+ * turns off the page-wrapper squeeze and the sidebar restore to match.
+ */
+const MODAL_MEDIA_QUERY = 'all';
 
 /**
  * A drawer that opens from the right side.
  *
- * On wide viewports (≥ 990px) the drawer squeezes page content alongside it.
+ * (Horizon default, unused here) On wide viewports the drawer squeezes page content alongside it.
  * The panel is a non-modal dialog (`show()`); we install a focus trap via
  * `trapFocus()` so Tab cycles within the drawer, mirroring the modal-mode
  * a11y contract. Focus moves to the close button on open and returns to
@@ -44,7 +49,7 @@ export class ThemeDrawer extends Component {
   #previouslyFocused = null;
 
   /** @type {MediaQueryList} */
-  #modalQuery = window.matchMedia(`(max-width: ${MODAL_BREAKPOINT - 1}px)`);
+  #modalQuery = window.matchMedia(MODAL_MEDIA_QUERY);
 
   /**
    * @returns {boolean} Whether the drawer is currently open.

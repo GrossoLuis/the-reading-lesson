@@ -117,7 +117,7 @@ Buttons are Public Sans 600 · 15px in sentence case (`--font-button--*`).
 --space-3 12px     --radius-lg   20px      --stroke-lg  10px  (colour bars)
 --space-4 16px     --radius-xl   32px
 --space-5 24px     --radius-full 9999px
---space-6 32px
+--space-6 32px     --radius-image 4px  (photos, covers, image frames)
 --space-7 48px     --shadow-sm  --shadow-md  --shadow-lg  --shadow-book
 --space-8 72px
 --space-9 112px    --focus-ring  2px grape, 3px offset

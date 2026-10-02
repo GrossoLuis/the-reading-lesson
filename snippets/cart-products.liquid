@@ -719,12 +719,27 @@
     overflow: hidden;
   }
 
+  /* The Reading Lesson: show the whole cover (no crop) on a paper-deep tile, with
+     the 4px image radius from the design system. */
+  .cart-items__media-container {
+    background: var(--color-paper-deep);
+    border-radius: var(--radius-image);
+  }
+
   .cart-items__media-image {
     aspect-ratio: inherit;
-    object-fit: cover;
+    object-fit: contain;
     object-position: center center;
     width: 100%;
     height: auto;
+    padding: 4px;
+    border-radius: var(--radius-image);
+    mix-blend-mode: multiply;
+  }
+
+  /* Quantity stepper takes the drawer's background instead of the white input fill. */
+  .cart-items .quantity-selector {
+    background-color: transparent;
   }
 
   .cart-items__empty-button {

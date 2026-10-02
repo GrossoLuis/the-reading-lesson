@@ -66,6 +66,7 @@
     data-sticky
   {% endif %}
 >
+  <div class="site-header__bar">
   <div class="site-header__inner">
     {%- if menu != blank -%}
       <button
@@ -245,6 +246,7 @@
       </ul>
     </div>
   </div>
+  </div>
 
   {%- comment -%} Drawer for small screens. {%- endcomment -%}
   <dialog
@@ -396,6 +398,12 @@
 
   .site-header.is-scrolled {
     box-shadow: var(--shadow-sm);
+  }
+
+  /* Breakpoints follow the header's own width, not the viewport: when the cart drawer
+     squeezes the page, the header lays itself out for the space it actually has. */
+  .site-header__bar {
+    container: site-header / inline-size;
   }
 
   .site-header__inner {
@@ -700,7 +708,7 @@
 
   /* ---------- Breakpoints ---------- */
 
-  @media screen and (max-width: 1279px) {
+  @container site-header (max-width: 1279px) {
     .site-header__inner {
       gap: var(--space-5);
     }
@@ -714,7 +722,7 @@
     }
   }
 
-  @media screen and (max-width: 1199px) {
+  @container site-header (max-width: 1199px) {
     .site-header__search {
       display: none;
     }
@@ -728,12 +736,10 @@
     }
   }
 
-  @media screen and (max-width: 989px) {
-    .site-header {
-      --header-row-height: 60px;
-    }
-
+  @container site-header (max-width: 989px) {
     .site-header__inner {
+      --header-row-height: 60px;
+
       gap: var(--space-2);
     }
 
@@ -916,8 +922,10 @@
         document.addEventListener('keydown', this.#onKeydown);
         document.addEventListener('click', this.#onDocumentClick);
 
+        // Horizon scrolls .page-wrapper on desktop and the document on mobile; a
+        // capture listener on document hears both.
         if (this.hasAttribute('data-sticky')) {
-          window.addEventListener('scroll', this.#onScroll, { passive: true });
+          document.addEventListener('scroll', this.#onScroll, { passive: true, capture: true });
           this.#onScroll();
         }
 
@@ -933,7 +941,7 @@
       disconnectedCallback() {
         document.removeEventListener('keydown', this.#onKeydown);
         document.removeEventListener('click', this.#onDocumentClick);
-        window.removeEventListener('scroll', this.#onScroll);
+        document.removeEventListener('scroll', this.#onScroll, { capture: true });
         this.#resizeObserver?.disconnect();
       }
 
@@ -959,7 +967,8 @@
       };
 
       #onScroll = () => {
-        this.classList.toggle('is-scrolled', window.scrollY > 4);
+        const wrapperTop = document.querySelector('.page-wrapper')?.scrollTop ?? 0;
+        this.classList.toggle('is-scrolled', window.scrollY + wrapperTop > 4);
       };
 
       #openDrawer = () => {
