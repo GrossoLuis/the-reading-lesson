@@ -47,11 +47,11 @@
       "name": "Hero",
       "settings": {
         "eyebrow": "",
-        "heading_start": "Teach your child to read, at home.",
+        "heading_start": "Teach your child to read,",
         "syllable_word": "",
         "show_arc": true,
         "heading_end": "",
-        "heading_accent": "Together.",
+        "heading_accent": "at home.",
         "text": "<p>The Reading Lesson takes your child from letters to reading chapter books with one book, a pencil, and about 20 minutes a day. No apps, no prep, no add-ons.</p>",
         "primary_label": "Shop the program",
         "primary_url": "shopify://collections/all",
@@ -65,7 +65,7 @@
         "badge_number": "3–8",
         "badge_label": "Years",
         "badge_color": "sun",
-        "note": "Over 4,000 reviews from families!"
+        "note": "Over 4,000 reviews from families all over the world!"
       }
     },
     "carousel_cta_iJt7VN": {
