@@ -75,9 +75,9 @@
           "type": "slide",
           "settings": {
             "image": "shopify://shop_images/reader-1.jpg",
-            "tag": "Reading",
+            "tag": "",
             "color": "sky",
-            "caption": "Her first word, sounded out loud",
+            "caption": "The Reading Lesson's step-by-step method builds on that win every day, so kids keep moving forward and get ahead in reading.",
             "link": ""
           }
         },
@@ -85,9 +85,9 @@
           "type": "slide",
           "settings": {
             "image": "shopify://shop_images/reader-2.jpg",
-            "tag": "Writing",
+            "tag": "",
             "color": "sun",
-            "caption": "Tracing letters, one curve at a time",
+            "caption": "Short, simple lessons that fit into any family's routine, no prep required.",
             "link": ""
           }
         },
@@ -95,9 +95,9 @@
           "type": "slide",
           "settings": {
             "image": "shopify://shop_images/reader-3.jpg",
-            "tag": "Reading",
+            "tag": "",
             "color": "grape",
-            "caption": "Bedtime stories, read together",
+            "caption": "Best for children ages 3 to 7. Start as soon as your child knows a few letters.",
             "link": ""
           }
         },
@@ -105,9 +105,9 @@
           "type": "slide",
           "settings": {
             "image": "shopify://shop_images/reader-5.jpg",
-            "tag": "Math",
+            "tag": "",
             "color": "leaf",
-            "caption": "Counting the ducks on every page",
+            "caption": "No apps, no screens. Just a book, a pencil, and time together.",
             "link": ""
           }
         },
@@ -115,9 +115,9 @@
           "type": "slide",
           "settings": {
             "image": "shopify://shop_images/492224038_1355999062650410_2217300621250377203_n.jpg",
-            "tag": "Reading",
+            "tag": "",
             "color": "sky",
-            "caption": "The book he asks for every night",
+            "caption": "After a few lessons, children ask for their Reading Lesson as they build confidence!",
             "link": ""
           }
         }
@@ -132,8 +132,8 @@
       "name": "Carousel CTA",
       "settings": {
         "eyebrow": "Reading together",
-        "heading": "Little readers, <em>big</em> discoveries",
-        "text": "<p>Real families, real progress. Children sounding out their first words, tracing letters and finding the joy of a story they can read on their own.</p>",
+        "heading": "Real readers!",
+        "text": "<p>From the very first lesson, children read a short story on their own. Twenty simple lessons later, they're reading with confidence, and often ahead of their grade.</p>",
         "primary_label": "Start reading together",
         "primary_url": "shopify://collections/all",
         "secondary_label": "",
@@ -334,7 +334,7 @@
             "product": "",
             "step_label": "Start here",
             "title": "The Reading Lesson",
-            "text": "<p>Zero to a second-grade reading level in 20 lessons. Ages 3–⁠8.</p>",
+            "text": "<p>Our best-selling and beloved reading program reviewed by over 4,000 families, and used all around the world.</p>",
             "link": "",
             "link_label": "Explore"
           }
@@ -348,7 +348,7 @@
             "product": "",
             "step_label": "Alongside it",
             "title": "Handwriting companions",
-            "text": "<p>Writing what they're reading builds the memory. Practice pages that follow the lessons.</p>",
+            "text": "<p>Writing what they're reading builds the memory. Practice pages that follow the lessons. The Writing Lesson follows along with the Reading Lesson to build skills.</p>",
             "link": "",
             "link_label": "Explore"
           }
@@ -362,7 +362,7 @@
             "product": "",
             "step_label": "Then",
             "title": "The Verbal Math Lesson",
-            "text": "<p>Math out loud. No pencil, no paper, no worksheets. Because small hands shouldn't decide how a child feels about math.</p>",
+            "text": "<p>Mental math, the old-fashioned way! Our math series teaches children to do math entirely in their heads, without pencil and paper. The method removes the frustration of writing from loving mathematics.</p>",
             "link": "",
             "link_label": "Explore"
           }
