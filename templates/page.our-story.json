@@ -17,7 +17,7 @@
           "settings": {
             "label": "Early 1990s",
             "title": "",
-            "text": "<p>In the early 1990s, two parents had a problem thousands of families know well: they had a curious child, and no reading program they actually liked. The popular options were cluttered, rigid, or ignored the messy reality that English isn't perfectly phonetic.</p>",
+            "text": "<p>In the early 90s, two parents had a problem thousands of families know well: they had a curious child, and no reading program they actually liked. The popular options were cluttered, rigid, or ignored the messy reality that English isn't perfectly phonetic.</p>",
             "stat": "1990s",
             "caption": "Two parents, one curious four-year-old"
           }
@@ -62,10 +62,10 @@
       ],
       "settings": {
         "eyebrow": "Our story",
-        "headline": "A pediatrician, an engineer, and a four-year-old who wanted to",
-        "headline_accent": "read",
+        "headline": "We began as two parents, trying to find the best way to teach their children to read",
+        "headline_accent": "at home.",
         "intro": "",
-        "quote": "A calm page and fifteen patient minutes a day beat every app ever made.",
+        "quote": "1 calm lesson and fifteen minutes a day beat every app ever made.",
         "quote_accent": "calm",
         "quote_caption": "what we still believe",
         "image": "shopify://shop_images/family.jpg",
