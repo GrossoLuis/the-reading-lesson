@@ -104,6 +104,7 @@
     },
     "series": {
       "type": "book-series",
+      "disabled": true,
       "settings": {
         "eyebrow": "A series in [count] books",
         "surface": "grape-soft"
@@ -211,7 +212,7 @@
         "eyebrow": "What parents keep saying",
         "heading": "Three decades of <em>reviews</em>",
         "featured_autoplay": true,
-        "featured_speed": 5,
+        "featured_speed": 3,
         "featured_label": "Featured reviews",
         "families_eyebrow": "From families like yours",
         "families_heading": "What parents say after Lesson 20",
