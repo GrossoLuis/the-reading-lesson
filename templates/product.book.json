@@ -36,18 +36,18 @@
             "text": "If it's not the right book, send it back."
           }
         },
-        "description": {
-          "type": "description",
-          "settings": {
-            "title": "About this book",
-            "open": true
-          }
-        },
         "book_details": {
           "type": "book_details",
           "settings": {
             "title": "Book details",
             "open": false
+          }
+        },
+        "description": {
+          "type": "description",
+          "settings": {
+            "title": "About this book",
+            "open": true
           }
         },
         "shipping": {
@@ -64,8 +64,8 @@
         "trust_shipping",
         "trust_gift",
         "trust_returns",
-        "description",
         "book_details",
+        "description",
         "shipping"
       ],
       "settings": {
