@@ -1,7 +1,7 @@
 /**
  * Book details: follows the format picked on the product section. Format, pages,
- * dimensions and ISBN are variant metafields; their rows switch to the selected variant
- * and hide when it has no value. Markup lives in sections/book-details.liquid.
+ * dimensions and ISBN are variant metafields; their lines switch to the selected variant
+ * and hide when it has no value. Markup lives in snippets/book-specs.liquid.
  */
 class BookDetails extends HTMLElement {
   #variants = [];
