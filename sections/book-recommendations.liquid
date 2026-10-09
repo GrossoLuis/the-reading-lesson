@@ -1,0 +1,266 @@
+{%- comment -%}
+  Book recommendations under the product. Add the section twice for two rows:
+
+  - More for this age: books with the same custom.age_range, read straight from the
+    catalogue (snippets/book-shelf.liquid).
+  - You may also like / Pairs well with: Shopify's product recommendations (related or
+    complementary). The page asks /recommendations/products for this same section, which
+    then renders the cards; assets/book-recommendations.js swaps them in when the row
+    nears the viewport, and removes the section when Shopify has nothing to suggest.
+
+  Cards are snippets/book-card.liquid, like the collection pages.
+{%- endcomment -%}
+
+{%- liquid
+  assign s = section.settings
+  assign age = product.metafields.custom.age_range.value
+  assign heading = s.heading
+
+  if s.source == 'age'
+    if age != blank
+      assign age_label = age | replace: '-', '–'
+      assign heading = heading | replace: '[age]', age_label
+      capture shelf
+        render 'book-shelf', source: 'age', value: age, exclude: product.id, limit: s.limit
+      endcapture
+    endif
+  elsif recommendations.performed?
+    capture shelf
+      render 'book-shelf', source: 'products', products: recommendations.products, exclude: product.id, limit: s.limit
+    endcapture
+  endif
+-%}
+
+{%- if s.source == 'age' -%}
+  {%- if shelf != blank -%}
+    <div class="book-recs surface-{{ s.surface }}">
+      <div class="book-recs__container">
+        <header class="book-recs__header">
+          {%- if s.eyebrow != blank -%}
+            <p class="book-recs__eyebrow text-eyebrow">{{ s.eyebrow }}</p>
+          {%- endif -%}
+          <h2 class="book-recs__heading h3">{{ heading }}</h2>
+        </header>
+        {{ shelf }}
+      </div>
+    </div>
+  {%- elsif request.design_mode -%}
+    <div class="book-recs book-recs--empty">
+      <p class="book-recs__editor-note text-small">
+        <strong>More for this age</strong> — shows other books with this product's age range
+        (custom.age_range). This product has no age range, or no other book shares it yet.
+        Visitors don't see this note.
+      </p>
+    </div>
+  {%- endif -%}
+{%- else -%}
+  {%- unless recommendations.performed? -%}
+    <script
+      type="module"
+      src="{{ 'book-recommendations.js' | asset_url }}"
+    ></script>
+    {%- comment -%} Scripts in the fetched cards don't run, so the card's quick add loads here. {%- endcomment -%}
+    <script
+      type="module"
+      src="{{ 'book-card.js' | asset_url }}"
+    ></script>
+  {%- endunless -%}
+
+  <book-recommendations
+    class="book-recs surface-{{ s.surface }}"
+    data-url="{{ routes.product_recommendations_url }}?section_id={{ section.id }}&product_id={{ product.id }}&limit={{ s.limit | plus: 1 }}&intent={{ s.source }}"
+    {% if recommendations.performed? %}
+      data-performed
+    {% endif %}
+  >
+    <div class="book-recs__container">
+      <header class="book-recs__header">
+        {%- if s.eyebrow != blank -%}
+          <p class="book-recs__eyebrow text-eyebrow">{{ s.eyebrow }}</p>
+        {%- endif -%}
+        <h2 class="book-recs__heading h3">{{ heading }}</h2>
+      </header>
+      <div data-recs-content>
+        {%- if recommendations.performed? -%}
+          {{ shelf }}
+        {%- else -%}
+          <ul
+            class="book-recs__skeleton"
+            aria-hidden="true"
+          >
+            {%- for i in (1..4) -%}
+              <li><span></span><span></span><span></span></li>
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+      </div>
+    </div>
+  </book-recommendations>
+{%- endif -%}
+
+{% stylesheet %}
+  .book-recs {
+    display: block;
+    padding-block: var(--space-8);
+  }
+
+  .book-recs__container {
+    max-width: var(--page-width);
+    margin-inline: auto;
+    padding-inline: var(--page-margin);
+  }
+
+  .book-recs__header {
+    margin-bottom: var(--space-6);
+  }
+
+  .book-recs__eyebrow {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: 0 0 var(--space-3);
+    color: var(--color-ink-muted);
+  }
+
+  .book-recs__eyebrow::before {
+    content: '';
+    flex: none;
+    width: 8px;
+    aspect-ratio: 1;
+    border-radius: var(--radius-full);
+    background: var(--color-sky);
+  }
+
+  .book-recs__heading {
+    margin: 0;
+    color: var(--color-ink);
+  }
+
+  /* Placeholder cards while Shopify's recommendations load. */
+  .book-recs__skeleton {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-5);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .book-recs__skeleton li {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .book-recs__skeleton span {
+    display: block;
+    height: 14px;
+    background: rgb(var(--color-ink-rgb) / 0.07);
+    border-radius: var(--radius-sm);
+  }
+
+  .book-recs__skeleton span:first-child {
+    height: auto;
+    aspect-ratio: 4 / 5;
+    border-radius: var(--radius-image);
+  }
+
+  .book-recs__skeleton span:last-child {
+    width: 50%;
+  }
+
+  .book-recs--empty {
+    padding: var(--space-5) var(--page-margin);
+  }
+
+  .book-recs__editor-note {
+    max-width: var(--page-width);
+    margin: 0 auto;
+    padding: var(--space-4) var(--space-5);
+    color: var(--color-ink-muted);
+    border: var(--stroke-md) dashed var(--color-line-strong);
+    border-radius: var(--radius-md);
+  }
+
+  @media screen and (max-width: 749px) {
+    .book-recs {
+      padding-block: var(--space-7);
+    }
+
+    .book-recs__skeleton {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .book-recs__skeleton li:nth-child(n + 3) {
+      display: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Book recommendations",
+  "tag": "section",
+  "class": "book-recs-section",
+  "enabled_on": {
+    "templates": ["product"]
+  },
+  "settings": [
+    {
+      "type": "select",
+      "id": "source",
+      "label": "Books",
+      "options": [
+        { "value": "age", "label": "Same age range" },
+        { "value": "related", "label": "Shopify recommendations: related" },
+        { "value": "complementary", "label": "Shopify recommendations: complementary" }
+      ],
+      "default": "age",
+      "info": "Complementary books are picked in the Search & Discovery app."
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "info": "[age] is replaced with the age range, e.g. 3–5.",
+      "default": "More for ages [age]"
+    },
+    {
+      "type": "range",
+      "id": "limit",
+      "label": "Books to show",
+      "min": 2,
+      "max": 8,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "select",
+      "id": "surface",
+      "label": "Background",
+      "options": [
+        { "value": "paper", "label": "Paper" },
+        { "value": "paper-deep", "label": "Paper deep" }
+      ],
+      "default": "paper"
+    }
+  ],
+  "presets": [
+    {
+      "name": "More for this age"
+    },
+    {
+      "name": "You may also like",
+      "settings": {
+        "source": "related",
+        "heading": "You may also like"
+      }
+    }
+  ]
+}
+{% endschema %}

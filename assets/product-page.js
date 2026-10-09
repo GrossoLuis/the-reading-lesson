@@ -18,6 +18,10 @@ import { getScrollContainer } from '@theme/scroll-container';
  *
  * Add to cart goes through @theme/cart-add, which dispatches CartLinesUpdateEvent
  * like Horizon's product form, so the cart drawer and the header count react to it.
+ *
+ * The sticky bar on phones ([data-sticky-cart]) repeats the price and the button, and
+ * submits the same form. A variant change is announced as `pdp:variant-change` on
+ * document so other sections (book details) can follow it.
  */
 class ProductPage extends HTMLElement {
   #desktop = window.matchMedia('(min-width: 990px)');
@@ -28,6 +32,7 @@ class ProductPage extends HTMLElement {
   #variants = [];
   #addedTimer = 0;
   #zoomIndex = 0;
+  #stickyObserver = null;
 
   connectedCallback() {
     this.gallery = this.querySelector('[data-gallery]');
@@ -70,6 +75,19 @@ class ProductPage extends HTMLElement {
       button.addEventListener('click', () => this.#stepQuantity(Number(button.dataset.qty)))
     );
 
+    // Sticky add to cart: shown once the main button has scrolled above the viewport.
+    this.stickyCart = this.querySelector('[data-sticky-cart]');
+    const mainButton = this.form?.querySelector('[data-add-button]');
+    if (this.stickyCart && mainButton) {
+      this.#stickyObserver = new IntersectionObserver(([entry]) => {
+        const show = !entry.isIntersecting && entry.boundingClientRect.top < 0;
+        this.stickyCart.classList.toggle('is-visible', show);
+        this.stickyCart.toggleAttribute('inert', !show);
+        this.stickyCart.setAttribute('aria-hidden', String(!show));
+      });
+      this.#stickyObserver.observe(mainButton);
+    }
+
     // Zoom
     this.zoom = this.querySelector('[data-zoom]');
     this.querySelectorAll('[data-zoom-open]').forEach((trigger) =>
@@ -95,6 +113,7 @@ class ProductPage extends HTMLElement {
     window.removeEventListener('resize', this.#onResize);
     this.#desktop.removeEventListener('change', this.#onResize);
     this.#resizeObserver?.disconnect();
+    this.#stickyObserver?.disconnect();
     cancelAnimationFrame(this.#frame);
   }
 
@@ -261,6 +280,11 @@ class ProductPage extends HTMLElement {
 
     this.#updateAvailability(selected);
     this.#renderVariant(variant);
+    document.dispatchEvent(
+      new CustomEvent('pdp:variant-change', {
+        detail: { productId: Number(this.dataset.productId), variantId: variant?.id ?? null },
+      })
+    );
 
     if (variant) {
       const url = new URL(window.location.href);
@@ -294,33 +318,31 @@ class ProductPage extends HTMLElement {
 
   #renderVariant(variant) {
     const idInput = this.querySelector('[data-variant-id]');
-    const button = this.querySelector('[data-add-button]');
-    const buttonText = this.querySelector('[data-add-text]');
-
     if (idInput) idInput.value = variant ? String(variant.id) : '';
 
-    if (button && buttonText) {
-      const available = Boolean(variant?.available);
+    const available = Boolean(variant?.available);
+    const label = !variant ? this.dataset.textUnavailable : available ? this.dataset.textAdd : this.dataset.textSoldOut;
+    this.querySelectorAll('[data-add-button]').forEach((button) => {
       button.disabled = !available;
-      buttonText.textContent = !variant
-        ? this.dataset.textUnavailable
-        : available
-          ? this.dataset.textAdd
-          : this.dataset.textSoldOut;
-    }
+      const text = button.querySelector('[data-add-text]');
+      if (text) text.textContent = label;
+    });
+
+    const stickyVariant = this.querySelector('[data-sticky-variant]');
+    if (stickyVariant && variant) stickyVariant.textContent = `· ${variant.title}`;
 
     if (!variant) {
       this.#renderStock('out', this.dataset.textUnavailable);
       return;
     }
 
-    const current = this.querySelector('[data-price-current]');
+    const prices = this.querySelectorAll('[data-price-current]');
     const compare = this.querySelector('[data-price-compare]');
     const badge = this.querySelector('[data-price-badge]');
     const saving = this.querySelector('[data-price-saving]');
     const onSale = variant.compare_at_price > variant.price;
 
-    if (current) current.innerHTML = this.#money(variant.price);
+    prices.forEach((price) => (price.innerHTML = this.#money(variant.price)));
     if (compare) {
       compare.hidden = !onSale;
       if (onSale) compare.innerHTML = this.#money(variant.compare_at_price);
@@ -359,19 +381,19 @@ class ProductPage extends HTMLElement {
   #onSubmit = async (event) => {
     event.preventDefault();
 
-    const button = this.querySelector('[data-add-button]');
-    const buttonText = this.querySelector('[data-add-text]');
+    const buttons = [...this.querySelectorAll('[data-add-button]')];
     const error = this.querySelector('[data-error]');
+    const button = buttons[0];
     if (!this.form || !button || button.disabled || button.classList.contains('is-loading')) return;
 
     const formData = new FormData(this.form);
     if (!formData.get('id')) return;
 
     if (error) error.hidden = true;
-    button.classList.add('is-loading');
+    buttons.forEach((b) => b.classList.add('is-loading'));
 
     const result = await addToCart({ source: this, formData, productId: this.dataset.productId });
-    button.classList.remove('is-loading');
+    buttons.forEach((b) => b.classList.remove('is-loading'));
 
     if (!result.ok) {
       if (error) {
@@ -381,16 +403,16 @@ class ProductPage extends HTMLElement {
       return;
     }
 
-    // Brief "Added" confirmation on the button.
-    if (buttonText) {
-      button.classList.add('is-added');
-      buttonText.textContent = Theme.translations?.added || 'Added';
-      clearTimeout(this.#addedTimer);
-      this.#addedTimer = setTimeout(() => {
-        button.classList.remove('is-added');
-        buttonText.textContent = this.dataset.textAdd;
-      }, 2000);
-    }
+    // Brief "Added" confirmation on the buttons.
+    const setAdded = (added) =>
+      buttons.forEach((b) => {
+        b.classList.toggle('is-added', added);
+        const text = b.querySelector('[data-add-text]');
+        if (text) text.textContent = added ? Theme.translations?.added || 'Added' : this.dataset.textAdd;
+      });
+    setAdded(true);
+    clearTimeout(this.#addedTimer);
+    this.#addedTimer = setTimeout(() => setAdded(false), 2000);
   };
 
   /* ---------------------------------------------------------------------------

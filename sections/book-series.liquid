@@ -1,0 +1,148 @@
+{%- comment -%}
+  Series on the product page, from the product's custom.series metaobject: its name and
+  description, then every book in reading order, numbered, with the current one marked.
+  The buy box links here ("Book 2 of 4 in …" → #book-series).
+
+  Hidden when the product isn't part of a series; in the theme editor it shows a note.
+{%- endcomment -%}
+
+{%- liquid
+  assign s = section.settings
+  assign series = product.metafields.custom.series.value
+  assign books = series.books.value
+-%}
+
+{%- if series != blank and books.size > 0 -%}
+  <div
+    id="book-series"
+    class="book-series surface-{{ s.surface }}"
+  >
+    <div class="book-series__container">
+      <header class="book-series__header">
+        {%- if s.eyebrow != blank -%}
+          <p class="book-series__eyebrow text-eyebrow">
+            {{- s.eyebrow | replace: '[count]', books.size -}}
+          </p>
+        {%- endif -%}
+        <h2 class="book-series__heading h3">{{ series.name.value }}</h2>
+        {%- if series.description.value != blank -%}
+          <p class="book-series__text">{{ series.description.value }}</p>
+        {%- endif -%}
+      </header>
+
+      {%- render 'book-shelf', source: 'products', products: books, numbered: true, current: product.id, limit: 12 -%}
+    </div>
+  </div>
+{%- elsif request.design_mode -%}
+  <div class="book-series book-series--empty">
+    <p class="book-series__editor-note text-small">
+      <strong>Series</strong> — pick a series in this product's <em>Series</em> metafield (custom.series)
+      to show the books in order. Visitors don't see this note.
+    </p>
+  </div>
+{%- endif -%}
+
+{% stylesheet %}
+  .book-series {
+    padding-block: var(--space-8);
+    scroll-margin-top: calc(var(--sticky-header-offset, 0px) + var(--space-5));
+  }
+
+  .book-series__container {
+    max-width: var(--page-width);
+    margin-inline: auto;
+    padding-inline: var(--page-margin);
+  }
+
+  .book-series__header {
+    max-width: 44rem;
+    margin-bottom: var(--space-6);
+  }
+
+  .book-series__eyebrow {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: 0 0 var(--space-3);
+    color: var(--color-ink-muted);
+  }
+
+  .book-series__eyebrow::before {
+    content: '';
+    flex: none;
+    width: 8px;
+    aspect-ratio: 1;
+    border-radius: var(--radius-full);
+    background: var(--color-grape);
+  }
+
+  .book-series__heading {
+    margin: 0;
+    color: var(--color-ink);
+  }
+
+  .book-series__text {
+    margin: var(--space-3) 0 0;
+    color: var(--color-ink-muted);
+  }
+
+  .book-series--empty {
+    padding: var(--space-5) var(--page-margin);
+  }
+
+  .book-series__editor-note {
+    max-width: var(--page-width);
+    margin: 0 auto;
+    padding: var(--space-4) var(--space-5);
+    color: var(--color-ink-muted);
+    border: var(--stroke-md) dashed var(--color-line-strong);
+    border-radius: var(--radius-md);
+  }
+
+  @media screen and (max-width: 749px) {
+    .book-series {
+      padding-block: var(--space-7);
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Series",
+  "tag": "section",
+  "class": "book-series-section",
+  "enabled_on": {
+    "templates": ["product"]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Shows the series picked in the product's Series metafield (custom.series), books in reading order."
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "info": "[count] is replaced with the number of books.",
+      "default": "A series in [count] books"
+    },
+    {
+      "type": "select",
+      "id": "surface",
+      "label": "Background",
+      "options": [
+        { "value": "paper", "label": "Paper" },
+        { "value": "paper-deep", "label": "Paper deep" },
+        { "value": "grape-soft", "label": "Grape soft" },
+        { "value": "sky-soft", "label": "Sky soft" }
+      ],
+      "default": "grape-soft"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Series"
+    }
+  ]
+}
+{% endschema %}

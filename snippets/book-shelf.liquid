@@ -1,0 +1,154 @@
+{%- doc -%}
+  A row of book cards (snippets/book-card.liquid): four across on desktop, a swipeable
+  row on phones. Renders nothing when no book matches, so callers can capture it and
+  hide their heading.
+
+  Sources:
+  - author: books whose custom.author is `value` (an Author metaobject, or the same text).
+  - age: books whose custom.age_range is `value`.
+  - products: the `products` list as given (series books, recommendations).
+
+  Author and age look through the first 250 products of the catalogue: Liquid can't
+  query products by metafield.
+
+  @param {string} source - 'author', 'age' or 'products'.
+  @param {object} [value] - The author metaobject or the age range to match.
+  @param {product[]} [products] - For source 'products'.
+  @param {number} [exclude] - A product id to leave out (the current product).
+  @param {number} [limit] - Maximum books. Defaults to 4.
+  @param {boolean} [numbered] - Labels each book "Book 1", "Book 2"… (series).
+  @param {number} [current] - With `numbered`, marks this product id as the current book.
+  @param {boolean} [grid] - Wraps onto rows on every screen instead of a swipeable row.
+
+  @example
+  {% render 'book-shelf', source: 'age', value: '3-5', exclude: product.id, limit: 4 %}
+{%- enddoc -%}
+
+{%- liquid
+  assign limit = limit | default: 4
+  assign match_key = value.system.id | default: value
+  assign sizes = '(min-width: 1200px) 300px, (min-width: 990px) 23vw, (min-width: 750px) 30vw, 70vw'
+-%}
+
+{%- capture items -%}
+  {%- if source == 'products' -%}
+    {%- assign shown = 0 -%}
+    {%- for book in products -%}
+      {%- if book.id == exclude -%}{%- continue -%}{%- endif -%}
+      {%- if shown >= limit -%}{%- break -%}{%- endif -%}
+      {%- assign shown = shown | plus: 1 -%}
+      <li class="book-shelf__item{% if numbered and book.id == current %} book-shelf__item--current{% endif %}">
+        {%- if numbered -%}
+          <p class="book-shelf__label text-eyebrow">
+            Book {{ forloop.index }}
+            {%- if book.id == current -%}
+              <span class="book-shelf__here">· You're here</span>
+            {%- endif -%}
+          </p>
+        {%- endif -%}
+        {%- render 'book-card', product: book, sizes: sizes -%}
+      </li>
+    {%- endfor -%}
+  {%- elsif match_key != blank -%}
+    {%- paginate collections.all.products by 250 -%}
+      {%- assign shown = 0 -%}
+      {%- for book in collections.all.products -%}
+        {%- if book.id == exclude -%}{%- continue -%}{%- endif -%}
+        {%- liquid
+          if source == 'author'
+            assign book_author = book.metafields.custom.author.value
+            assign book_key = book_author.system.id | default: book_author
+          else
+            assign book_key = book.metafields.custom.age_range.value
+          endif
+        -%}
+        {%- if book_key != blank and book_key == match_key -%}
+          {%- assign shown = shown | plus: 1 -%}
+          <li class="book-shelf__item">
+            {%- render 'book-card', product: book, sizes: sizes -%}
+          </li>
+          {%- if shown >= limit -%}{%- break -%}{%- endif -%}
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endpaginate -%}
+  {%- endif -%}
+{%- endcapture -%}
+
+{%- if items != blank -%}
+  <ul
+    class="book-shelf{% if grid %} book-shelf--grid{% endif %}"
+    role="list"
+  >
+    {{ items }}
+  </ul>
+{%- endif -%}
+
+{% stylesheet %}
+  .book-shelf {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-6) var(--space-5);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .book-shelf__item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    min-width: 0;
+  }
+
+  .book-shelf__label {
+    display: flex;
+    gap: var(--space-2);
+    margin: 0;
+    color: var(--color-ink-muted);
+  }
+
+  .book-shelf__item--current .book-shelf__label {
+    color: var(--color-ink);
+  }
+
+  .book-shelf__here {
+    color: var(--color-tomato-deep);
+  }
+
+  .book-shelf__item--current .book-card__media {
+    box-shadow: 0 0 0 2px var(--color-ink);
+  }
+
+  @media screen and (max-width: 989px) {
+    .book-shelf {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .book-shelf:not(.book-shelf--grid) {
+      display: flex;
+      gap: var(--space-4);
+      margin-inline: calc(var(--page-margin) * -1);
+      padding: 0 var(--page-margin) var(--space-2);
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline: var(--page-margin);
+      scrollbar-width: none;
+    }
+
+    .book-shelf:not(.book-shelf--grid)::-webkit-scrollbar {
+      display: none;
+    }
+
+    .book-shelf:not(.book-shelf--grid) .book-shelf__item {
+      flex: 0 0 68%;
+      scroll-snap-align: start;
+    }
+
+    .book-shelf--grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-5) var(--space-4);
+    }
+  }
+{% endstylesheet %}

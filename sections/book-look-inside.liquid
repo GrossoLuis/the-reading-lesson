@@ -1,0 +1,555 @@
+{%- comment -%}
+  Look inside: sample pages from the product's custom.look_inside metafield (a list of
+  images, in reading order).
+
+  A row of spreads that scrolls sideways (drag or swipe), then a full-screen viewer:
+  arrows, keyboard, swipe on phones, a page counter and thumbnails along the bottom.
+  Behaviour lives in assets/book-look-inside.js.
+
+  Hidden when the product has no sample pages; in the theme editor it shows a note.
+{%- endcomment -%}
+
+{%- liquid
+  assign s = section.settings
+  assign pages = product.metafields.custom.look_inside.value
+  assign page_count = pages.size
+-%}
+
+{%- if page_count > 0 -%}
+  <script
+    type="module"
+    src="{{ 'book-look-inside.js' | asset_url }}"
+  ></script>
+
+  <book-look-inside class="look-inside surface-{{ s.surface }}">
+    <div class="look-inside__container">
+      <header class="look-inside__header">
+        <div>
+          {%- if s.eyebrow != blank -%}
+            <p class="look-inside__eyebrow text-eyebrow">{{ s.eyebrow }}</p>
+          {%- endif -%}
+          {%- if s.heading != blank -%}
+            <h2 class="look-inside__heading h3">{{ s.heading }}</h2>
+          {%- endif -%}
+          {%- if s.text != blank -%}
+            <p class="look-inside__text">{{ s.text }}</p>
+          {%- endif -%}
+        </div>
+        <button
+          type="button"
+          class="brand-button brand-button--secondary look-inside__open"
+          data-viewer-open
+          data-index="0"
+        >
+          {%- render 'brand-icon', name: 'expand', size: 18 -%}
+          <span>{{ s.button_label }}</span>
+        </button>
+      </header>
+
+      <ul
+        class="look-inside__track"
+        role="list"
+        data-track
+      >
+        {%- for page in pages -%}
+          {%- liquid
+            assign image = page.preview_image | default: page
+            assign alt = page.alt | default: image.alt
+            if alt == blank
+              assign alt = product.title | append: ', sample page ' | append: forloop.index
+            endif
+          -%}
+          <li class="look-inside__item">
+            <button
+              type="button"
+              class="look-inside__page"
+              data-viewer-open
+              data-index="{{ forloop.index0 }}"
+              aria-label="Open page {{ forloop.index }} of {{ page_count }} full screen"
+              style="--ratio: {{ image.aspect_ratio | default: 1.4 }};"
+            >
+              {{-
+                image
+                | image_url: width: 1200
+                | image_tag:
+                  class: 'look-inside__image',
+                  widths: '360, 540, 720, 960, 1200',
+                  sizes: '(min-width: 990px) 40vw, 80vw',
+                  loading: 'lazy',
+                  alt: alt
+              -}}
+            </button>
+          </li>
+        {%- endfor -%}
+      </ul>
+    </div>
+
+    <dialog
+      class="look-inside-viewer"
+      aria-label="{{ s.heading | default: 'Look inside' | escape }}: {{ product.title | escape }}"
+      data-viewer
+    >
+      <div class="look-inside-viewer__bar">
+        <p
+          class="look-inside-viewer__counter"
+          aria-live="polite"
+        >
+          Page <span data-viewer-current>1</span> of {{ page_count }}
+        </p>
+        <button
+          type="button"
+          class="look-inside-viewer__button"
+          data-viewer-close
+          aria-label="Close"
+        >
+          {% render 'brand-icon', name: 'close' %}
+        </button>
+      </div>
+
+      <ul
+        class="look-inside-viewer__slides"
+        role="list"
+        data-viewer-slides
+      >
+        {%- for page in pages -%}
+          {%- liquid
+            assign image = page.preview_image | default: page
+            assign alt = page.alt | default: image.alt
+            if alt == blank
+              assign alt = product.title | append: ', sample page ' | append: forloop.index
+            endif
+          -%}
+          <li class="look-inside-viewer__slide">
+            {{-
+              image
+              | image_url: width: 2400
+              | image_tag:
+                class: 'look-inside-viewer__image',
+                widths: '960, 1400, 1800, 2400',
+                sizes: '100vw',
+                loading: 'lazy',
+                alt: alt
+            -}}
+          </li>
+        {%- endfor -%}
+      </ul>
+
+      {%- if page_count > 1 -%}
+        <button
+          type="button"
+          class="look-inside-viewer__button look-inside-viewer__nav look-inside-viewer__nav--prev"
+          data-viewer-step="-1"
+          aria-label="Previous page"
+        >
+          {% render 'brand-icon', name: 'arrow-left' %}
+        </button>
+        <button
+          type="button"
+          class="look-inside-viewer__button look-inside-viewer__nav look-inside-viewer__nav--next"
+          data-viewer-step="1"
+          aria-label="Next page"
+        >
+          {% render 'brand-icon', name: 'arrow-right' %}
+        </button>
+
+        <ul
+          class="look-inside-viewer__thumbs"
+          role="list"
+        >
+          {%- for page in pages -%}
+            {%- assign image = page.preview_image | default: page -%}
+            <li>
+              <button
+                type="button"
+                class="look-inside-viewer__thumb"
+                data-viewer-thumb
+                data-index="{{ forloop.index0 }}"
+                aria-label="Page {{ forloop.index }}"
+              >
+                {{- image | image_url: width: 200 | image_tag: loading: 'lazy', alt: '' -}}
+              </button>
+            </li>
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+    </dialog>
+  </book-look-inside>
+{%- elsif request.design_mode -%}
+  <div class="look-inside look-inside--empty">
+    <p class="look-inside__editor-note text-small">
+      <strong>Look inside</strong> — add sample pages to this product's <em>Look inside</em>
+      metafield (custom.look_inside) to show them here. Visitors don't see this note.
+    </p>
+  </div>
+{%- endif -%}
+
+{% stylesheet %}
+  .look-inside {
+    display: block;
+    padding-block: var(--space-8);
+    overflow: hidden;
+  }
+
+  .look-inside__container {
+    max-width: var(--page-width);
+    margin-inline: auto;
+    padding-inline: var(--page-margin);
+  }
+
+  .look-inside__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-5);
+    margin-bottom: var(--space-6);
+  }
+
+  .look-inside__eyebrow {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: 0 0 var(--space-3);
+    color: var(--color-ink-muted);
+  }
+
+  .look-inside__eyebrow::before {
+    content: '';
+    flex: none;
+    width: 8px;
+    aspect-ratio: 1;
+    border-radius: var(--radius-full);
+    background: var(--color-leaf);
+  }
+
+  .look-inside__heading {
+    margin: 0;
+    color: var(--color-ink);
+  }
+
+  .look-inside__text {
+    max-width: 36rem;
+    margin: var(--space-3) 0 0;
+    color: var(--color-ink-muted);
+  }
+
+  .look-inside__open {
+    flex: none;
+  }
+
+  /* Spreads in a row that bleeds off the right edge, so there's always more to see. */
+  .look-inside__track {
+    display: flex;
+    gap: var(--space-5);
+    margin: 0 calc(var(--page-margin) * -1);
+    padding: var(--space-2) var(--page-margin) var(--space-5);
+    overflow-x: auto;
+    list-style: none;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--page-margin);
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-line-strong) transparent;
+    overscroll-behavior-x: contain;
+  }
+
+  .look-inside__item {
+    flex: none;
+    scroll-snap-align: start;
+  }
+
+  .look-inside__page {
+    display: block;
+    height: clamp(240px, 34vw, 440px);
+    aspect-ratio: var(--ratio);
+    padding: 0;
+    overflow: hidden;
+    background: var(--color-card);
+    border: 0;
+    border-radius: var(--radius-image);
+    box-shadow: var(--shadow-book, var(--shadow-md));
+    cursor: zoom-in;
+    transition: transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .look-inside__page:hover {
+    transform: translateY(-4px);
+  }
+
+  .look-inside__page:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus-ring, var(--color-grape));
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .look-inside__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .look-inside--empty {
+    padding: var(--space-5) var(--page-margin);
+  }
+
+  .look-inside__editor-note {
+    max-width: var(--page-width);
+    margin: 0 auto;
+    padding: var(--space-4) var(--space-5);
+    color: var(--color-ink-muted);
+    border: var(--stroke-md) dashed var(--color-line-strong);
+    border-radius: var(--radius-md);
+  }
+
+  /* ---------- Viewer ---------- */
+
+  .look-inside-viewer {
+    width: 100vw;
+    max-width: 100vw;
+    height: 100svh;
+    max-height: 100svh;
+    margin: 0;
+    padding: 0;
+    color: var(--color-ink);
+    background: var(--color-paper);
+    border: 0;
+  }
+
+  .look-inside-viewer[open] {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+  }
+
+  .look-inside-viewer::backdrop {
+    background: rgb(var(--color-ink-rgb) / 0.5);
+  }
+
+  .look-inside-viewer__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-4) var(--space-5);
+  }
+
+  .look-inside-viewer__counter {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .look-inside-viewer__slides {
+    display: flex;
+    margin: 0;
+    padding: 0;
+    overflow-x: auto;
+    list-style: none;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    overscroll-behavior: contain;
+  }
+
+  .look-inside-viewer__slides::-webkit-scrollbar {
+    display: none;
+  }
+
+  .look-inside-viewer__slide {
+    display: grid;
+    flex: 0 0 100%;
+    place-items: center;
+    padding: 0 clamp(var(--space-4), 8vw, 120px);
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+  }
+
+  .look-inside-viewer__image {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: var(--radius-image);
+    box-shadow: var(--shadow-book, var(--shadow-md));
+  }
+
+  .look-inside-viewer__button {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    color: var(--color-ink);
+    background: var(--color-card);
+    border: var(--stroke-sm) solid var(--color-line);
+    border-radius: var(--radius-full);
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+  }
+
+  .look-inside-viewer__button:hover {
+    border-color: var(--color-ink);
+  }
+
+  .look-inside-viewer__button[disabled] {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  .look-inside-viewer :is(button):focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus-ring, var(--color-grape));
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .look-inside-viewer__nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .look-inside-viewer__nav--prev {
+    left: var(--space-5);
+  }
+
+  .look-inside-viewer__nav--next {
+    right: var(--space-5);
+  }
+
+  .look-inside-viewer__thumbs {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-2);
+    margin: 0;
+    padding: var(--space-4) var(--space-5) calc(var(--space-4) + env(safe-area-inset-bottom));
+    overflow-x: auto;
+    list-style: none;
+    scrollbar-width: none;
+  }
+
+  .look-inside-viewer__thumb {
+    display: block;
+    width: 64px;
+    height: 44px;
+    padding: 0;
+    overflow: hidden;
+    background: var(--color-card);
+    border: var(--stroke-sm) solid var(--color-line);
+    border-radius: var(--radius-image);
+    opacity: 0.55;
+    cursor: pointer;
+    transition: opacity 200ms ease, border-color 200ms ease;
+  }
+
+  .look-inside-viewer__thumb img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .look-inside-viewer__thumb:hover,
+  .look-inside-viewer__thumb[aria-current='true'] {
+    opacity: 1;
+  }
+
+  .look-inside-viewer__thumb[aria-current='true'] {
+    border-color: var(--color-ink);
+    box-shadow: 0 0 0 1px var(--color-ink);
+  }
+
+  @media screen and (max-width: 749px) {
+    .look-inside {
+      padding-block: var(--space-7);
+    }
+
+    .look-inside__open {
+      width: 100%;
+    }
+
+    .look-inside__page {
+      height: 56vw;
+    }
+
+    .look-inside-viewer__slide {
+      padding: 0 var(--space-3);
+    }
+
+    .look-inside-viewer__nav {
+      display: none;
+    }
+
+    .look-inside-viewer__thumbs {
+      justify-content: flex-start;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .look-inside__page,
+    .look-inside-viewer__thumb {
+      transition: none;
+    }
+
+    .look-inside__page:hover {
+      transform: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Look inside",
+  "tag": "section",
+  "class": "look-inside-section",
+  "enabled_on": {
+    "templates": ["product"]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Shows the images in the product's Look inside metafield (custom.look_inside)."
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Sample pages"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Look inside"
+    },
+    {
+      "type": "text",
+      "id": "text",
+      "label": "Text",
+      "default": "Turn a few pages before it arrives at your door."
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Open the book"
+    },
+    {
+      "type": "select",
+      "id": "surface",
+      "label": "Background",
+      "options": [
+        { "value": "paper", "label": "Paper" },
+        { "value": "paper-deep", "label": "Paper deep" },
+        { "value": "sky-soft", "label": "Sky soft" },
+        { "value": "leaf-soft", "label": "Leaf soft" }
+      ],
+      "default": "paper"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Look inside"
+    }
+  ]
+}
+{% endschema %}

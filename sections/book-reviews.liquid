@@ -1,0 +1,475 @@
+{%- comment -%}
+  Reviews on the product page. Placeholder until the reviews app is in: the summary
+  (average, stars, count) and the review cards are written in the theme editor (blocks),
+  like the homepage testimonials.
+
+  When the app arrives (e.g. Judge.me), its widget goes in the "App" block: the summary and
+  review blocks can then be removed, and the styles under "App widget" dress it in the
+  brand's type and colours.
+{%- endcomment -%}
+
+{%- liquid
+  assign s = section.settings
+  assign reviews = section.blocks | where: 'type', 'review'
+  assign apps = section.blocks | where: 'type', '@app'
+-%}
+
+<div
+  id="reviews"
+  class="book-reviews surface-{{ s.surface }}"
+>
+  <div class="book-reviews__container">
+    <header class="book-reviews__header">
+      {%- if s.eyebrow != blank -%}
+        <p class="book-reviews__eyebrow text-eyebrow">{{ s.eyebrow }}</p>
+      {%- endif -%}
+      {%- if s.heading != blank -%}
+        <h2 class="book-reviews__heading h3">{{ s.heading }}</h2>
+      {%- endif -%}
+    </header>
+
+    {%- if reviews.size > 0 -%}
+      <div class="book-reviews__layout">
+        <aside class="book-reviews__summary">
+          <p class="book-reviews__average">{{ s.average | round: 1 }}</p>
+          <span
+            class="book-reviews__stars book-reviews__stars--large"
+            style="--rating: {{ s.average | times: 20 }}%;"
+            aria-hidden="true"
+          ></span>
+          <p class="book-reviews__count text-small">
+            <span class="visually-hidden">Rated {{ s.average | round: 1 }} out of 5,</span>
+            Based on {{ s.count }} reviews
+          </p>
+          {%- if s.button_label != blank -%}
+            {%- render 'brand-button', label: s.button_label, url: s.button_url, style: 'secondary', class: 'book-reviews__write' -%}
+          {%- endif -%}
+        </aside>
+
+        <ul
+          class="book-reviews__list"
+          role="list"
+        >
+          {%- for block in reviews -%}
+            {%- assign b = block.settings -%}
+            <li
+              class="book-reviews__card"
+              {{ block.shopify_attributes }}
+            >
+              <div class="book-reviews__card-top">
+                <span
+                  class="book-reviews__stars"
+                  style="--rating: {{ b.rating | times: 20 }}%;"
+                  aria-hidden="true"
+                ></span>
+                <span class="visually-hidden">Rated {{ b.rating }} out of 5</span>
+                {%- if b.date != blank -%}
+                  <span class="book-reviews__date text-small">{{ b.date }}</span>
+                {%- endif -%}
+              </div>
+              {%- if b.title != blank -%}
+                <h3 class="book-reviews__title h5">{{ b.title }}</h3>
+              {%- endif -%}
+              {%- if b.text != blank -%}
+                <div class="book-reviews__text">{{ b.text }}</div>
+              {%- endif -%}
+              <p class="book-reviews__author text-small">
+                <span
+                  class="book-reviews__avatar"
+                  aria-hidden="true"
+                  >{{ b.name | slice: 0 }}</span
+                >
+                <span>
+                  <strong>{{ b.name }}</strong>
+                  {%- if b.detail != blank -%}
+                    <span class="book-reviews__detail">{{ b.detail }}</span>
+                  {%- endif -%}
+                </span>
+                {%- if b.verified -%}
+                  <span class="book-reviews__verified">Verified buyer</span>
+                {%- endif -%}
+              </p>
+            </li>
+          {%- endfor -%}
+        </ul>
+      </div>
+    {%- endif -%}
+
+    {%- for block in apps -%}
+      <div class="book-reviews__app">
+        {%- render block -%}
+      </div>
+    {%- endfor -%}
+  </div>
+</div>
+
+{% stylesheet %}
+  .book-reviews {
+    padding-block: var(--space-8);
+    scroll-margin-top: calc(var(--sticky-header-offset, 0px) + var(--space-5));
+  }
+
+  .book-reviews__container {
+    max-width: var(--page-width);
+    margin-inline: auto;
+    padding-inline: var(--page-margin);
+  }
+
+  .book-reviews__header {
+    margin-bottom: var(--space-6);
+  }
+
+  .book-reviews__eyebrow {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: 0 0 var(--space-3);
+    color: var(--color-ink-muted);
+  }
+
+  .book-reviews__eyebrow::before {
+    content: '';
+    flex: none;
+    width: 8px;
+    aspect-ratio: 1;
+    border-radius: var(--radius-full);
+    background: var(--color-sun);
+  }
+
+  .book-reviews__heading {
+    margin: 0;
+    color: var(--color-ink);
+  }
+
+  .book-reviews__layout {
+    display: grid;
+    grid-template-columns: 17rem minmax(0, 1fr);
+    gap: var(--space-6);
+    align-items: start;
+  }
+
+  /* ---------- Summary ---------- */
+
+  .book-reviews__summary {
+    position: sticky;
+    top: calc(var(--sticky-header-offset, 0px) + var(--space-5));
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+    padding: var(--space-6);
+    background: var(--color-card);
+    border: var(--stroke-sm) solid var(--color-line);
+    border-radius: var(--radius-lg);
+  }
+
+  .book-reviews__average {
+    margin: 0;
+    font-family: var(--font-heading--family);
+    font-size: 56px;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--color-ink);
+  }
+
+  .book-reviews__count {
+    margin: 0 0 var(--space-3);
+    color: var(--color-ink-muted);
+  }
+
+  .book-reviews__write {
+    width: 100%;
+  }
+
+  .book-reviews__stars {
+    --star: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m12 2.5 2.9 6 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.2 1.3-6.6L2.5 9.3l6.6-.8z'/%3E%3C/svg%3E");
+    --star-size: 16px;
+
+    display: inline-block;
+    width: calc(var(--star-size) * 5);
+    height: var(--star-size);
+    background: linear-gradient(90deg, var(--color-sun) var(--rating), var(--color-line) var(--rating));
+    -webkit-mask: var(--star) left / var(--star-size) var(--star-size) repeat-x;
+    mask: var(--star) left / var(--star-size) var(--star-size) repeat-x;
+  }
+
+  .book-reviews__stars--large {
+    --star-size: 22px;
+  }
+
+  /* ---------- Cards ---------- */
+
+  .book-reviews__list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-5);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .book-reviews__card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-5);
+    background: var(--color-card);
+    border: var(--stroke-sm) solid var(--color-line);
+    border-radius: var(--radius-lg);
+  }
+
+  .book-reviews__card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+
+  .book-reviews__date {
+    color: var(--color-ink-muted);
+  }
+
+  .book-reviews__title {
+    margin: 0;
+    color: var(--color-ink);
+  }
+
+  .book-reviews__text {
+    flex: 1;
+    color: var(--color-ink-muted);
+  }
+
+  .book-reviews__text > * {
+    margin: 0;
+  }
+
+  .book-reviews__author {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+    margin: var(--space-2) 0 0;
+    padding-top: var(--space-4);
+    color: var(--color-ink);
+    border-top: var(--stroke-sm) solid var(--color-line);
+  }
+
+  .book-reviews__avatar {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    font-family: var(--font-heading--family);
+    font-weight: 600;
+    color: var(--color-ink);
+    background: var(--color-sky-soft);
+    border-radius: var(--radius-full);
+  }
+
+  .book-reviews__author strong {
+    display: block;
+    font-weight: 600;
+  }
+
+  .book-reviews__detail {
+    display: block;
+    color: var(--color-ink-muted);
+  }
+
+  .book-reviews__verified {
+    margin-left: auto;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--color-leaf-deep);
+    background: var(--color-leaf-soft);
+    border-radius: var(--radius-full);
+  }
+
+  /* ---------- App widget ---------- */
+
+  .book-reviews__app {
+    margin-top: var(--space-6);
+    font-family: var(--font-body--family);
+    color: var(--color-ink);
+  }
+
+  .book-reviews__app :is(h2, h3, h4) {
+    font-family: var(--font-heading--family);
+    color: var(--color-ink);
+  }
+
+  .book-reviews__app :is(button, .jdgm-btn, .jdgm-write-rev-link) {
+    font-family: var(--font-body--family);
+    border-radius: var(--radius-full);
+  }
+
+  .book-reviews__app :is(.jdgm-star, .spr-icon) {
+    color: var(--color-sun) !important;
+  }
+
+  @media screen and (max-width: 989px) {
+    .book-reviews__layout {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .book-reviews__summary {
+      position: static;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: center;
+      column-gap: var(--space-4);
+    }
+
+    .book-reviews__average {
+      grid-row: span 2;
+    }
+
+    .book-reviews__count {
+      margin: 0;
+    }
+
+    .book-reviews__write {
+      grid-column: 1 / -1;
+      margin-top: var(--space-3);
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .book-reviews {
+      padding-block: var(--space-7);
+    }
+
+    .book-reviews__list {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Book reviews",
+  "tag": "section",
+  "class": "book-reviews-section",
+  "max_blocks": 12,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Placeholder reviews until the reviews app is installed. Then add its widget with the App block and remove the review blocks."
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "From families like yours"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "What parents say"
+    },
+    {
+      "type": "range",
+      "id": "average",
+      "label": "Average rating",
+      "min": 1,
+      "max": 5,
+      "step": 0.1,
+      "default": 4.8
+    },
+    {
+      "type": "number",
+      "id": "count",
+      "label": "Number of reviews",
+      "default": 128
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Write a review"
+    },
+    {
+      "type": "url",
+      "id": "button_url",
+      "label": "Button link"
+    },
+    {
+      "type": "select",
+      "id": "surface",
+      "label": "Background",
+      "options": [
+        { "value": "paper", "label": "Paper" },
+        { "value": "paper-deep", "label": "Paper deep" },
+        { "value": "sun-soft", "label": "Sun soft" }
+      ],
+      "default": "paper-deep"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "@app"
+    },
+    {
+      "type": "review",
+      "name": "Review",
+      "settings": [
+        {
+          "type": "range",
+          "id": "rating",
+          "label": "Rating",
+          "min": 1,
+          "max": 5,
+          "step": 1,
+          "default": 5
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "She asked for one more lesson"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Review",
+          "default": "<p>Twenty minutes a day and by the second week she was sounding out words on cereal boxes.</p>"
+        },
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Name",
+          "default": "Laura M."
+        },
+        {
+          "type": "text",
+          "id": "detail",
+          "label": "Detail",
+          "default": "Mom of a 5-year-old"
+        },
+        {
+          "type": "text",
+          "id": "date",
+          "label": "Date",
+          "default": "March 2026"
+        },
+        {
+          "type": "checkbox",
+          "id": "verified",
+          "label": "Verified buyer",
+          "default": true
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Book reviews",
+      "blocks": [{ "type": "review" }, { "type": "review" }]
+    }
+  ]
+}
+{% endschema %}

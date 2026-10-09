@@ -3,10 +3,14 @@
   tint, a badge and a wishlist heart over it, then ages and rating, the title in
   Besley, the author, and the price with a round "+" to add to cart.
 
-  - Tint: each product keeps the same soft colour everywhere (picked from its id).
-  - Ages: metafield custom.age_range, else the product type, else its first collection.
-  - Author: metafield custom.author. Rating: the standard reviews.rating metafields.
-  - Badges, in order: Sold out, sale (-25%), Staff pick (tag "staff-pick"), New.
+  - Tint: metafield custom.card_colour, else the same soft colour everywhere (picked
+    from its id).
+  - Ages: metafield custom.age_range ("Ages 3–5"), else the product type, else its first
+    collection.
+  - Author: metafield custom.author, an Author metaobject (its name) or plain text.
+    Rating: the standard reviews.rating metafields.
+  - Badges, in order: Sold out, sale (-25%), metafield custom.badge, Staff pick (tag
+    "staff-pick"), New. Metafields: METAFIELDS.md.
   - "+" adds straight to the cart (assets/book-card.js): the product's selected or first
     available variant, the same one its product page opens with.
 
@@ -26,6 +30,10 @@
   assign tints = 'sky,sun,tomato,grape,leaf' | split: ','
   assign tint_index = product.id | modulo: 5
   assign tint = tints[tint_index]
+  assign card_colour = product.metafields.custom.card_colour.value | downcase
+  if tints contains card_colour
+    assign tint = card_colour
+  endif
 
   assign variant = product.selected_or_first_available_variant
   assign on_sale = false
@@ -35,6 +43,9 @@
   endif
 
   assign ages = product.metafields.custom.age_range.value
+  if ages != blank
+    assign ages = ages | replace: '-', '–' | prepend: 'Ages '
+  endif
   if ages == blank
     assign ages = product.type
   endif
@@ -48,6 +59,8 @@
   endif
 
   assign author = product.metafields.custom.author.value
+  assign author = author.name.value | default: author
+  assign badge_field = product.metafields.custom.badge.value
 
   assign badge = blank
   assign badge_style = ''
@@ -61,6 +74,12 @@
   elsif on_sale
     assign badge = '-' | append: discount | append: '%'
     assign badge_style = 'sale'
+  elsif badge_field != blank
+    assign badge = badge_field
+    assign badge_style = 'pick'
+    if badge_field == 'New'
+      assign badge_style = 'new'
+    endif
   elsif product.tags contains 'staff-pick'
     assign badge = 'Staff pick'
     assign badge_style = 'pick'

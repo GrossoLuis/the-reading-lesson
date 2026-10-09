@@ -1,0 +1,281 @@
+{%- comment -%}
+  Author on the product page, from the product's custom.author metaobject (name, photo,
+  bio): a card with the portrait, the bio and a link to the author's page, then a row of
+  their other books (snippets/book-shelf.liquid).
+
+  Hidden when the product has no author; in the theme editor it shows a note.
+{%- endcomment -%}
+
+{%- liquid
+  assign s = section.settings
+  assign author = product.metafields.custom.author.value
+  assign author_name = author.name.value | default: author
+  assign author_url = author.system.url
+  assign photo = author.photo.value
+  assign bio = author.bio.value
+
+  if s.show_books and author != blank
+    capture shelf
+      render 'book-shelf', source: 'author', value: author, exclude: product.id, limit: s.books_limit
+    endcapture
+  endif
+-%}
+
+{%- if author_name != blank -%}
+  <div class="book-author surface-{{ s.surface }}">
+    <div class="book-author__container">
+      <article class="book-author__card">
+        <div class="book-author__portrait">
+          {%- if photo != blank -%}
+            {%- assign photo_image = photo.preview_image | default: photo -%}
+            {{-
+              photo_image
+              | image_url: width: 480
+              | image_tag: class: 'book-author__photo', widths: '160, 240, 320, 480', sizes: '160px', loading: 'lazy', alt: author_name
+            -}}
+          {%- else -%}
+            <span
+              class="book-author__initial"
+              aria-hidden="true"
+              >{{ author_name | slice: 0 }}</span
+            >
+          {%- endif -%}
+        </div>
+
+        <div class="book-author__body">
+          {%- if s.eyebrow != blank -%}
+            <p class="book-author__eyebrow text-eyebrow">{{ s.eyebrow }}</p>
+          {%- endif -%}
+          <h2 class="book-author__name h4">{{ author_name }}</h2>
+          {%- if bio != blank -%}
+            <p class="book-author__bio">{{ bio | newline_to_br }}</p>
+          {%- endif -%}
+          {%- if author_url != blank and s.link_label != blank -%}
+            {%- assign link_label = s.link_label | replace: '[author]', author_name -%}
+            {%- render 'brand-button', label: link_label, url: author_url, style: 'secondary', arrow: true -%}
+          {%- endif -%}
+        </div>
+      </article>
+
+      {%- if shelf != blank -%}
+        <div class="book-author__books">
+          <h3 class="book-author__books-heading h5">
+            {{- s.books_heading | replace: '[author]', author_name -}}
+          </h3>
+          {{ shelf }}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+{%- elsif request.design_mode -%}
+  <div class="book-author book-author--empty">
+    <p class="book-author__editor-note text-small">
+      <strong>Author</strong> — pick an author in this product's <em>Author</em> metafield
+      (custom.author) to show the author card. Visitors don't see this note.
+    </p>
+  </div>
+{%- endif -%}
+
+{% stylesheet %}
+  .book-author {
+    padding-block: var(--space-8);
+  }
+
+  .book-author__container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-7);
+    max-width: var(--page-width);
+    margin-inline: auto;
+    padding-inline: var(--page-margin);
+  }
+
+  .book-author__card {
+    display: grid;
+    grid-template-columns: 160px minmax(0, 1fr);
+    gap: var(--space-6);
+    align-items: center;
+    max-width: 58rem;
+    padding: var(--space-6);
+    background: var(--color-card);
+    border: var(--stroke-sm) solid var(--color-line);
+    border-radius: var(--radius-lg);
+  }
+
+  .book-author__portrait {
+    position: relative;
+    width: 160px;
+    aspect-ratio: 1;
+  }
+
+  /* A sun ring offset behind the portrait, from the brand's colour-bar frame. */
+  .book-author__portrait::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-full);
+    background: var(--color-sun);
+    transform: translate(8px, 8px);
+  }
+
+  .book-author__photo,
+  .book-author__initial {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: var(--radius-full);
+  }
+
+  .book-author__initial {
+    display: grid;
+    place-items: center;
+    font-family: var(--font-heading--family);
+    font-size: 64px;
+    font-weight: 600;
+    color: var(--color-ink);
+    background: var(--color-sky-soft);
+  }
+
+  .book-author__body {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+
+  .book-author__eyebrow {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: 0;
+    color: var(--color-ink-muted);
+  }
+
+  .book-author__eyebrow::before {
+    content: '';
+    flex: none;
+    width: 8px;
+    aspect-ratio: 1;
+    border-radius: var(--radius-full);
+    background: var(--color-sun);
+  }
+
+  .book-author__name {
+    margin: 0;
+    color: var(--color-ink);
+  }
+
+  .book-author__bio {
+    margin: 0 0 var(--space-2);
+    color: var(--color-ink-muted);
+  }
+
+  .book-author__books-heading {
+    margin: 0 0 var(--space-5);
+    color: var(--color-ink);
+  }
+
+  .book-author--empty {
+    padding: var(--space-5) var(--page-margin);
+  }
+
+  .book-author__editor-note {
+    max-width: var(--page-width);
+    margin: 0 auto;
+    padding: var(--space-4) var(--space-5);
+    color: var(--color-ink-muted);
+    border: var(--stroke-md) dashed var(--color-line-strong);
+    border-radius: var(--radius-md);
+  }
+
+  @media screen and (max-width: 749px) {
+    .book-author {
+      padding-block: var(--space-7);
+    }
+
+    .book-author__card {
+      grid-template-columns: minmax(0, 1fr);
+      justify-items: start;
+      gap: var(--space-5);
+      padding: var(--space-5);
+    }
+
+    .book-author__portrait {
+      width: 112px;
+    }
+
+    .book-author__initial {
+      font-size: 44px;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Author",
+  "tag": "section",
+  "class": "book-author-section",
+  "enabled_on": {
+    "templates": ["product"]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Shows the author picked in the product's Author metafield (custom.author)."
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Meet the author"
+    },
+    {
+      "type": "text",
+      "id": "link_label",
+      "label": "Link label",
+      "info": "[author] is replaced with the author's name. Links to the author's page.",
+      "default": "All books by [author]"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_books",
+      "label": "Show the author's other books",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "books_heading",
+      "label": "Books heading",
+      "default": "More by [author]"
+    },
+    {
+      "type": "range",
+      "id": "books_limit",
+      "label": "Books to show",
+      "min": 2,
+      "max": 8,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "select",
+      "id": "surface",
+      "label": "Background",
+      "options": [
+        { "value": "paper", "label": "Paper" },
+        { "value": "paper-deep", "label": "Paper deep" },
+        { "value": "sun-soft", "label": "Sun soft" },
+        { "value": "sky-soft", "label": "Sky soft" }
+      ],
+      "default": "paper"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Author"
+    }
+  ]
+}
+{% endschema %}
