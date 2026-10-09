@@ -1,0 +1,203 @@
+{
+  "sections": {
+    "main": {
+      "type": "product",
+      "blocks": {
+        "trust_shipping": {
+          "type": "trust",
+          "settings": {
+            "icon": "truck",
+            "title": "Free shipping over $40",
+            "text": "Nationwide, wrapped with care."
+          }
+        },
+        "trust_gift": {
+          "type": "trust",
+          "settings": {
+            "icon": "gift",
+            "title": "Ready to gift",
+            "text": "Add free gift wrapping at checkout."
+          }
+        },
+        "trust_returns": {
+          "type": "trust",
+          "settings": {
+            "icon": "returns",
+            "title": "Easy 30-day returns",
+            "text": "If it's not the right book, send it back."
+          }
+        },
+        "description": {
+          "type": "description",
+          "settings": {
+            "title": "About this book",
+            "open": true
+          }
+        },
+        "shipping": {
+          "type": "collapsible",
+          "settings": {
+            "title": "Shipping & returns",
+            "content": "<p>Orders ship in 1–2 business days. Shipping is free on orders over $40.</p><p>Not the right fit? Return it within 30 days for a full refund.</p>",
+            "open": false
+          }
+        }
+      },
+      "block_order": [
+        "trust_shipping",
+        "trust_gift",
+        "trust_returns",
+        "description",
+        "shipping"
+      ],
+      "settings": {
+        "image_fit": "contain",
+        "show_breadcrumbs": true,
+        "eyebrow_source": "collection",
+        "price_note": "Shipping calculated at checkout.",
+        "show_excerpt": true,
+        "excerpt_words": 30,
+        "show_quantity": true,
+        "show_dynamic_checkout": true,
+        "stock_note": "Ships in 1–2 business days",
+        "low_stock_threshold": 5,
+        "show_book_meta": true,
+        "show_sticky_cart": true,
+        "structured_data": "book"
+      }
+    },
+    "details": {
+      "type": "book-details",
+      "settings": {
+        "specs_heading": "The details",
+        "note_heading": "Why we love it",
+        "note_signature": "The Reading Lesson team",
+        "note_surface": "card",
+        "surface": "paper-deep"
+      }
+    },
+    "look_inside": {
+      "type": "book-look-inside",
+      "settings": {
+        "eyebrow": "Sample pages",
+        "heading": "Look inside",
+        "text": "Turn a few pages before it arrives at your door.",
+        "button_label": "Open the book",
+        "surface": "paper"
+      }
+    },
+    "series": {
+      "type": "book-series",
+      "settings": {
+        "eyebrow": "A series in [count] books",
+        "surface": "grape-soft"
+      }
+    },
+    "author": {
+      "type": "book-author",
+      "settings": {
+        "eyebrow": "Meet the author",
+        "link_label": "All books by [author]",
+        "show_books": true,
+        "books_heading": "More by [author]",
+        "books_limit": 4,
+        "surface": "paper"
+      }
+    },
+    "reviews": {
+      "type": "book-reviews",
+      "blocks": {
+        "review_1": {
+          "type": "review",
+          "settings": {
+            "rating": 5,
+            "title": "She asked for one more lesson",
+            "text": "<p>Twenty minutes a day and by the second week she was sounding out words on cereal boxes.</p>",
+            "name": "Laura M.",
+            "detail": "Mom of a 5-year-old",
+            "date": "March 2026",
+            "verified": true
+          }
+        },
+        "review_2": {
+          "type": "review",
+          "settings": {
+            "rating": 5,
+            "title": "Clear, calm and kind",
+            "text": "<p>Every lesson tells me exactly what to say. No prep, no tears, and he is proud of himself every single day.</p>",
+            "name": "David R.",
+            "detail": "Dad of a 4-year-old",
+            "date": "February 2026",
+            "verified": true
+          }
+        },
+        "review_3": {
+          "type": "review",
+          "settings": {
+            "rating": 4,
+            "title": "Worth every minute",
+            "text": "<p>We tried apps first. This book is what finally made reading click for our twins.</p>",
+            "name": "Priya S.",
+            "detail": "Mom of 6-year-old twins",
+            "date": "January 2026",
+            "verified": true
+          }
+        },
+        "review_4": {
+          "type": "review",
+          "settings": {
+            "rating": 5,
+            "title": "A family heirloom now",
+            "text": "<p>I learned with this book thirty years ago and now my daughter is reading with it too.</p>",
+            "name": "Emily T.",
+            "detail": "Mom of a 5-year-old",
+            "date": "December 2025",
+            "verified": false
+          }
+        }
+      },
+      "block_order": [
+        "review_1",
+        "review_2",
+        "review_3",
+        "review_4"
+      ],
+      "settings": {
+        "eyebrow": "From families like yours",
+        "heading": "What parents say",
+        "average": 4.8,
+        "count": 128,
+        "button_label": "Write a review",
+        "surface": "paper-deep"
+      }
+    },
+    "recs_age": {
+      "type": "book-recommendations",
+      "settings": {
+        "source": "age",
+        "heading": "More for ages [age]",
+        "limit": 4,
+        "surface": "paper"
+      }
+    },
+    "recs_related": {
+      "type": "book-recommendations",
+      "settings": {
+        "source": "related",
+        "heading": "You may also like",
+        "limit": 4,
+        "surface": "paper"
+      }
+    }
+  },
+  "order": [
+    "main",
+    "details",
+    "look_inside",
+    "series",
+    "author",
+    "reviews",
+    "recs_age",
+    "recs_related"
+  ]
+}

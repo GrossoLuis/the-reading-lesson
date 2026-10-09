@@ -1,0 +1,17 @@
+{
+  "sections": {
+    "main": {
+      "type": "author",
+      "settings": {
+        "show_breadcrumbs": true,
+        "eyebrow": "Author",
+        "books_heading": "Books by [author]",
+        "empty_text": "New books by this author are on their way.",
+        "surface": "paper"
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

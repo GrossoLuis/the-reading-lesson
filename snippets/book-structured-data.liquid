@@ -1,0 +1,96 @@
+{%- doc -%}
+  JSON-LD for a book: schema.org Product and Book in one node, so Google reads the price
+  and stock (Product) and the author, ISBN, pages and age (Book). One offer per variant
+  (format), each with its own ISBN as gtin when it is 13 digits. Metafields: METAFIELDS.md.
+
+  @param {product} product
+
+  @example
+  {% render 'book-structured-data', product: product %}
+{%- enddoc -%}
+
+{%- liquid
+  assign book = product.metafields.custom
+  assign author = book.author.value
+  assign author_name = author.name.value | default: author
+  assign series = book.series.value
+  assign first_variant = product.selected_or_first_available_variant
+  assign isbn = first_variant.metafields.custom.isbn.value
+  assign pages = first_variant.metafields.custom.pages.value
+  assign rating = product.metafields.reviews.rating.value
+  assign rating_count = product.metafields.reviews.rating_count.value | default: 0
+-%}
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": ["Product", "Book"],
+    "@id": {{ request.origin | append: product.url | append: '#book' | json }},
+    "url": {{ request.origin | append: product.url | json }},
+    "name": {{ product.title | json }},
+    "description": {{ product.description | strip_html | strip_newlines | truncate: 5000 | json }},
+    {%- if product.featured_image -%}
+      "image": [
+        {%- for media in product.media limit: 6 -%}
+          {{ media.preview_image | image_url: width: 1200 | prepend: 'https:' | json }}{% unless forloop.last %},{% endunless %}
+        {%- endfor -%}
+      ],
+    {%- endif -%}
+    {%- if author_name != blank -%}
+      "author": {
+        "@type": "Person",
+        "name": {{ author_name | json }}
+        {%- if author.system.url != blank -%}
+          , "url": {{ request.origin | append: author.system.url | json }}
+        {%- endif -%}
+      },
+    {%- endif -%}
+    {%- if isbn != blank -%}
+      "isbn": {{ isbn | remove: '-' | remove: ' ' | json }},
+    {%- endif -%}
+    {%- if pages != blank -%}
+      "numberOfPages": {{ pages | json }},
+    {%- endif -%}
+    {%- if book.publisher.value != blank -%}
+      "publisher": { "@type": "Organization", "name": {{ book.publisher.value | json }} },
+    {%- endif -%}
+    {%- if book.publication_year.value != blank -%}
+      "datePublished": {{ book.publication_year.value | append: '' | json }},
+    {%- endif -%}
+    {%- if book.age_range.value != blank -%}
+      "typicalAgeRange": {{ book.age_range.value | json }},
+    {%- endif -%}
+    {%- if series != blank -%}
+      "isPartOf": { "@type": "BookSeries", "name": {{ series.name.value | json }} },
+    {%- endif -%}
+    {%- if rating != blank and rating_count > 0 -%}
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": {{ rating.rating | json }},
+        "bestRating": {{ rating.scale_max | json }},
+        "ratingCount": {{ rating_count | json }}
+      },
+    {%- endif -%}
+    "brand": { "@type": "Brand", "name": {{ product.vendor | default: shop.name | json }} },
+    "offers": [
+      {%- for variant in product.variants -%}
+        {%- assign variant_isbn = variant.metafields.custom.isbn.value | remove: '-' | remove: ' ' -%}
+        {
+          "@type": "Offer",
+          "url": {{ request.origin | append: variant.url | json }},
+          "price": {{ variant.price | divided_by: 100.0 | json }},
+          "priceCurrency": {{ cart.currency.iso_code | json }},
+          "availability": "https://schema.org/{% if variant.available %}InStock{% else %}OutOfStock{% endif %}",
+          "itemCondition": "https://schema.org/NewCondition",
+          {%- if variant_isbn.size == 13 -%}
+            "gtin13": {{ variant_isbn | json }},
+          {%- endif -%}
+          {%- unless product.has_only_default_variant -%}
+            "name": {{ variant.title | json }},
+          {%- endunless -%}
+          "sku": {{ variant.sku | default: variant.id | append: '' | json }}
+        }{% unless forloop.last %},{% endunless %}
+      {%- endfor -%}
+    ]
+  }
+</script>

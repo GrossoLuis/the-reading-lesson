@@ -13,6 +13,13 @@
   Add to cart posts to /cart/add.js and dispatches the same CartLinesUpdateEvent as
   Horizon's product form, so the cart drawer and the header count update with it.
   Behaviour lives in assets/product-page.js.
+
+  Book template (templates/product.book.json) turns on three settings, all off by default
+  so the standard product template is unchanged:
+  - Book details: age seal on the gallery, card colour behind it, badge and reading level
+    chips, "by <author>" and "Book 2 of 4 in <series>" from the metafields in METAFIELDS.md.
+  - Sticky add to cart: a compact bar on phones once the main button scrolls away.
+  - Structured data as a book (snippets/book-structured-data.liquid).
 {%- endcomment -%}
 
 <script
@@ -53,6 +60,38 @@
   assign trust_items = section.blocks | where: 'type', 'trust'
 
   assign low_stock_threshold = s.low_stock_threshold
+
+  assign book = product.metafields.custom
+  assign book_age = blank
+  assign book_badge = blank
+  assign book_level = blank
+  assign book_author = blank
+  assign book_series = blank
+  assign book_tint = blank
+  assign series_position = 0
+  assign series_size = 0
+
+  if s.show_book_meta
+    assign book_age = book.age_range.value
+    assign book_badge = book.badge.value
+    assign book_level = book.reading_level.value
+    assign book_author = book.author.value
+    assign book_series = book.series.value
+    if book.card_colour.value != blank
+      assign book_tint = book.card_colour.value | downcase
+    endif
+
+    if book_series != blank
+      assign series_books = book_series.books.value
+      assign series_size = series_books.size
+      for series_book in series_books
+        if series_book.id == product.id
+          assign series_position = forloop.index
+          break
+        endif
+      endfor
+    endif
+  endif
 -%}
 
 <product-page
@@ -127,7 +166,22 @@
             </ul>
           {%- endif -%}
 
-          <div class="pdp__stage{% if s.image_fit == 'cover' %} pdp__stage--cover{% endif %}">
+          <div
+            class="pdp__stage{% if s.image_fit == 'cover' %} pdp__stage--cover{% endif %}"
+            {% if book_tint != blank %}
+              style="--pdp-stage-bg: var(--color-{{ book_tint }}-soft);"
+            {% endif %}
+          >
+            {%- if book_age != blank -%}
+              <span
+                class="pdp__age-seal"
+                style="--seal-bg: var(--color-age-{{ book_age | handle }}); --seal-fg: var(--color-on-age-{{ book_age | handle }});"
+              >
+                <span class="pdp__age-seal-label">Ages</span>
+                <span class="pdp__age-seal-value">{{ book_age | replace: '-', '–' }}</span>
+              </span>
+            {%- endif -%}
+
             <ul
               class="pdp__slides"
               role="list"
@@ -243,7 +297,51 @@
             <p class="pdp__eyebrow text-eyebrow">{{ eyebrow }}</p>
           {%- endif -%}
 
+          {%- if book_badge != blank or book_level != blank -%}
+            <ul
+              class="pdp__chips"
+              role="list"
+            >
+              {%- if book_badge != blank -%}
+                <li class="pdp__chip pdp__chip--{{ book_badge | handle }}">
+                  {%- render 'brand-icon', name: 'star', size: 14 -%}
+                  {{ book_badge }}
+                </li>
+              {%- endif -%}
+              {%- if book_level != blank -%}
+                <li class="pdp__chip pdp__chip--level">
+                  {%- render 'brand-icon', name: 'book', size: 14 -%}
+                  {{ book_level }}
+                </li>
+              {%- endif -%}
+            </ul>
+          {%- endif -%}
+
           <h1 class="pdp__title h3">{{ product.title }}</h1>
+
+          {%- if book_author != blank or series_position > 0 -%}
+            <div class="pdp__byline">
+              {%- if book_author != blank -%}
+                {%- assign author_name = book_author.name.value | default: book_author -%}
+                <p class="pdp__author">
+                  by
+                  {% if book_author.system.url != blank -%}
+                    <a href="{{ book_author.system.url }}">{{ author_name }}</a>
+                  {%- else -%}
+                    <span>{{ author_name }}</span>
+                  {%- endif %}
+                </p>
+              {%- endif -%}
+              {%- if series_position > 0 -%}
+                <p class="pdp__series text-small">
+                  <a href="#book-series">
+                    Book {{ series_position }} of {{ series_size }} in
+                    <em>{{ book_series.name.value }}</em>
+                  </a>
+                </p>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
 
           {%- assign rating = product.metafields.reviews.rating.value -%}
           {%- if rating != blank -%}
@@ -530,6 +628,54 @@
     </div>
   </div>
 
+  {%- comment -%} ---------- Sticky add to cart (phones) ---------- {%- endcomment -%}
+  {%- if s.show_sticky_cart -%}
+    <div
+      class="pdp-sticky"
+      data-sticky-cart
+      aria-hidden="true"
+      inert
+    >
+      {%- if product.featured_media -%}
+        {{-
+          product.featured_media.preview_image
+          | image_url: width: 120
+          | image_tag: class: 'pdp-sticky__image', width: 48, height: 48, loading: 'lazy', alt: ''
+        -}}
+      {%- endif -%}
+      <div class="pdp-sticky__text">
+        <p class="pdp-sticky__title">{{ product.title }}</p>
+        <p class="pdp-sticky__price">
+          <span data-price-current>{{ current_variant.price | money }}</span>
+          {%- unless has_only_default_variant -%}
+            <span
+              class="pdp-sticky__variant"
+              data-sticky-variant
+              >· {{ current_variant.title }}</span
+            >
+          {%- endunless -%}
+        </p>
+      </div>
+      <button
+        type="submit"
+        form="{{ product_form_id }}"
+        class="brand-button brand-button--purchase pdp-sticky__add"
+        data-add-button
+        {% unless current_variant.available %}
+          disabled
+        {% endunless %}
+      >
+        <span data-add-text>
+          {%- if current_variant.available -%}
+            {{ 'products.product.add_to_cart' | t }}
+          {%- else -%}
+            {{ 'products.product.sold_out' | t }}
+          {%- endif -%}
+        </span>
+      </button>
+    </div>
+  {%- endif -%}
+
   {%- comment -%} ---------- Zoom ---------- {%- endcomment -%}
   {%- if media_count > 0 -%}
     <dialog
@@ -595,6 +741,7 @@
           "compare_at_price": {{ variant.compare_at_price | default: 0 }},
           "inventory_tracked": {% if variant.inventory_management == 'shopify' %}true{% else %}false{% endif %},
           "inventory_quantity": {{ variant.inventory_quantity | default: 0 }},
+          "title": {{ variant.title | json }},
           "featured_media_id": {{ variant.featured_media.id | default: 'null' }}
         }{% unless forloop.last %},{% endunless %}
       {%- endfor -%}
@@ -602,9 +749,13 @@
   </script>
 </product-page>
 
-<script type="application/ld+json">
-  {{ product | structured_data }}
-</script>
+{%- if s.structured_data == 'book' -%}
+  {%- render 'book-structured-data', product: product -%}
+{%- else -%}
+  <script type="application/ld+json">
+    {{ product | structured_data }}
+  </script>
+{%- endif -%}
 
 {% stylesheet %}
   .pdp {
@@ -757,7 +908,7 @@
     position: relative;
     min-height: 0;
     overflow: hidden;
-    background: var(--color-paper-deep);
+    background: var(--pdp-stage-bg, var(--color-paper-deep));
     border: var(--stroke-sm) solid var(--color-line);
     border-radius: var(--radius-image);
   }
@@ -1446,6 +1597,223 @@
     outline-offset: var(--focus-ring-offset);
   }
 
+  /* ---------- Book details ---------- */
+
+  /* Round seal in the age's colour, tilted like a sticker on the cover. */
+  .pdp__age-seal {
+    position: absolute;
+    top: var(--space-5);
+    right: var(--space-5);
+    z-index: 2;
+    display: grid;
+    place-content: center;
+    width: 84px;
+    aspect-ratio: 1;
+    text-align: center;
+    color: var(--seal-fg, var(--color-ink));
+    background: var(--seal-bg, var(--color-sun));
+    border-radius: var(--radius-full);
+    box-shadow: var(--shadow-sm);
+    transform: rotate(-8deg);
+    pointer-events: none;
+  }
+
+  .pdp__age-seal-label {
+    font-family: var(--font-body--family);
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .pdp__age-seal-value {
+    font-family: var(--font-heading--family);
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.1;
+  }
+
+  .pdp__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .pdp__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--color-ink);
+    background: var(--color-card);
+    border: var(--stroke-sm) solid var(--color-line);
+    border-radius: var(--radius-full);
+  }
+
+  .pdp__chip--staff-pick {
+    color: var(--color-grape);
+    background: var(--color-grape-soft);
+    border-color: transparent;
+  }
+
+  .pdp__chip--bestseller,
+  .pdp__chip--award-winner {
+    color: var(--color-sun-deep);
+    background: var(--color-sun-soft);
+    border-color: transparent;
+  }
+
+  .pdp__chip--new {
+    color: var(--color-tomato-deep);
+    background: var(--color-tomato-soft);
+    border-color: transparent;
+  }
+
+  .pdp__byline {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    margin-top: calc(var(--space-2) * -1);
+  }
+
+  .pdp__author {
+    margin: 0;
+    font-family: var(--font-heading--family);
+    font-size: 18px;
+    color: var(--color-ink-muted);
+  }
+
+  .pdp__author a,
+  .pdp__author span {
+    color: var(--color-ink);
+    font-style: italic;
+    font-weight: 600;
+  }
+
+  .pdp__author a {
+    text-decoration: underline;
+    text-decoration-color: var(--color-line-strong);
+    text-underline-offset: 4px;
+  }
+
+  .pdp__author a:hover {
+    text-decoration-color: currentColor;
+  }
+
+  .pdp__series {
+    margin: 0;
+  }
+
+  .pdp__series a {
+    color: var(--color-link);
+    text-decoration: none;
+  }
+
+  .pdp__series a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  /* ---------- Sticky add to cart ---------- */
+
+  .pdp-sticky {
+    display: none;
+  }
+
+  @media screen and (max-width: 989px) {
+    .pdp-sticky {
+      position: fixed;
+      inset: auto 0 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--page-margin) calc(var(--space-3) + env(safe-area-inset-bottom));
+      background: var(--color-card);
+      border-top: var(--stroke-sm) solid var(--color-line);
+      box-shadow: var(--shadow-md);
+      transform: translateY(110%);
+      transition: transform 280ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .pdp-sticky.is-visible {
+      transform: none;
+    }
+
+    .pdp-sticky__image {
+      flex: none;
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+      background: var(--color-paper-deep);
+      border-radius: var(--radius-image);
+    }
+
+    .pdp-sticky__text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .pdp-sticky__title,
+    .pdp-sticky__price {
+      margin: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .pdp-sticky__title {
+      font-family: var(--font-heading--family);
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--color-ink);
+    }
+
+    .pdp-sticky__price {
+      font-size: 13px;
+      color: var(--color-ink);
+    }
+
+    .pdp-sticky__variant {
+      color: var(--color-ink-muted);
+    }
+
+    .pdp-sticky__add {
+      flex: none;
+      min-height: 48px;
+    }
+
+    .pdp-sticky__add[disabled] {
+      --brand-button-bg: var(--color-line);
+      --brand-button-border: var(--color-line);
+      --brand-button-fg: var(--color-ink-muted);
+      --brand-button-hover-bg: var(--color-line);
+    }
+
+    .pdp-sticky__add.is-added {
+      --brand-button-bg: var(--color-leaf-deep);
+      --brand-button-border: var(--color-leaf-deep);
+      --brand-button-hover-bg: var(--color-leaf-deep);
+    }
+
+    .pdp__age-seal {
+      top: var(--space-4);
+      right: var(--space-4);
+      width: 68px;
+    }
+
+    .pdp__age-seal-value {
+      font-size: 20px;
+    }
+  }
+
   /* ---------- Mobile and tablet: swipe carousel ---------- */
 
   @media screen and (max-width: 989px) {
@@ -1561,7 +1929,8 @@
     .pdp__slide,
     .pdp__slide.is-active,
     .pdp__progress-bar,
-    .pdp__thumb {
+    .pdp__thumb,
+    .pdp-sticky {
       transition: none;
     }
   }
@@ -1743,6 +2112,34 @@
       "max": 20,
       "step": 1,
       "default": 5
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sticky_cart",
+      "label": "Show a sticky add to cart bar on phones",
+      "info": "Appears once the main button scrolls out of view.",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Book"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_book_meta",
+      "label": "Show book details",
+      "info": "Age seal, card colour, badge, reading level, author and series, from the product's metafields.",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "structured_data",
+      "label": "Search engine data",
+      "options": [
+        { "value": "product", "label": "Product" },
+        { "value": "book", "label": "Book (author, ISBN, pages, age)" }
+      ],
+      "default": "product"
     }
   ]
 }
