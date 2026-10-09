@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "main": {
@@ -34,18 +43,19 @@
             "open": true
           }
         },
+        "book_details": {
+          "type": "book_details",
+          "settings": {
+            "title": "Book details",
+            "open": false
+          }
+        },
         "shipping": {
           "type": "collapsible",
           "settings": {
             "title": "Shipping & returns",
             "content": "<p>Orders ship in 1–2 business days. Shipping is free on orders over $40.</p><p>Not the right fit? Return it within 30 days for a full refund.</p>",
-            "open": false
-          }
-        },
-        "book_details": {
-          "type": "book_details",
-          "settings": {
-            "title": "Book details",
+            "page": "",
             "open": false
           }
         }
@@ -69,8 +79,8 @@
         "show_dynamic_checkout": true,
         "stock_note": "Ships in 1–2 business days",
         "low_stock_threshold": 5,
-        "show_book_meta": true,
         "show_sticky_cart": true,
+        "show_book_meta": true,
         "structured_data": "book"
       }
     },
@@ -269,19 +279,11 @@
         "surface": "paper"
       }
     },
-    "recs_age": {
-      "type": "book-recommendations",
-      "settings": {
-        "source": "age",
-        "heading": "More for ages [age]",
-        "limit": 4,
-        "surface": "paper"
-      }
-    },
     "recs_related": {
       "type": "book-recommendations",
       "settings": {
         "source": "related",
+        "eyebrow": "",
         "heading": "You may also like",
         "limit": 4,
         "surface": "paper"
@@ -296,7 +298,6 @@
     "author",
     "testimonials",
     "faq",
-    "recs_age",
     "recs_related"
   ]
 }
