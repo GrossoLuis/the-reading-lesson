@@ -1,115 +1,48 @@
 {%- comment -%}
-  Why we love it: the staff note and the highlights of a book, from the product's
-  custom.why_we_love_it and custom.highlights metafields.
+  Why we love it: the staff note of a book, from the product's custom.why_we_love_it
+  metafield.
 
-  An eyebrow and display heading like the homepage sections, then the note on an ink
-  card with the big sun quote mark (as in the testimonials), signed, beside the
-  highlights: one soft-colour tile each, with its icon on a white disc in the deep tone.
-  With only one of the two, it takes the whole width.
+  A paper-deep box in the colour-bar frame of Our Story (sky, grape, tomato, sun): the
+  eyebrow and display heading on the left, the note in Besley on the right, signed.
 
-  Hidden when the product has neither; in the theme editor it shows a note.
+  Renders nothing when the metafield is empty; in the theme editor it shows a note
+  instead.
 {%- endcomment -%}
 
 {%- liquid
   assign s = section.settings
-  assign note = product.metafields.custom.why_we_love_it.value
-  assign highlights = product.metafields.custom.highlights.value
-  assign tones = 'sky,sun,leaf,grape,tomato' | split: ','
-
-  assign layout = 'both'
-  if note == blank
-    assign layout = 'highlights'
-  elsif highlights == blank
-    assign layout = 'note'
-  endif
+  assign note = product.metafields.custom.why_we_love_it.value | strip
 -%}
 
-{%- if note != blank or highlights != blank -%}
+{%- if note != blank -%}
   <div class="book-love surface-{{ s.surface }}">
     <div class="book-love__container">
-      <header class="book-love__header">
-        {%- if s.eyebrow != blank -%}
-          <p class="book-love__eyebrow text-eyebrow">{{ s.eyebrow }}</p>
-        {%- endif -%}
-        {%- if s.heading != blank -%}
-          <h2 class="book-love__heading text-display">{{ s.heading }}</h2>
-        {%- endif -%}
-      </header>
+      <div class="book-love__frame">
+        <header class="book-love__header">
+          {%- if s.eyebrow != blank -%}
+            <p class="book-love__eyebrow text-eyebrow">{{ s.eyebrow }}</p>
+          {%- endif -%}
+          {%- if s.heading != blank -%}
+            <h2 class="book-love__heading text-display">{{ s.heading }}</h2>
+          {%- endif -%}
+        </header>
 
-      <div class="book-love__grid book-love__grid--{{ layout }}">
-        {%- if note != blank -%}
-          <figure class="book-love__note surface-ink">
-            <svg
-              class="book-love__mark"
-              viewBox="0 0 48 36"
-              aria-hidden="true"
-              focusable="false"
-            >
-              <path
-                fill="currentColor"
-                d="M0 36V22.6C0 9.9 6.4 2.3 19.1 0l1.7 5.2C14 7 10.6 11 10.3 17H20v19H0Zm27.2 0V22.6C27.2 9.9 33.6 2.3 46.3 0L48 5.2C41.2 7 37.8 11 37.5 17h9.7v19h-20Z"
-              />
-            </svg>
-            <blockquote class="book-love__quote">
-              {{- note | newline_to_br -}}
-            </blockquote>
-            {%- if s.signature != blank -%}
-              <figcaption class="book-love__signature">
-                <span
-                  class="book-love__signature-dot"
-                  aria-hidden="true"
-                ></span>
-                {{ s.signature }}
-              </figcaption>
-            {%- endif -%}
-          </figure>
-        {%- endif -%}
-
-        {%- if highlights != blank -%}
-          <ul
-            class="book-love__highlights"
-            role="list"
-          >
-            {%- for highlight in highlights -%}
-              {%- liquid
-                case highlight
-                  when 'Phonics-based'
-                    assign icon = 'book'
-                  when 'Read-aloud favourite'
-                    assign icon = 'speaker'
-                  when 'Hands-on activities'
-                    assign icon = 'puzzle'
-                  when 'Builds writing skills'
-                    assign icon = 'pencil'
-                  when 'Short daily lessons'
-                    assign icon = 'clock'
-                  when 'Award winner'
-                    assign icon = 'rosette'
-                  when 'Loved by kids'
-                    assign icon = 'heart'
-                  when 'Great gift'
-                    assign icon = 'gift'
-                  else
-                    assign icon = 'star'
-                endcase
-                assign tone_index = forloop.index0 | modulo: 5
-                assign tone = tones[tone_index]
-              -%}
-              <li class="book-love__highlight book-love__highlight--{{ tone }}">
-                <span class="book-love__highlight-icon">{% render 'brand-icon', name: icon, size: 24 %}</span>
-                <span class="book-love__highlight-label">{{ highlight }}</span>
-              </li>
-            {%- endfor -%}
-          </ul>
-        {%- endif -%}
+        <figure class="book-love__note">
+          <blockquote class="book-love__quote">
+            {{- note | newline_to_br -}}
+          </blockquote>
+          {%- if s.signature != blank -%}
+            <figcaption class="book-love__signature">— {{ s.signature }}</figcaption>
+          {%- endif -%}
+        </figure>
       </div>
     </div>
   </div>
 {%- elsif request.design_mode -%}
   <div class="book-love book-love--empty">
     <p class="book-love__editor-note text-small">
-      <strong>Why we love it</strong> — fill this product's <em>Why we love it</em> or
-      <em>Highlights</em> metafields to show this section. Visitors don't see this note.
+      <strong>Why we love it</strong> — write this product's <em>Why we love it</em> metafield
+      (custom.why_we_love_it) to show this section. Visitors don't see this note.
     </p>
   </div>
 {%- endif -%}
@@ -125,9 +58,18 @@
     padding-inline: var(--page-margin);
   }
 
-  .book-love__header {
-    max-width: 44rem;
-    margin-bottom: var(--space-7);
+  /* Colour-bar frame, the signature element of Our Story. */
+  .book-love__frame {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: clamp(var(--space-6), 5vw, var(--space-8));
+    align-items: center;
+    padding: clamp(var(--space-6), 6vw, var(--space-9));
+    background: var(--color-paper-deep);
+    border-style: solid;
+    border-width: var(--colour-bar-thickness);
+    border-color: var(--color-sky) var(--color-grape) var(--color-tomato) var(--color-sun);
+    border-radius: var(--radius-xl);
   }
 
   .book-love__eyebrow {
@@ -160,153 +102,27 @@
     color: var(--color-grape);
   }
 
-  .book-love__grid {
-    display: grid;
-    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-    gap: var(--space-6);
-    align-items: stretch;
-  }
-
-  .book-love__grid--note {
-    grid-template-columns: minmax(0, 52rem);
-  }
-
-  .book-love__grid--highlights {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  /* ---------- Note ---------- */
-
   .book-love__note {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-6);
     margin: 0;
-    padding: clamp(var(--space-6), 4.5vw, var(--space-8));
-    overflow: hidden;
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-lg);
-  }
-
-  /* A soft sun glow in the corner, as on the testimonials card. */
-  .book-love__note::after {
-    content: '';
-    position: absolute;
-    right: -18%;
-    bottom: -38%;
-    width: 60%;
-    aspect-ratio: 1;
-    border-radius: var(--radius-full);
-    background: radial-gradient(closest-side, rgb(var(--color-sun-rgb) / 0.16), transparent);
-    pointer-events: none;
-  }
-
-  .book-love__mark {
-    width: 48px;
-    height: auto;
-    color: var(--color-sun);
   }
 
   .book-love__quote {
-    position: relative;
-    z-index: 1;
-    flex: 1;
     margin: 0;
     font-family: var(--font-heading--family);
-    font-size: clamp(22px, 2.2vw, 30px);
-    font-weight: 500;
-    line-height: 1.4;
-    color: #fff;
+    font-size: clamp(20px, 1.9vw, 26px);
+    font-weight: 400;
+    line-height: 1.55;
+    color: var(--color-ink);
     text-wrap: pretty;
   }
 
   .book-love__signature {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    padding-top: var(--space-5);
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    color: rgb(255 255 255 / 0.75);
-    border-top: var(--stroke-sm) solid rgb(255 255 255 / 0.16);
-  }
-
-  .book-love__signature-dot {
-    width: 8px;
-    aspect-ratio: 1;
-    border-radius: var(--radius-full);
-    background: var(--color-sun);
-  }
-
-  /* ---------- Highlights ---------- */
-
-  .book-love__highlights {
-    display: grid;
-    grid-auto-rows: 1fr;
-    gap: var(--space-4);
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .book-love__grid--highlights .book-love__highlights {
-    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
-  }
-
-  .book-love__highlight {
-    --tone-soft: var(--color-sky-soft);
-    --tone-deep: var(--color-sky-deep);
-
-    display: flex;
-    align-items: center;
-    gap: var(--space-4);
-    padding: var(--space-5);
-    background: var(--tone-soft);
-    border-radius: var(--radius-lg);
-  }
-
-  .book-love__highlight--sun {
-    --tone-soft: var(--color-sun-soft);
-    --tone-deep: var(--color-sun-deep);
-  }
-
-  .book-love__highlight--leaf {
-    --tone-soft: var(--color-leaf-soft);
-    --tone-deep: var(--color-leaf-deep);
-  }
-
-  .book-love__highlight--grape {
-    --tone-soft: var(--color-grape-soft);
-    --tone-deep: var(--color-grape);
-  }
-
-  .book-love__highlight--tomato {
-    --tone-soft: var(--color-tomato-soft);
-    --tone-deep: var(--color-tomato-deep);
-  }
-
-  .book-love__highlight-icon {
-    display: grid;
-    flex: none;
-    place-items: center;
-    width: 52px;
-    height: 52px;
-    color: var(--tone-deep);
-    background: var(--color-card);
-    border-radius: var(--radius-full);
-    box-shadow: var(--shadow-sm);
-  }
-
-  .book-love__highlight-label {
-    font-family: var(--font-heading--family);
-    font-size: 20px;
-    font-weight: 600;
-    line-height: 1.25;
-    color: var(--color-ink);
+    margin-top: var(--space-5);
+    font-family: var(--font-accent--family);
+    font-style: var(--font-accent--style);
+    font-weight: var(--font-accent--weight);
+    font-size: 18px;
+    color: var(--color-grape);
   }
 
   .book-love--empty {
@@ -327,39 +143,17 @@
       padding-block: var(--space-8);
     }
 
-    .book-love__grid {
+    .book-love__frame {
       grid-template-columns: minmax(0, 1fr);
-    }
-
-    .book-love__highlights {
-      grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+      gap: var(--space-5);
     }
   }
 
   @media screen and (max-width: 749px) {
-    .book-love__header {
-      margin-bottom: var(--space-6);
-    }
-
-    .book-love__note {
+    .book-love__frame {
+      padding: var(--space-6) var(--space-5);
+      border-width: calc(var(--colour-bar-thickness) * 0.7);
       border-radius: var(--radius-lg);
-    }
-
-    .book-love__mark {
-      width: 36px;
-    }
-
-    .book-love__highlight {
-      padding: var(--space-4);
-    }
-
-    .book-love__highlight-icon {
-      width: 44px;
-      height: 44px;
-    }
-
-    .book-love__highlight-label {
-      font-size: 18px;
     }
   }
 {% endstylesheet %}
@@ -375,7 +169,7 @@
   "settings": [
     {
       "type": "paragraph",
-      "content": "Shows the product's Why we love it and Highlights metafields."
+      "content": "Shows the product's Why we love it metafield (custom.why_we_love_it). Hidden when it's empty."
     },
     {
       "type": "text",
