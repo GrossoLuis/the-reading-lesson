@@ -1,7 +1,9 @@
 {%- comment -%}
   Author on the product page, from the product's custom.author metaobject (name, photo,
-  bio): a card with the portrait, the bio and a link to the author's page, then a row of
-  their other books (snippets/book-shelf.liquid).
+  bio), dressed like the homepage learning-path cards: a soft-colour card with a white
+  label pill, the portrait on a ring of the card's colour, the name in Besley, the bio
+  and an ink button to the author's page. Then a row of their other books
+  (snippets/book-shelf.liquid).
 
   Hidden when the product has no author; in the theme editor it shows a note.
 {%- endcomment -%}
@@ -24,14 +26,19 @@
 {%- if author_name != blank -%}
   <div class="book-author surface-{{ s.surface }}">
     <div class="book-author__container">
-      <article class="book-author__card">
+      <article class="book-author__card book-author__card--{{ s.card_colour }}">
         <div class="book-author__portrait">
           {%- if photo != blank -%}
             {%- assign photo_image = photo.preview_image | default: photo -%}
             {{-
               photo_image
-              | image_url: width: 480
-              | image_tag: class: 'book-author__photo', widths: '160, 240, 320, 480', sizes: '160px', loading: 'lazy', alt: author_name
+              | image_url: width: 560
+              | image_tag:
+                class: 'book-author__photo',
+                widths: '200, 280, 400, 560',
+                sizes: '(min-width: 750px) 240px, 160px',
+                loading: 'lazy',
+                alt: author_name
             -}}
           {%- else -%}
             <span
@@ -44,22 +51,22 @@
 
         <div class="book-author__body">
           {%- if s.eyebrow != blank -%}
-            <p class="book-author__eyebrow text-eyebrow">{{ s.eyebrow }}</p>
+            <p class="book-author__tag">{{ s.eyebrow }}</p>
           {%- endif -%}
-          <h2 class="book-author__name h4">{{ author_name }}</h2>
+          <h2 class="book-author__name h3">{{ author_name }}</h2>
           {%- if bio != blank -%}
             <p class="book-author__bio">{{ bio | newline_to_br }}</p>
           {%- endif -%}
           {%- if author_url != blank and s.link_label != blank -%}
             {%- assign link_label = s.link_label | replace: '[author]', author_name -%}
-            {%- render 'brand-button', label: link_label, url: author_url, style: 'secondary', arrow: true -%}
+            {%- render 'brand-button', label: link_label, url: author_url, style: 'primary', arrow: true -%}
           {%- endif -%}
         </div>
       </article>
 
       {%- if shelf != blank -%}
         <div class="book-author__books">
-          <h3 class="book-author__books-heading h5">
+          <h3 class="book-author__books-heading h4">
             {{- s.books_heading | replace: '[author]', author_name -}}
           </h3>
           {{ shelf }}
@@ -78,44 +85,80 @@
 
 {% stylesheet %}
   .book-author {
-    padding-block: var(--space-8);
+    padding-block: var(--space-9);
   }
 
   .book-author__container {
     display: flex;
     flex-direction: column;
-    gap: var(--space-7);
+    gap: var(--space-8);
     max-width: var(--page-width);
     margin-inline: auto;
     padding-inline: var(--page-margin);
   }
 
   .book-author__card {
+    --author-soft: var(--color-sky-soft);
+    --author-color: var(--color-sky);
+    --author-deep: var(--color-sky-deep);
+
+    position: relative;
     display: grid;
-    grid-template-columns: 160px minmax(0, 1fr);
-    gap: var(--space-6);
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: clamp(var(--space-6), 5vw, var(--space-8));
     align-items: center;
-    max-width: 58rem;
-    padding: var(--space-6);
-    background: var(--color-card);
-    border: var(--stroke-sm) solid var(--color-line);
-    border-radius: var(--radius-lg);
+    padding: clamp(var(--space-6), 5vw, var(--space-8));
+    overflow: hidden;
+    background: var(--author-soft);
+    border-radius: var(--radius-xl);
+  }
+
+  .book-author__card--sun {
+    --author-soft: var(--color-sun-soft);
+    --author-color: var(--color-sun);
+    --author-deep: var(--color-sun-deep);
+  }
+
+  .book-author__card--leaf {
+    --author-soft: var(--color-leaf-soft);
+    --author-color: var(--color-leaf);
+    --author-deep: var(--color-leaf-deep);
+  }
+
+  .book-author__card--grape {
+    --author-soft: var(--color-grape-soft);
+    --author-color: var(--color-grape);
+    --author-deep: var(--color-grape);
+  }
+
+  /* A soft halo of the card's colour behind the portrait, as behind the learning-path covers. */
+  .book-author__card::before {
+    content: '';
+    position: absolute;
+    left: -6%;
+    top: 50%;
+    width: 46%;
+    aspect-ratio: 1;
+    border-radius: var(--radius-full);
+    background: radial-gradient(closest-side, rgb(255 255 255 / 0.7), transparent);
+    transform: translateY(-50%);
+    pointer-events: none;
   }
 
   .book-author__portrait {
     position: relative;
-    width: 160px;
+    width: 100%;
     aspect-ratio: 1;
   }
 
-  /* A sun ring offset behind the portrait, from the brand's colour-bar frame. */
+  /* Ring in the card's colour, offset like a sticker behind the photo. */
   .book-author__portrait::before {
     content: '';
     position: absolute;
     inset: 0;
     border-radius: var(--radius-full);
-    background: var(--color-sun);
-    transform: translate(8px, 8px);
+    background: var(--author-color);
+    transform: translate(10px, 10px);
   }
 
   .book-author__photo,
@@ -125,41 +168,53 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    border: 6px solid var(--color-card);
     border-radius: var(--radius-full);
+    box-shadow: var(--shadow-md);
   }
 
   .book-author__initial {
     display: grid;
     place-items: center;
     font-family: var(--font-heading--family);
-    font-size: 64px;
+    font-size: 88px;
     font-weight: 600;
-    color: var(--color-ink);
-    background: var(--color-sky-soft);
+    color: var(--author-deep);
+    background: var(--color-card);
   }
 
   .book-author__body {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: var(--space-3);
+    gap: var(--space-4);
+    max-width: 40rem;
   }
 
-  .book-author__eyebrow {
-    display: flex;
+  .book-author__tag {
+    display: inline-flex;
     align-items: center;
-    gap: var(--space-3);
+    gap: var(--space-2);
     margin: 0;
-    color: var(--color-ink-muted);
+    padding: 5px 11px 5px 9px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--author-deep);
+    background: rgb(var(--color-card-rgb) / 0.85);
+    border-radius: var(--radius-full);
+    box-shadow: 0 1px 2px rgb(var(--color-ink-rgb) / 0.06);
   }
 
-  .book-author__eyebrow::before {
+  .book-author__tag::before {
     content: '';
-    flex: none;
-    width: 8px;
+    width: 7px;
     aspect-ratio: 1;
     border-radius: var(--radius-full);
-    background: var(--color-sun);
+    background: var(--author-color);
   }
 
   .book-author__name {
@@ -169,11 +224,14 @@
 
   .book-author__bio {
     margin: 0 0 var(--space-2);
-    color: var(--color-ink-muted);
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--color-ink);
+    opacity: 0.8;
   }
 
   .book-author__books-heading {
-    margin: 0 0 var(--space-5);
+    margin: 0 0 var(--space-6);
     color: var(--color-ink);
   }
 
@@ -192,22 +250,23 @@
 
   @media screen and (max-width: 749px) {
     .book-author {
-      padding-block: var(--space-7);
+      padding-block: var(--space-8);
     }
 
     .book-author__card {
       grid-template-columns: minmax(0, 1fr);
       justify-items: start;
       gap: var(--space-5);
-      padding: var(--space-5);
+      padding: var(--space-6) var(--space-5);
+      border-radius: var(--radius-lg);
     }
 
     .book-author__portrait {
-      width: 112px;
+      width: 150px;
     }
 
     .book-author__initial {
-      font-size: 44px;
+      font-size: 56px;
     }
   }
 {% endstylesheet %}
@@ -228,7 +287,7 @@
     {
       "type": "text",
       "id": "eyebrow",
-      "label": "Eyebrow",
+      "label": "Label",
       "default": "Meet the author"
     },
     {
@@ -237,6 +296,18 @@
       "label": "Link label",
       "info": "[author] is replaced with the author's name. Links to the author's page.",
       "default": "All books by [author]"
+    },
+    {
+      "type": "select",
+      "id": "card_colour",
+      "label": "Card colour",
+      "options": [
+        { "value": "sky", "label": "Sky" },
+        { "value": "sun", "label": "Sun" },
+        { "value": "leaf", "label": "Leaf" },
+        { "value": "grape", "label": "Grape" }
+      ],
+      "default": "sky"
     },
     {
       "type": "checkbox",
@@ -265,9 +336,7 @@
       "label": "Background",
       "options": [
         { "value": "paper", "label": "Paper" },
-        { "value": "paper-deep", "label": "Paper deep" },
-        { "value": "sun-soft", "label": "Sun soft" },
-        { "value": "sky-soft", "label": "Sky soft" }
+        { "value": "paper-deep", "label": "Paper deep" }
       ],
       "default": "paper"
     }

@@ -2,9 +2,11 @@
   Look inside: sample pages from the product's custom.look_inside metafield (a list of
   images, in reading order).
 
-  A row of spreads that scrolls sideways (drag or swipe), then a full-screen viewer:
-  arrows, keyboard, swipe on phones, a page counter and thumbnails along the bottom.
-  Behaviour lives in assets/book-look-inside.js.
+  The heading like the homepage sections, with round arrows that move the row of pages.
+  The pages are the protagonists: big, on white with the book shadow, numbered, and a
+  "zoom" chip on hover. Any page opens the full-screen viewer at that page: arrows,
+  keyboard, swipe on phones, a counter and thumbnails. Behaviour lives in
+  assets/book-look-inside.js.
 
   Hidden when the product has no sample pages; in the theme editor it shows a note.
 {%- endcomment -%}
@@ -24,26 +26,39 @@
   <book-look-inside class="look-inside surface-{{ s.surface }}">
     <div class="look-inside__container">
       <header class="look-inside__header">
-        <div>
+        <div class="look-inside__intro">
           {%- if s.eyebrow != blank -%}
             <p class="look-inside__eyebrow text-eyebrow">{{ s.eyebrow }}</p>
           {%- endif -%}
           {%- if s.heading != blank -%}
-            <h2 class="look-inside__heading h3">{{ s.heading }}</h2>
+            <h2 class="look-inside__heading text-display">{{ s.heading }}</h2>
           {%- endif -%}
           {%- if s.text != blank -%}
             <p class="look-inside__text">{{ s.text }}</p>
           {%- endif -%}
         </div>
-        <button
-          type="button"
-          class="brand-button brand-button--secondary look-inside__open"
-          data-viewer-open
-          data-index="0"
-        >
-          {%- render 'brand-icon', name: 'expand', size: 18 -%}
-          <span>{{ s.button_label }}</span>
-        </button>
+
+        {%- if page_count > 1 -%}
+          <div class="look-inside__arrows">
+            <button
+              type="button"
+              class="look-inside__arrow"
+              data-track-step="-1"
+              aria-label="Previous pages"
+              disabled
+            >
+              {% render 'brand-icon', name: 'arrow-left', size: 20 %}
+            </button>
+            <button
+              type="button"
+              class="look-inside__arrow"
+              data-track-step="1"
+              aria-label="Next pages"
+            >
+              {% render 'brand-icon', name: 'arrow-right', size: 20 %}
+            </button>
+          </div>
+        {%- endif -%}
       </header>
 
       <ul
@@ -59,26 +74,37 @@
               assign alt = product.title | append: ', sample page ' | append: forloop.index
             endif
           -%}
-          <li class="look-inside__item">
+          <li
+            class="look-inside__item"
+            data-track-item
+          >
             <button
               type="button"
               class="look-inside__page"
               data-viewer-open
               data-index="{{ forloop.index0 }}"
               aria-label="Open page {{ forloop.index }} of {{ page_count }} full screen"
-              style="--ratio: {{ image.aspect_ratio | default: 1.4 }};"
+              style="--ratio: {{ image.aspect_ratio | default: 0.75 }};"
             >
               {{-
                 image
                 | image_url: width: 1200
                 | image_tag:
                   class: 'look-inside__image',
-                  widths: '360, 540, 720, 960, 1200',
-                  sizes: '(min-width: 990px) 40vw, 80vw',
+                  widths: '400, 600, 800, 1000, 1200',
+                  sizes: '(min-width: 990px) 420px, 70vw',
                   loading: 'lazy',
                   alt: alt
               -}}
+              <span
+                class="look-inside__zoom"
+                aria-hidden="true"
+              >
+                {%- render 'brand-icon', name: 'expand', size: 16 -%}
+                Zoom
+              </span>
             </button>
+            <p class="look-inside__number text-eyebrow">Page {{ forloop.index }}</p>
           </li>
         {%- endfor -%}
       </ul>
@@ -86,7 +112,7 @@
 
     <dialog
       class="look-inside-viewer"
-      aria-label="{{ s.heading | default: 'Look inside' | escape }}: {{ product.title | escape }}"
+      aria-label="{{ s.heading | strip_html | default: 'Look inside' | escape }}: {{ product.title | escape }}"
       data-viewer
     >
       <div class="look-inside-viewer__bar">
@@ -120,16 +146,14 @@
             endif
           -%}
           <li class="look-inside-viewer__slide">
-            {{-
-              image
-              | image_url: width: 2400
-              | image_tag:
-                class: 'look-inside-viewer__image',
-                widths: '960, 1400, 1800, 2400',
-                sizes: '100vw',
-                loading: 'lazy',
-                alt: alt
-            -}}
+            {%- comment -%} Not lazy: lazy images inside a closed dialog never load. The viewer sets the src when it opens. {%- endcomment -%}
+            <img
+              class="look-inside-viewer__image"
+              data-src="{{ image | image_url: width: 2000 }}"
+              width="{{ image.width }}"
+              height="{{ image.height }}"
+              alt="{{ alt | escape }}"
+            >
           </li>
         {%- endfor -%}
       </ul>
@@ -166,7 +190,12 @@
                 data-index="{{ forloop.index0 }}"
                 aria-label="Page {{ forloop.index }}"
               >
-                {{- image | image_url: width: 200 | image_tag: loading: 'lazy', alt: '' -}}
+                <img
+                  data-src="{{ image | image_url: width: 160 }}"
+                  width="64"
+                  height="88"
+                  alt=""
+                >
               </button>
             </li>
           {%- endfor -%}
@@ -186,7 +215,7 @@
 {% stylesheet %}
   .look-inside {
     display: block;
-    padding-block: var(--space-8);
+    padding-block: var(--space-9);
     overflow: hidden;
   }
 
@@ -198,18 +227,21 @@
 
   .look-inside__header {
     display: flex;
-    flex-wrap: wrap;
     align-items: flex-end;
     justify-content: space-between;
-    gap: var(--space-5);
-    margin-bottom: var(--space-6);
+    gap: var(--space-6);
+    margin-bottom: var(--space-7);
+  }
+
+  .look-inside__intro {
+    max-width: 44rem;
   }
 
   .look-inside__eyebrow {
     display: flex;
     align-items: center;
     gap: var(--space-3);
-    margin: 0 0 var(--space-3);
+    margin: 0 0 var(--space-4);
     color: var(--color-ink-muted);
   }
 
@@ -225,54 +257,106 @@
   .look-inside__heading {
     margin: 0;
     color: var(--color-ink);
+    text-wrap: balance;
+  }
+
+  .look-inside__heading :is(em, i) {
+    font-family: var(--font-accent--family);
+    font-style: var(--font-accent--style);
+    font-weight: var(--font-accent--weight);
+    color: var(--color-grape);
   }
 
   .look-inside__text {
-    max-width: 36rem;
-    margin: var(--space-3) 0 0;
+    margin: var(--space-4) 0 0;
+    font-size: 17px;
     color: var(--color-ink-muted);
   }
 
-  .look-inside__open {
-    flex: none;
+  .look-inside__arrows[hidden] {
+    display: none;
   }
 
-  /* Spreads in a row that bleeds off the right edge, so there's always more to see. */
+  .look-inside__arrows {
+    display: flex;
+    flex: none;
+    gap: var(--space-3);
+  }
+
+  .look-inside__arrow {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    padding: 0;
+    color: var(--color-ink);
+    background: var(--color-card);
+    border: var(--stroke-sm) solid var(--color-line-strong);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease, opacity 150ms ease;
+  }
+
+  .look-inside__arrow:hover:not([disabled]) {
+    color: #fff;
+    background: var(--color-ink);
+    border-color: var(--color-ink);
+  }
+
+  .look-inside__arrow[disabled] {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  .look-inside__arrow:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus-ring, var(--color-grape));
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  /* The row bleeds off the right edge, so there are always more pages to see. */
   .look-inside__track {
     display: flex;
-    gap: var(--space-5);
+    gap: var(--space-6);
     margin: 0 calc(var(--page-margin) * -1);
-    padding: var(--space-2) var(--page-margin) var(--space-5);
+    padding: var(--space-3) var(--page-margin) var(--space-6);
     overflow-x: auto;
     list-style: none;
     scroll-snap-type: x mandatory;
     scroll-padding-inline: var(--page-margin);
-    scrollbar-width: thin;
-    scrollbar-color: var(--color-line-strong) transparent;
+    scrollbar-width: none;
     overscroll-behavior-x: contain;
   }
 
+  .look-inside__track::-webkit-scrollbar {
+    display: none;
+  }
+
   .look-inside__item {
+    display: flex;
     flex: none;
+    flex-direction: column;
+    gap: var(--space-4);
     scroll-snap-align: start;
   }
 
   .look-inside__page {
+    position: relative;
     display: block;
-    height: clamp(240px, 34vw, 440px);
+    height: clamp(320px, 36vw, 520px);
     aspect-ratio: var(--ratio);
     padding: 0;
     overflow: hidden;
-    background: var(--color-card);
+    background: #fff;
     border: 0;
     border-radius: var(--radius-image);
-    box-shadow: var(--shadow-book, var(--shadow-md));
+    box-shadow: var(--shadow-book, var(--shadow-lg));
     cursor: zoom-in;
-    transition: transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    transition: transform 400ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 400ms ease;
   }
 
   .look-inside__page:hover {
-    transform: translateY(-4px);
+    transform: translateY(-6px) rotate(-0.6deg);
+    box-shadow: var(--shadow-lg);
   }
 
   .look-inside__page:focus-visible {
@@ -285,6 +369,34 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+
+  .look-inside__zoom {
+    position: absolute;
+    top: var(--space-3);
+    right: var(--space-3);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    background: rgb(var(--color-ink-rgb) / 0.85);
+    border-radius: var(--radius-full);
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity 200ms ease, transform 200ms ease;
+  }
+
+  .look-inside__page:is(:hover, :focus-visible) .look-inside__zoom {
+    opacity: 1;
+    transform: none;
+  }
+
+  .look-inside__number {
+    margin: 0;
+    color: var(--color-ink-muted);
   }
 
   .look-inside--empty {
@@ -310,7 +422,7 @@
     margin: 0;
     padding: 0;
     color: var(--color-ink);
-    background: var(--color-paper);
+    background: var(--color-paper-deep);
     border: 0;
   }
 
@@ -341,9 +453,12 @@
 
   .look-inside-viewer__slides {
     display: flex;
+    height: 100%;
+    min-height: 0;
     margin: 0;
     padding: 0;
     overflow-x: auto;
+    overflow-y: hidden;
     list-style: none;
     scroll-snap-type: x mandatory;
     scrollbar-width: none;
@@ -355,9 +470,12 @@
   }
 
   .look-inside-viewer__slide {
-    display: grid;
+    display: flex;
     flex: 0 0 100%;
-    place-items: center;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 0;
     padding: 0 clamp(var(--space-4), 8vw, 120px);
     scroll-snap-align: center;
     scroll-snap-stop: always;
@@ -365,13 +483,14 @@
 
   .look-inside-viewer__image {
     display: block;
-    max-width: 100%;
-    max-height: 100%;
     width: auto;
     height: auto;
+    max-width: 100%;
+    max-height: 100%;
     object-fit: contain;
+    background: #fff;
     border-radius: var(--radius-image);
-    box-shadow: var(--shadow-book, var(--shadow-md));
+    box-shadow: var(--shadow-book, var(--shadow-lg));
   }
 
   .look-inside-viewer__button {
@@ -388,7 +507,9 @@
     cursor: pointer;
   }
 
-  .look-inside-viewer__button:hover {
+  .look-inside-viewer__button:hover:not([disabled]) {
+    color: #fff;
+    background: var(--color-ink);
     border-color: var(--color-ink);
   }
 
@@ -429,11 +550,11 @@
 
   .look-inside-viewer__thumb {
     display: block;
-    width: 64px;
-    height: 44px;
+    width: 48px;
+    height: 64px;
     padding: 0;
     overflow: hidden;
-    background: var(--color-card);
+    background: #fff;
     border: var(--stroke-sm) solid var(--color-line);
     border-radius: var(--radius-image);
     opacity: 0.55;
@@ -460,15 +581,24 @@
 
   @media screen and (max-width: 749px) {
     .look-inside {
-      padding-block: var(--space-7);
+      padding-block: var(--space-8);
     }
 
-    .look-inside__open {
-      width: 100%;
+    .look-inside__header {
+      margin-bottom: var(--space-6);
+    }
+
+    .look-inside__arrows {
+      display: none;
+    }
+
+    .look-inside__track {
+      gap: var(--space-4);
     }
 
     .look-inside__page {
-      height: 56vw;
+      height: 92vw;
+      max-height: 440px;
     }
 
     .look-inside-viewer__slide {
@@ -486,6 +616,8 @@
 
   @media (prefers-reduced-motion: reduce) {
     .look-inside__page,
+    .look-inside__zoom,
+    .look-inside__arrow,
     .look-inside-viewer__thumb {
       transition: none;
     }
@@ -516,22 +648,17 @@
       "default": "Sample pages"
     },
     {
-      "type": "text",
+      "type": "inline_richtext",
       "id": "heading",
       "label": "Heading",
-      "default": "Look inside"
+      "info": "Put a word in italics to give it the accent colour.",
+      "default": "Take a <em>look</em> inside"
     },
     {
       "type": "text",
       "id": "text",
       "label": "Text",
-      "default": "Turn a few pages before it arrives at your door."
-    },
-    {
-      "type": "text",
-      "id": "button_label",
-      "label": "Button label",
-      "default": "Open the book"
+      "default": "Turn a few pages before it arrives at your door. Click any page to read it full screen."
     },
     {
       "type": "select",
@@ -543,7 +670,7 @@
         { "value": "sky-soft", "label": "Sky soft" },
         { "value": "leaf-soft", "label": "Leaf soft" }
       ],
-      "default": "paper"
+      "default": "paper-deep"
     }
   ],
   "presets": [

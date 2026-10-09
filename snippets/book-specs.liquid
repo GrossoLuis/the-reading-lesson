@@ -1,0 +1,189 @@
+{%- doc -%}
+  The book's details as plain lines ("Format: Hardcover"), for the "Book details"
+  accordion of the product section. Only the fields with a value are listed.
+
+  Format, pages, dimensions and ISBN belong to the variant: when the shopper picks
+  another format (pdp:variant-change), assets/book-details.js switches those lines to it.
+  Metafields: METAFIELDS.md. Renders nothing when the product has none of them.
+
+  @param {product} product
+
+  @example
+  {% render 'book-specs', product: product %}
+{%- enddoc -%}
+
+{%- liquid
+  assign book = product.metafields.custom
+  assign current_variant = product.selected_or_first_available_variant
+
+  assign author = book.author.value
+  assign author_name = author.name.value | default: author
+  assign series = book.series.value
+  assign series_position = 0
+  if series != blank
+    for series_book in series.books.value
+      if series_book.id == product.id
+        assign series_position = forloop.index
+        break
+      endif
+    endfor
+  endif
+
+  assign format_index = -1
+  for option in product.options_with_values
+    assign option_name = option.name | downcase
+    if option_name contains 'format'
+      assign format_index = forloop.index0
+      break
+    endif
+  endfor
+
+  comment
+    Variant lines show when any variant has a value; the current variant's value fills them.
+  endcomment
+  assign has_pages = false
+  assign has_dimensions = false
+  assign has_isbn = false
+  for variant in product.variants
+    if variant.metafields.custom.pages.value != blank
+      assign has_pages = true
+    endif
+    if variant.metafields.custom.dimensions.value != blank
+      assign has_dimensions = true
+    endif
+    if variant.metafields.custom.isbn.value != blank
+      assign has_isbn = true
+    endif
+  endfor
+
+  assign current_pages = current_variant.metafields.custom.pages.value
+  assign current_dimensions = current_variant.metafields.custom.dimensions.value
+  assign current_isbn = current_variant.metafields.custom.isbn.value
+-%}
+
+{%- capture lines -%}
+  {%- if author_name != blank -%}
+    <li>
+      <span class="book-specs__label">Author:</span>
+      {% if author.system.url != blank -%}
+        <a href="{{ author.system.url }}">{{ author_name }}</a>
+      {%- else -%}
+        {{ author_name }}
+      {%- endif %}
+    </li>
+  {%- endif -%}
+  {%- if format_index >= 0 -%}
+    <li>
+      <span class="book-specs__label">Format:</span>
+      <span data-spec="format">{{ current_variant.options[format_index] }}</span>
+    </li>
+  {%- endif -%}
+  {%- if book.age_range.value != blank -%}
+    <li><span class="book-specs__label">Ages:</span> {{ book.age_range.value | replace: '-', '–' }}</li>
+  {%- endif -%}
+  {%- if book.reading_level.value != blank -%}
+    <li><span class="book-specs__label">Reading level:</span> {{ book.reading_level.value }}</li>
+  {%- endif -%}
+  {%- if series != blank -%}
+    <li>
+      <span class="book-specs__label">Series:</span>
+      <a href="#book-series">{{ series.name.value }}</a>
+      {%- if series_position > 0 %}, book {{ series_position }}{% endif -%}
+    </li>
+  {%- endif -%}
+  {%- if has_pages -%}
+    <li
+      data-spec-row="pages"
+      {% if current_pages == blank %}
+        hidden
+      {% endif %}
+    >
+      <span class="book-specs__label">Pages:</span>
+      <span data-spec="pages">{{ current_pages }}</span>
+    </li>
+  {%- endif -%}
+  {%- if has_dimensions -%}
+    <li
+      data-spec-row="dimensions"
+      {% if current_dimensions == blank %}
+        hidden
+      {% endif %}
+    >
+      <span class="book-specs__label">Dimensions:</span>
+      <span data-spec="dimensions">{{ current_dimensions }}</span>
+    </li>
+  {%- endif -%}
+  {%- if has_isbn -%}
+    <li
+      data-spec-row="isbn"
+      {% if current_isbn == blank %}
+        hidden
+      {% endif %}
+    >
+      <span class="book-specs__label">ISBN:</span>
+      <span data-spec="isbn">{{ current_isbn }}</span>
+    </li>
+  {%- endif -%}
+  {%- if book.publisher.value != blank -%}
+    <li><span class="book-specs__label">Publisher:</span> {{ book.publisher.value }}</li>
+  {%- endif -%}
+  {%- if book.publication_year.value != blank -%}
+    <li><span class="book-specs__label">Published:</span> {{ book.publication_year.value }}</li>
+  {%- endif -%}
+{%- endcapture -%}
+
+{%- if lines != blank -%}
+  <script
+    type="module"
+    src="{{ 'book-details.js' | asset_url }}"
+  ></script>
+
+  <book-details data-product-id="{{ product.id }}">
+    <ul
+      class="book-specs"
+      role="list"
+    >
+      {{ lines }}
+    </ul>
+    <script
+      type="application/json"
+      data-spec-variants
+    >
+      [
+        {%- for variant in product.variants -%}
+          {
+            "id": {{ variant.id }},
+            "format": {% if format_index >= 0 %}{{ variant.options[format_index] | json }}{% else %}null{% endif %},
+            "pages": {{ variant.metafields.custom.pages.value | json }},
+            "dimensions": {{ variant.metafields.custom.dimensions.value | json }},
+            "isbn": {{ variant.metafields.custom.isbn.value | json }}
+          }{% unless forloop.last %},{% endunless %}
+        {%- endfor -%}
+      ]
+    </script>
+  </book-details>
+{%- endif -%}
+
+{% stylesheet %}
+  .book-specs {
+    display: grid;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .book-specs [hidden] {
+    display: none;
+  }
+
+  .book-specs__label {
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+
+  .book-specs a {
+    color: var(--color-link);
+    text-underline-offset: 3px;
+  }
+{% endstylesheet %}

@@ -41,6 +41,13 @@
             "content": "<p>Orders ship in 1–2 business days. Shipping is free on orders over $40.</p><p>Not the right fit? Return it within 30 days for a full refund.</p>",
             "open": false
           }
+        },
+        "book_details": {
+          "type": "book_details",
+          "settings": {
+            "title": "Book details",
+            "open": false
+          }
         }
       },
       "block_order": [
@@ -48,6 +55,7 @@
         "trust_gift",
         "trust_returns",
         "description",
+        "book_details",
         "shipping"
       ],
       "settings": {
@@ -66,24 +74,22 @@
         "structured_data": "book"
       }
     },
-    "details": {
-      "type": "book-details",
+    "love": {
+      "type": "book-love",
       "settings": {
-        "specs_heading": "The details",
-        "note_heading": "Why we love it",
-        "note_signature": "The Reading Lesson team",
-        "note_surface": "card",
-        "surface": "paper-deep"
+        "eyebrow": "From our shelf",
+        "heading": "Why we <em>love</em> it",
+        "signature": "The Reading Lesson team",
+        "surface": "paper"
       }
     },
     "look_inside": {
       "type": "book-look-inside",
       "settings": {
         "eyebrow": "Sample pages",
-        "heading": "Look inside",
-        "text": "Turn a few pages before it arrives at your door.",
-        "button_label": "Open the book",
-        "surface": "paper"
+        "heading": "Take a <em>look</em> inside",
+        "text": "Turn a few pages before it arrives at your door. Click any page to read it full screen.",
+        "surface": "paper-deep"
       }
     },
     "series": {
@@ -101,74 +107,106 @@
         "show_books": true,
         "books_heading": "More by [author]",
         "books_limit": 4,
-        "surface": "paper"
+        "surface": "paper",
+        "card_colour": "sky"
       }
     },
-    "reviews": {
-      "type": "book-reviews",
+    "testimonials": {
+      "type": "testimonials",
       "blocks": {
-        "review_1": {
+        "featured_PXe8gt": {
+          "type": "featured",
+          "settings": {
+            "quote": "<p>“We’d tried another popular reading program first. My daughter would grimace and beg me to do anything else. With The Reading Lesson, we got past the first lessons <em>‘without tears and complaints’</em> — and it delivered results.”</p>",
+            "source": "<p><strong>Paraphrased from a NextGen Homeschool curriculum review.</strong> Families arriving after a first attempt that didn’t take is the most common story we hear.</p>"
+          }
+        },
+        "featured_tyz9Ty": {
+          "type": "featured",
+          "settings": {
+            "quote": "<p>“Refreshingly straightforward approach and uncluttered format. <em>Highly recommended.</em>”</p>",
+            "source": "<p><strong>Library Journal.</strong> Discovery Education independently praised the same thing: calm, uncluttered pages.</p>"
+          }
+        },
+        "featured_VDkgKy": {
+          "type": "featured",
+          "settings": {
+            "quote": "<p>“By far the <em>easiest to use</em>.”</p>",
+            "source": "<p><strong>Home Educating Family Association</strong>, after trying several reading programs. Every lesson tells you exactly what to say.</p>"
+          }
+        },
+        "highlight_6gtEPQ": {
+          "type": "highlight",
+          "settings": {
+            "title": "Easiest to use",
+            "text": "<p>“By far the easiest to use,” wrote one reviewer for the Home Educating Family Association, after trying several reading programs. Every lesson tells you exactly what to say.</p>",
+            "color": "sky"
+          }
+        },
+        "highlight_WinJGb": {
+          "type": "highlight",
+          "settings": {
+            "title": "Calm, uncluttered pages",
+            "text": "<p>“Refreshingly straightforward approach and uncluttered format. Highly recommended.” — <em>Library Journal</em>. Discovery Education independently praised the same thing. The calm is the method.</p>",
+            "color": "sun"
+          }
+        },
+        "highlight_iNXC9A": {
+          "type": "highlight",
+          "settings": {
+            "title": "It simply works",
+            "text": "<p>“Take my advice. This book works!” — Jennifer LB Lesse, <em>A StoryBook Weaver’s Book Reviews</em>. Kids read their first tiny story before Lesson One is over.</p>",
+            "color": "leaf"
+          }
+        },
+        "review_aBeEJG": {
           "type": "review",
           "settings": {
             "rating": 5,
-            "title": "She asked for one more lesson",
-            "text": "<p>Twenty minutes a day and by the second week she was sounding out words on cereal boxes.</p>",
-            "name": "Laura M.",
-            "detail": "Mom of a 5-year-old",
-            "date": "March 2026",
-            "verified": true
+            "quote": "<p>“The single best program for teaching children to read I have found to date, and I have seen many. It worked. Not only was it simple enough for anyone to use, but the program is built on solid phonics and whole language principles.”</p>",
+            "author": "Amazon reviewer"
           }
         },
-        "review_2": {
+        "review_DJgXpq": {
           "type": "review",
           "settings": {
             "rating": 5,
-            "title": "Clear, calm and kind",
-            "text": "<p>Every lesson tells me exactly what to say. No prep, no tears, and he is proud of himself every single day.</p>",
-            "name": "David R.",
-            "detail": "Dad of a 4-year-old",
-            "date": "February 2026",
-            "verified": true
+            "quote": "<p>“I got this a few weeks before my daughter turned 4. Amazingly, she often brings me the book in the morning when she wakes up and asks to do a page from her lesson book. She’s enjoying it.”</p>",
+            "author": "Amazon reviewer"
           }
         },
-        "review_3": {
-          "type": "review",
-          "settings": {
-            "rating": 4,
-            "title": "Worth every minute",
-            "text": "<p>We tried apps first. This book is what finally made reading click for our twins.</p>",
-            "name": "Priya S.",
-            "detail": "Mom of 6-year-old twins",
-            "date": "January 2026",
-            "verified": true
-          }
-        },
-        "review_4": {
+        "review_hELq49": {
           "type": "review",
           "settings": {
             "rating": 5,
-            "title": "A family heirloom now",
-            "text": "<p>I learned with this book thirty years ago and now my daughter is reading with it too.</p>",
-            "name": "Emily T.",
-            "detail": "Mom of a 5-year-old",
-            "date": "December 2025",
-            "verified": false
+            "quote": "<p>“We’ve successfully taught 7 children to read with The Reading Lesson and I’m currently teaching our 8th. Allow me to quell any fears you may have. This curriculum is wonderful and most importantly, it works.”</p>",
+            "author": "Amazon reviewer"
           }
         }
       },
       "block_order": [
-        "review_1",
-        "review_2",
-        "review_3",
-        "review_4"
+        "featured_PXe8gt",
+        "featured_tyz9Ty",
+        "featured_VDkgKy",
+        "highlight_6gtEPQ",
+        "highlight_WinJGb",
+        "highlight_iNXC9A",
+        "review_aBeEJG",
+        "review_DJgXpq",
+        "review_hELq49"
       ],
+      "name": "Testimonials",
       "settings": {
-        "eyebrow": "From families like yours",
-        "heading": "What parents say",
-        "average": 4.8,
-        "count": 128,
-        "button_label": "Write a review",
-        "surface": "paper-deep"
+        "eyebrow": "What parents keep saying",
+        "heading": "Three decades of <em>reviews</em>",
+        "featured_autoplay": true,
+        "featured_speed": 5,
+        "featured_label": "Featured reviews",
+        "families_eyebrow": "From families like yours",
+        "families_heading": "What parents say after Lesson 20",
+        "link_label": "Read thousands of parent reviews on Amazon",
+        "link_url": "",
+        "surface": "paper"
       }
     },
     "recs_age": {
@@ -192,11 +230,11 @@
   },
   "order": [
     "main",
-    "details",
+    "love",
     "look_inside",
     "series",
     "author",
-    "reviews",
+    "testimonials",
     "recs_age",
     "recs_related"
   ]

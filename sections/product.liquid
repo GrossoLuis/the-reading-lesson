@@ -17,9 +17,11 @@
   Book template (templates/product.book.json) turns on three settings, all off by default
   so the standard product template is unchanged:
   - Book details: age seal on the gallery, card colour behind it, badge and reading level
-    chips, "by <author>" and "Book 2 of 4 in <series>" from the metafields in METAFIELDS.md.
+    chips, "by <author>" and "Book 2 of 4 in <series>" from the book metafields.
   - Sticky add to cart: a compact bar on phones once the main button scrolls away.
   - Structured data as a book (snippets/book-structured-data.liquid).
+  The "Book details" block adds an accordion with the book's specs as plain lines
+  (snippets/book-specs.liquid); it renders nothing for a product without them.
 {%- endcomment -%}
 
 <script
@@ -57,6 +59,7 @@
 
   assign accordions = section.blocks | where: 'type', 'collapsible'
   assign description_blocks = section.blocks | where: 'type', 'description'
+  assign book_detail_blocks = section.blocks | where: 'type', 'book_details'
   assign trust_items = section.blocks | where: 'type', 'trust'
 
   assign low_stock_threshold = s.low_stock_threshold
@@ -303,16 +306,10 @@
               role="list"
             >
               {%- if book_badge != blank -%}
-                <li class="pdp__chip pdp__chip--{{ book_badge | handle }}">
-                  {%- render 'brand-icon', name: 'star', size: 14 -%}
-                  {{ book_badge }}
-                </li>
+                <li class="pdp__chip pdp__chip--{{ book_badge | handle }}">{{ book_badge }}</li>
               {%- endif -%}
               {%- if book_level != blank -%}
-                <li class="pdp__chip pdp__chip--level">
-                  {%- render 'brand-icon', name: 'book', size: 14 -%}
-                  {{ book_level }}
-                </li>
+                <li class="pdp__chip pdp__chip--level">{{ book_level }}</li>
               {%- endif -%}
             </ul>
           {%- endif -%}
@@ -580,7 +577,7 @@
             </ul>
           {%- endif -%}
 
-          {%- if description_blocks.size > 0 or accordions.size > 0 -%}
+          {%- if description_blocks.size > 0 or accordions.size > 0 or book_detail_blocks.size > 0 -%}
             <div class="pdp__accordions">
               {%- for block in section.blocks -%}
                 {%- case block.type -%}
@@ -598,6 +595,23 @@
                           <span class="pdp__accordion-icon" aria-hidden="true"></span>
                         </summary>
                         <div class="pdp__accordion-content pdp__rte">{{ product.description }}</div>
+                      </details>
+                    {%- endif -%}
+                  {%- when 'book_details' -%}
+                    {%- capture specs -%}{%- render 'book-specs', product: product -%}{%- endcapture -%}
+                    {%- if specs != blank -%}
+                      <details
+                        class="pdp__accordion"
+                        {% if block.settings.open %}
+                          open
+                        {% endif %}
+                        {{ block.shopify_attributes }}
+                      >
+                        <summary>
+                          {{- block.settings.title -}}
+                          <span class="pdp__accordion-icon" aria-hidden="true"></span>
+                        </summary>
+                        <div class="pdp__accordion-content">{{ specs }}</div>
                       </details>
                     {%- endif -%}
                   {%- when 'collapsible' -%}
@@ -1646,10 +1660,11 @@
   .pdp__chip {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 5px 12px;
+    min-height: 28px;
+    padding: 0 12px;
     font-size: 12px;
     font-weight: 700;
+    line-height: 1;
     letter-spacing: 0.04em;
     color: var(--color-ink);
     background: var(--color-card);
@@ -1958,6 +1973,29 @@
           "id": "open",
           "label": "Open by default",
           "default": true
+        }
+      ]
+    },
+    {
+      "type": "book_details",
+      "name": "Book details",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "The book's metafields as plain lines: author, format, ages, reading level, series, pages, dimensions, ISBN, publisher and year. Hidden when the product has none."
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Book details"
+        },
+        {
+          "type": "checkbox",
+          "id": "open",
+          "label": "Open by default",
+          "default": false
         }
       ]
     },
