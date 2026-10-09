@@ -1,11 +1,17 @@
 {%- comment -%}
   Author on the product page, from the product's custom.author metaobject (name, photo,
-  bio), dressed like the homepage learning-path cards: a soft-colour card with a white
-  label pill, the portrait on a ring of the card's colour, the name in Besley, the bio
-  and an ink button to the author's page. Then a row of their other books
-  (snippets/book-shelf.liquid).
+  bio). An editorial scene rather than a card:
 
-  Hidden when the product has no author; in the theme editor it shows a note.
+  - Left, the portrait in a ring of the four colour-bar colours (sky, sun, grape,
+    tomato), with up to three covers of the author's other books fanned behind it, a
+    tilted sun sticker and a few colour dots around.
+  - Right, "Meet <name>" with the name in the accent italic, the bio as a lead, how many
+    of their books are in the shop and a button to the author's page.
+  - Below, a row of their other books (snippets/book-shelf.liquid).
+
+  The other books come from the first 250 products of the catalogue: Liquid can't
+  query products by metafield. Hidden when the product has no author; in the theme
+  editor it shows a note.
 {%- endcomment -%}
 
 {%- liquid
@@ -15,6 +21,25 @@
   assign author_url = author.system.url
   assign photo = author.photo.value
   assign bio = author.bio.value
+  assign author_key = author.system.id | default: author
+
+  assign book_count = 0
+  assign cover_handles = ''
+  if author != blank
+    paginate collections.all.products by 250
+      for book in collections.all.products
+        assign book_author = book.metafields.custom.author.value
+        assign book_key = book_author.system.id | default: book_author
+        if book_key != blank and book_key == author_key
+          assign book_count = book_count | plus: 1
+          if book.id != product.id and book.featured_media
+            assign cover_handles = cover_handles | append: book.handle | append: ','
+          endif
+        endif
+      endfor
+    endpaginate
+  endif
+  assign cover_handles = cover_handles | split: ','
 
   if s.show_books and author != blank
     capture shelf
@@ -26,43 +51,72 @@
 {%- if author_name != blank -%}
   <div class="book-author surface-{{ s.surface }}">
     <div class="book-author__container">
-      <article class="book-author__card book-author__card--{{ s.card_colour }}">
-        <div class="book-author__portrait">
-          {%- if photo != blank -%}
-            {%- assign photo_image = photo.preview_image | default: photo -%}
+      <div class="book-author__scene">
+        <div class="book-author__stage">
+          {%- for handle in cover_handles limit: 3 -%}
+            {%- assign cover_class = 'book-author__cover book-author__cover--' | append: forloop.index -%}
             {{-
-              photo_image
-              | image_url: width: 560
-              | image_tag:
-                class: 'book-author__photo',
-                widths: '200, 280, 400, 560',
-                sizes: '(min-width: 750px) 240px, 160px',
-                loading: 'lazy',
-                alt: author_name
+              all_products[handle].featured_media.preview_image
+              | image_url: width: 360
+              | image_tag: class: cover_class, width: 180, height: 240, loading: 'lazy', alt: ''
             -}}
-          {%- else -%}
-            <span
-              class="book-author__initial"
-              aria-hidden="true"
-              >{{ author_name | slice: 0 }}</span
-            >
+          {%- endfor -%}
+
+          <span class="book-author__dot book-author__dot--sky" aria-hidden="true"></span>
+          <span class="book-author__dot book-author__dot--sun" aria-hidden="true"></span>
+          <span class="book-author__dot book-author__dot--leaf" aria-hidden="true"></span>
+
+          <div class="book-author__ring">
+            <div class="book-author__portrait">
+              {%- if photo != blank -%}
+                {%- assign photo_image = photo.preview_image | default: photo -%}
+                {{-
+                  photo_image
+                  | image_url: width: 720
+                  | image_tag:
+                    class: 'book-author__photo',
+                    widths: '280, 400, 560, 720',
+                    sizes: '(min-width: 990px) 340px, 240px',
+                    loading: 'lazy',
+                    alt: author_name
+                -}}
+              {%- else -%}
+                <span class="book-author__initial" aria-hidden="true">{{ author_name | slice: 0 }}</span>
+              {%- endif -%}
+            </div>
+          </div>
+
+          {%- if s.sticker != blank -%}
+            <span class="book-author__sticker">{{ s.sticker }}</span>
           {%- endif -%}
         </div>
 
         <div class="book-author__body">
           {%- if s.eyebrow != blank -%}
-            <p class="book-author__tag">{{ s.eyebrow }}</p>
+            <p class="book-author__eyebrow text-eyebrow">{{ s.eyebrow }}</p>
           {%- endif -%}
-          <h2 class="book-author__name h3">{{ author_name }}</h2>
+          <h2 class="book-author__name text-display">
+            {{- s.heading_prefix }}
+            <em>{{ author_name }}</em>
+          </h2>
           {%- if bio != blank -%}
-            <p class="book-author__bio">{{ bio | newline_to_br }}</p>
+            <p class="book-author__bio text-lead">{{ bio | newline_to_br }}</p>
           {%- endif -%}
-          {%- if author_url != blank and s.link_label != blank -%}
-            {%- assign link_label = s.link_label | replace: '[author]', author_name -%}
-            {%- render 'brand-button', label: link_label, url: author_url, style: 'primary', arrow: true -%}
-          {%- endif -%}
+
+          <div class="book-author__footer">
+            {%- if author_url != blank and s.link_label != blank -%}
+              {%- assign link_label = s.link_label | replace: '[author]', author_name -%}
+              {%- render 'brand-button', label: link_label, url: author_url, style: 'primary', arrow: true -%}
+            {%- endif -%}
+            {%- if book_count > 1 -%}
+              <p class="book-author__count">
+                <span class="book-author__count-number">{{ book_count }}</span>
+                <span class="book-author__count-label">books in<br>our shop</span>
+              </p>
+            {%- endif -%}
+          </div>
         </div>
-      </article>
+      </div>
 
       {%- if shelf != blank -%}
         <div class="book-author__books">
@@ -78,7 +132,7 @@
   <div class="book-author book-author--empty">
     <p class="book-author__editor-note text-small">
       <strong>Author</strong> — pick an author in this product's <em>Author</em> metafield
-      (custom.author) to show the author card. Visitors don't see this note.
+      (custom.author) to show this section. Visitors don't see this note.
     </p>
   </div>
 {%- endif -%}
@@ -86,148 +140,250 @@
 {% stylesheet %}
   .book-author {
     padding-block: var(--space-9);
+    overflow: hidden;
   }
 
   .book-author__container {
     display: flex;
     flex-direction: column;
-    gap: var(--space-8);
+    gap: var(--space-9);
     max-width: var(--page-width);
     margin-inline: auto;
     padding-inline: var(--page-margin);
   }
 
-  .book-author__card {
-    --author-soft: var(--color-sky-soft);
-    --author-color: var(--color-sky);
-    --author-deep: var(--color-sky-deep);
+  .book-author__scene {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    gap: clamp(var(--space-7), 7vw, var(--space-9));
+    align-items: center;
+  }
 
+  /* ---------- Stage: ring, covers, sticker ---------- */
+
+  .book-author__stage {
     position: relative;
     display: grid;
-    grid-template-columns: 240px minmax(0, 1fr);
-    gap: clamp(var(--space-6), 5vw, var(--space-8));
-    align-items: center;
-    padding: clamp(var(--space-6), 5vw, var(--space-8));
-    overflow: hidden;
-    background: var(--author-soft);
-    border-radius: var(--radius-xl);
-  }
-
-  .book-author__card--sun {
-    --author-soft: var(--color-sun-soft);
-    --author-color: var(--color-sun);
-    --author-deep: var(--color-sun-deep);
-  }
-
-  .book-author__card--leaf {
-    --author-soft: var(--color-leaf-soft);
-    --author-color: var(--color-leaf);
-    --author-deep: var(--color-leaf-deep);
-  }
-
-  .book-author__card--grape {
-    --author-soft: var(--color-grape-soft);
-    --author-color: var(--color-grape);
-    --author-deep: var(--color-grape);
-  }
-
-  /* A soft halo of the card's colour behind the portrait, as behind the learning-path covers. */
-  .book-author__card::before {
-    content: '';
-    position: absolute;
-    left: -6%;
-    top: 50%;
-    width: 46%;
+    place-items: center;
+    width: min(100%, 460px);
     aspect-ratio: 1;
+    margin-inline: auto;
+  }
+
+  /* The four colour-bar colours as a ring around the portrait. */
+  .book-author__ring {
+    position: relative;
+    z-index: 2;
+    width: 76%;
+    aspect-ratio: 1;
+    padding: var(--colour-bar-thickness);
+    background: conic-gradient(
+      from -45deg,
+      var(--color-sky) 0 25%,
+      var(--color-grape) 0 50%,
+      var(--color-tomato) 0 75%,
+      var(--color-sun) 0 100%
+    );
     border-radius: var(--radius-full);
-    background: radial-gradient(closest-side, rgb(255 255 255 / 0.7), transparent);
-    transform: translateY(-50%);
-    pointer-events: none;
+    box-shadow: var(--shadow-lg);
   }
 
   .book-author__portrait {
-    position: relative;
     width: 100%;
-    aspect-ratio: 1;
-  }
-
-  /* Ring in the card's colour, offset like a sticker behind the photo. */
-  .book-author__portrait::before {
-    content: '';
-    position: absolute;
-    inset: 0;
+    height: 100%;
+    overflow: hidden;
+    background: var(--color-sky-soft);
+    border: 6px solid var(--color-paper);
     border-radius: var(--radius-full);
-    background: var(--author-color);
-    transform: translate(10px, 10px);
   }
 
-  .book-author__photo,
-  .book-author__initial {
-    position: relative;
+  .book-author__photo {
     display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    border: 6px solid var(--color-card);
-    border-radius: var(--radius-full);
-    box-shadow: var(--shadow-md);
   }
 
   .book-author__initial {
     display: grid;
     place-items: center;
-    font-family: var(--font-heading--family);
-    font-size: 88px;
-    font-weight: 600;
-    color: var(--author-deep);
-    background: var(--color-card);
+    width: 100%;
+    height: 100%;
+    font-family: var(--font-accent--family);
+    font-style: var(--font-accent--style);
+    font-weight: var(--font-accent--weight);
+    font-size: clamp(88px, 10vw, 140px);
+    color: var(--color-grape);
   }
 
+  /* The author's other books, fanned behind the ring. */
+  .book-author__cover {
+    position: absolute;
+    z-index: 1;
+    width: 30%;
+    height: auto;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    background: var(--color-card);
+    border-radius: var(--radius-image);
+    box-shadow: var(--shadow-book, var(--shadow-md));
+  }
+
+  .book-author__cover--1 {
+    top: 4%;
+    left: -2%;
+    transform: rotate(-12deg);
+  }
+
+  .book-author__cover--2 {
+    right: -4%;
+    top: 14%;
+    transform: rotate(9deg);
+  }
+
+  .book-author__cover--3 {
+    left: 6%;
+    bottom: -2%;
+    transform: rotate(7deg);
+  }
+
+  .book-author__dot {
+    position: absolute;
+    z-index: 3;
+    border-radius: var(--radius-full);
+  }
+
+  .book-author__dot--sky {
+    top: 6%;
+    right: 18%;
+    width: 18px;
+    height: 18px;
+    background: var(--color-sky);
+  }
+
+  .book-author__dot--sun {
+    bottom: 14%;
+    left: 4%;
+    width: 12px;
+    height: 12px;
+    background: var(--color-sun);
+  }
+
+  .book-author__dot--leaf {
+    right: 6%;
+    bottom: 26%;
+    width: 10px;
+    height: 10px;
+    background: var(--color-leaf);
+  }
+
+  /* Round sun sticker, tilted like the age seal on the cover. */
+  .book-author__sticker {
+    position: absolute;
+    z-index: 4;
+    right: 6%;
+    bottom: 6%;
+    display: grid;
+    place-items: center;
+    width: 96px;
+    aspect-ratio: 1;
+    padding: var(--space-3);
+    font-family: var(--font-accent--family);
+    font-style: var(--font-accent--style);
+    font-weight: var(--font-accent--weight);
+    font-size: 15px;
+    line-height: 1.15;
+    text-align: center;
+    color: var(--color-ink);
+    background: var(--color-sun);
+    border-radius: var(--radius-full);
+    box-shadow: var(--shadow-md);
+    transform: rotate(-10deg);
+  }
+
+  /* ---------- Text ---------- */
+
   .book-author__body {
-    position: relative;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: var(--space-4);
-    max-width: 40rem;
+    gap: var(--space-5);
   }
 
-  .book-author__tag {
-    display: inline-flex;
+  .book-author__eyebrow {
+    display: flex;
     align-items: center;
-    gap: var(--space-2);
+    gap: var(--space-3);
     margin: 0;
-    padding: 5px 11px 5px 9px;
-    font-size: 11px;
-    font-weight: 700;
-    line-height: 1.3;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--author-deep);
-    background: rgb(var(--color-card-rgb) / 0.85);
-    border-radius: var(--radius-full);
-    box-shadow: 0 1px 2px rgb(var(--color-ink-rgb) / 0.06);
+    color: var(--color-ink-muted);
   }
 
-  .book-author__tag::before {
+  .book-author__eyebrow::before {
     content: '';
-    width: 7px;
+    flex: none;
+    width: 8px;
     aspect-ratio: 1;
     border-radius: var(--radius-full);
-    background: var(--author-color);
+    background: var(--color-sun);
   }
 
   .book-author__name {
     margin: 0;
     color: var(--color-ink);
+    text-wrap: balance;
   }
 
+  .book-author__name em {
+    font-family: var(--font-accent--family);
+    font-style: var(--font-accent--style);
+    font-weight: var(--font-accent--weight);
+    color: var(--color-grape);
+  }
+
+  /* The bio hangs from a short sun rule, like a note pinned to the page. */
   .book-author__bio {
-    margin: 0 0 var(--space-2);
-    font-size: 17px;
-    line-height: 1.6;
-    color: var(--color-ink);
-    opacity: 0.8;
+    position: relative;
+    margin: 0;
+    padding-left: var(--space-5);
+    color: var(--color-ink-muted);
+    border-left: 3px solid var(--color-sun);
+  }
+
+  .book-author__footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-6);
+    margin-top: var(--space-2);
+  }
+
+  .book-author__count {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: 0;
+  }
+
+  .book-author__count-number {
+    font-family: var(--font-heading--family);
+    font-size: 44px;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--color-grape);
+  }
+
+  .book-author__count-label {
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-ink-muted);
+  }
+
+  .book-author__books {
+    padding-top: var(--space-7);
+    border-top: var(--stroke-sm) solid var(--color-line);
   }
 
   .book-author__books-heading {
@@ -248,25 +404,37 @@
     border-radius: var(--radius-md);
   }
 
-  @media screen and (max-width: 749px) {
+  @media screen and (max-width: 989px) {
     .book-author {
       padding-block: var(--space-8);
     }
 
-    .book-author__card {
+    .book-author__container {
+      gap: var(--space-8);
+    }
+
+    .book-author__scene {
       grid-template-columns: minmax(0, 1fr);
-      justify-items: start;
-      gap: var(--space-5);
-      padding: var(--space-6) var(--space-5);
-      border-radius: var(--radius-lg);
+      gap: var(--space-6);
     }
 
-    .book-author__portrait {
-      width: 150px;
+    .book-author__stage {
+      width: min(100%, 340px);
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .book-author__stage {
+      width: min(86%, 300px);
     }
 
-    .book-author__initial {
-      font-size: 56px;
+    .book-author__sticker {
+      width: 76px;
+      font-size: 12px;
+    }
+
+    .book-author__count-number {
+      font-size: 36px;
     }
   }
 {% endstylesheet %}
@@ -282,13 +450,27 @@
   "settings": [
     {
       "type": "paragraph",
-      "content": "Shows the author picked in the product's Author metafield (custom.author)."
+      "content": "Shows the author picked in the product's Author metafield (custom.author), with covers of their other books around the portrait."
     },
     {
       "type": "text",
       "id": "eyebrow",
-      "label": "Label",
-      "default": "Meet the author"
+      "label": "Eyebrow",
+      "default": "The person behind the pages"
+    },
+    {
+      "type": "text",
+      "id": "heading_prefix",
+      "label": "Heading before the name",
+      "info": "The author's name follows, in the accent italic.",
+      "default": "Meet"
+    },
+    {
+      "type": "text",
+      "id": "sticker",
+      "label": "Sticker",
+      "info": "Round sun sticker on the portrait. Leave empty to hide it.",
+      "default": "Written with love"
     },
     {
       "type": "text",
@@ -296,18 +478,6 @@
       "label": "Link label",
       "info": "[author] is replaced with the author's name. Links to the author's page.",
       "default": "All books by [author]"
-    },
-    {
-      "type": "select",
-      "id": "card_colour",
-      "label": "Card colour",
-      "options": [
-        { "value": "sky", "label": "Sky" },
-        { "value": "sun", "label": "Sun" },
-        { "value": "leaf", "label": "Leaf" },
-        { "value": "grape", "label": "Grape" }
-      ],
-      "default": "sky"
     },
     {
       "type": "checkbox",
@@ -336,7 +506,8 @@
       "label": "Background",
       "options": [
         { "value": "paper", "label": "Paper" },
-        { "value": "paper-deep", "label": "Paper deep" }
+        { "value": "paper-deep", "label": "Paper deep" },
+        { "value": "sky-soft", "label": "Sky soft" }
       ],
       "default": "paper"
     }

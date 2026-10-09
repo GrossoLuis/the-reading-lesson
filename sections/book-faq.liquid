@@ -1,0 +1,452 @@
+{%- comment -%}
+  Questions parents ask: the doubts that stop a purchase, answered on the product page.
+
+  Left, sticky on desktop: eyebrow, display heading and a sun-soft help card with a link
+  to the contact page (below the questions on phones). Right: the questions (blocks), numbered in the accent italic, each
+  opening on its answer. Native <details>, so it works without JavaScript; opening one
+  closes the others (name attribute).
+
+  Also prints FAQPage structured data with the same questions, for search results.
+{%- endcomment -%}
+
+{%- liquid
+  assign s = section.settings
+  assign questions = section.blocks | where: 'type', 'question'
+-%}
+
+{%- if questions.size > 0 -%}
+  <div class="book-faq surface-{{ s.surface }}">
+    <div class="book-faq__container">
+      <header class="book-faq__intro">
+        {%- if s.eyebrow != blank -%}
+          <p class="book-faq__eyebrow text-eyebrow">{{ s.eyebrow }}</p>
+        {%- endif -%}
+        {%- if s.heading != blank -%}
+          <h2 class="book-faq__heading text-display">{{ s.heading }}</h2>
+        {%- endif -%}
+        {%- if s.text != blank -%}
+          <p class="book-faq__text">{{ s.text }}</p>
+        {%- endif -%}
+
+        {%- if s.help_heading != blank or s.help_text != blank -%}
+          <div class="book-faq__help">
+            {%- if s.help_heading != blank -%}
+              <p class="book-faq__help-heading">{{ s.help_heading }}</p>
+            {%- endif -%}
+            {%- if s.help_text != blank -%}
+              <p class="book-faq__help-text">{{ s.help_text }}</p>
+            {%- endif -%}
+            {%- if s.help_label != blank and s.help_url != blank -%}
+              {%- render 'brand-button', label: s.help_label, url: s.help_url, style: 'primary', arrow: true -%}
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      </header>
+
+      <div class="book-faq__list">
+        {%- for block in questions -%}
+          <details
+            class="book-faq__item"
+            name="faq-{{ section.id }}"
+            {% if forloop.first and s.open_first %}
+              open
+            {% endif %}
+            {{ block.shopify_attributes }}
+          >
+            <summary class="book-faq__question">
+              <span class="book-faq__number">{{ forloop.index | prepend: '0' | slice: -2, 2 }}</span>
+              <span class="book-faq__question-text">{{ block.settings.question }}</span>
+              <span
+                class="book-faq__icon"
+                aria-hidden="true"
+              ></span>
+            </summary>
+            <div class="book-faq__answer">{{ block.settings.answer }}</div>
+          </details>
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+
+  {%- if s.structured_data -%}
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {%- for block in questions -%}
+            {
+              "@type": "Question",
+              "name": {{ block.settings.question | json }},
+              "acceptedAnswer": { "@type": "Answer", "text": {{ block.settings.answer | strip_html | strip | json }} }
+            }{% unless forloop.last %},{% endunless %}
+          {%- endfor -%}
+        ]
+      }
+    </script>
+  {%- endif -%}
+{%- endif -%}
+
+{% stylesheet %}
+  .book-faq {
+    padding-block: var(--space-9);
+  }
+
+  .book-faq__container {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: clamp(var(--space-7), 6vw, var(--space-9));
+    align-items: start;
+    max-width: var(--page-width);
+    margin-inline: auto;
+    padding-inline: var(--page-margin);
+  }
+
+  /* ---------- Intro ---------- */
+
+  .book-faq__intro {
+    position: sticky;
+    top: calc(var(--sticky-header-offset, 0px) + var(--space-6));
+  }
+
+  .book-faq__eyebrow {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: 0 0 var(--space-4);
+    color: var(--color-ink-muted);
+  }
+
+  .book-faq__eyebrow::before {
+    content: '';
+    flex: none;
+    width: 8px;
+    aspect-ratio: 1;
+    border-radius: var(--radius-full);
+    background: var(--color-sky);
+  }
+
+  .book-faq__heading {
+    margin: 0;
+    color: var(--color-ink);
+    text-wrap: balance;
+  }
+
+  .book-faq__heading :is(em, i) {
+    font-family: var(--font-accent--family);
+    font-style: var(--font-accent--style);
+    font-weight: var(--font-accent--weight);
+    color: var(--color-grape);
+  }
+
+  .book-faq__text {
+    margin: var(--space-4) 0 0;
+    font-size: 17px;
+    color: var(--color-ink-muted);
+  }
+
+  .book-faq__help {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+    margin-top: var(--space-7);
+    padding: var(--space-6);
+    background: var(--color-sun-soft);
+    border-radius: var(--radius-lg);
+  }
+
+  .book-faq__help-heading {
+    margin: 0;
+    font-family: var(--font-heading--family);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+
+  .book-faq__help-text {
+    margin: 0 0 var(--space-2);
+    color: var(--color-ink-muted);
+  }
+
+  /* ---------- Questions ---------- */
+
+  .book-faq__list {
+    border-top: var(--stroke-sm) solid var(--color-line);
+  }
+
+  .book-faq__item {
+    border-bottom: var(--stroke-sm) solid var(--color-line);
+  }
+
+  .book-faq__question {
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr) 40px;
+    gap: var(--space-4);
+    align-items: center;
+    padding-block: var(--space-5);
+    list-style: none;
+    cursor: pointer;
+  }
+
+  .book-faq__question::-webkit-details-marker {
+    display: none;
+  }
+
+  .book-faq__question:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus-ring, var(--color-grape));
+    outline-offset: 4px;
+    border-radius: var(--radius-sm);
+  }
+
+  .book-faq__number {
+    font-family: var(--font-accent--family);
+    font-style: var(--font-accent--style);
+    font-weight: var(--font-accent--weight);
+    font-size: 24px;
+    color: var(--color-grape);
+  }
+
+  .book-faq__question-text {
+    font-family: var(--font-heading--family);
+    font-size: 21px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--color-ink);
+  }
+
+  /* Plus in a circle that turns into a minus on ink. */
+  .book-faq__icon {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border: var(--stroke-sm) solid var(--color-line-strong);
+    border-radius: var(--radius-full);
+    transition: background-color 200ms ease, border-color 200ms ease;
+  }
+
+  .book-faq__icon::before,
+  .book-faq__icon::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 14px;
+    height: 1.5px;
+    margin: -0.75px 0 0 -7px;
+    border-radius: var(--radius-full);
+    background: var(--color-ink);
+    transition: transform 200ms ease, background-color 200ms ease;
+  }
+
+  .book-faq__icon::after {
+    transform: rotate(90deg);
+  }
+
+  .book-faq__question:hover .book-faq__icon {
+    border-color: var(--color-ink);
+  }
+
+  .book-faq__item[open] .book-faq__icon {
+    background: var(--color-ink);
+    border-color: var(--color-ink);
+  }
+
+  .book-faq__item[open] .book-faq__icon::before,
+  .book-faq__item[open] .book-faq__icon::after {
+    background: #fff;
+  }
+
+  .book-faq__item[open] .book-faq__icon::after {
+    transform: rotate(0deg);
+  }
+
+  .book-faq__answer {
+    padding: 0 calc(40px + var(--space-4)) var(--space-6) calc(3rem + var(--space-4));
+    font-size: 16px;
+    line-height: 1.65;
+    color: var(--color-ink-muted);
+  }
+
+  .book-faq__answer > :first-child {
+    margin-top: 0;
+  }
+
+  .book-faq__answer > :last-child {
+    margin-bottom: 0;
+  }
+
+  .book-faq__answer a {
+    color: var(--color-link);
+  }
+
+  @media screen and (max-width: 989px) {
+    .book-faq {
+      padding-block: var(--space-8);
+    }
+
+    /* One column: the intro dissolves so the help card can follow the questions. */
+    .book-faq__container {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .book-faq__intro {
+      display: contents;
+    }
+
+    .book-faq__list {
+      order: 1;
+      margin-top: var(--space-6);
+    }
+
+    .book-faq__help {
+      order: 2;
+      margin-top: var(--space-6);
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .book-faq__question {
+      grid-template-columns: 2.25rem minmax(0, 1fr) 36px;
+      gap: var(--space-3);
+    }
+
+    .book-faq__number {
+      font-size: 20px;
+    }
+
+    .book-faq__question-text {
+      font-size: 18px;
+    }
+
+    .book-faq__icon {
+      width: 36px;
+      height: 36px;
+    }
+
+    .book-faq__answer {
+      padding: 0 0 var(--space-5) calc(2.25rem + var(--space-3));
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .book-faq__icon,
+    .book-faq__icon::before,
+    .book-faq__icon::after {
+      transition: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Questions parents ask",
+  "tag": "section",
+  "class": "book-faq-section",
+  "max_blocks": 12,
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Before you start"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "info": "Put a word in italics to give it the accent colour.",
+      "default": "Questions <em>parents</em> ask"
+    },
+    {
+      "type": "text",
+      "id": "text",
+      "label": "Text",
+      "default": "Everything families want to know before the first lesson."
+    },
+    {
+      "type": "checkbox",
+      "id": "open_first",
+      "label": "Open the first question",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Help card"
+    },
+    {
+      "type": "text",
+      "id": "help_heading",
+      "label": "Heading",
+      "default": "Still not sure?"
+    },
+    {
+      "type": "text",
+      "id": "help_text",
+      "label": "Text",
+      "default": "Tell us about your child and we'll help you pick the right book."
+    },
+    {
+      "type": "text",
+      "id": "help_label",
+      "label": "Button label",
+      "default": "Write to us"
+    },
+    {
+      "type": "url",
+      "id": "help_url",
+      "label": "Button link",
+      "info": "The button shows once a link is set, e.g. the contact page."
+    },
+    {
+      "type": "header",
+      "content": "Search engines"
+    },
+    {
+      "type": "checkbox",
+      "id": "structured_data",
+      "label": "Add FAQ structured data",
+      "info": "Lets search engines read the questions and answers.",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "surface",
+      "label": "Background",
+      "options": [
+        { "value": "paper", "label": "Paper" },
+        { "value": "paper-deep", "label": "Paper deep" }
+      ],
+      "default": "paper"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "question",
+      "name": "Question",
+      "settings": [
+        {
+          "type": "text",
+          "id": "question",
+          "label": "Question",
+          "default": "Is my child ready to start?"
+        },
+        {
+          "type": "richtext",
+          "id": "answer",
+          "label": "Answer",
+          "default": "<p>If your child knows a few letters and can sit with you for 15 minutes, they're ready. No prior reading is needed.</p>"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Questions parents ask",
+      "blocks": [{ "type": "question" }]
+    }
+  ]
+}
+{% endschema %}

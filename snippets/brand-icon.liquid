@@ -3,8 +3,7 @@
   drawn in currentColor so they follow the text colour.
 
   @param {string} name - search, account, heart, bag, menu, close, chevron-down, chevron-right, arrow-right,
-    arrow-left, pause, play, truck, gift, returns, book, star, speaker, puzzle, pencil,
-    clock, rosette, expand
+    arrow-left, pause, play, truck, gift, returns, book, star, expand
   @param {number} [size] - Rendered size in px. Defaults to 22.
 
   @example
@@ -61,16 +60,6 @@
       <path d="M12 6.75c-1.6-1.3-4-2-7.25-2v13c3.25 0 5.65.7 7.25 2 1.6-1.3 4-2 7.25-2v-13c-3.25 0-5.65.7-7.25 2ZM12 6.75v13"/>
     {%- when 'star' -%}
       <path d="m12 4.75 2.2 4.6 5.05.65-3.7 3.5.95 5-4.5-2.45-4.5 2.45.95-5-3.7-3.5 5.05-.65z"/>
-    {%- when 'speaker' -%}
-      <path d="M4.75 9.75h3l4.5-4v12.5l-4.5-4h-3z"/><path d="M15.25 9.25a4 4 0 0 1 0 5.5M17.75 6.75a7.5 7.5 0 0 1 0 10.5"/>
-    {%- when 'puzzle' -%}
-      <path d="M5.75 8.25h3.5a2 2 0 1 1 3.5 0h3.5v3.5a2 2 0 1 1 0 3.5v3.5H5.75v-3.5a2 2 0 1 0 0-3.5z"/>
-    {%- when 'pencil' -%}
-      <path d="M15.25 5.25 18.75 8.75 9 18.5l-4.25.75.75-4.25zM13.25 7.25l3.5 3.5"/>
-    {%- when 'clock' -%}
-      <circle cx="12" cy="12" r="7.25"/><path d="M12 8.25V12l2.75 1.75"/>
-    {%- when 'rosette' -%}
-      <circle cx="12" cy="9.5" r="4.75"/><path d="m9.25 13.5-1.5 6.25L12 17.5l4.25 2.25-1.5-6.25"/>
     {%- when 'expand' -%}
       <path d="M14.25 4.75h5v5M19.25 4.75l-5.5 5.5M9.75 19.25h-5v-5M4.75 19.25l5.5-5.5"/>
   {%- endcase -%}

@@ -102,13 +102,14 @@
     "author": {
       "type": "book-author",
       "settings": {
-        "eyebrow": "Meet the author",
+        "eyebrow": "The person behind the pages",
+        "heading_prefix": "Meet",
+        "sticker": "Written with love",
         "link_label": "All books by [author]",
         "show_books": true,
         "books_heading": "More by [author]",
         "books_limit": 4,
-        "surface": "paper",
-        "card_colour": "sky"
+        "surface": "paper"
       }
     },
     "testimonials": {
@@ -209,6 +210,65 @@
         "surface": "paper"
       }
     },
+    "faq": {
+      "type": "book-faq",
+      "blocks": {
+        "q1": {
+          "type": "question",
+          "settings": {
+            "question": "Is my child ready to start?",
+            "answer": "<p>If your child knows a few letters and can sit with you for about 15 minutes, they are ready. No prior reading is needed: the first lesson starts from the very beginning.</p>"
+          }
+        },
+        "q2": {
+          "type": "question",
+          "settings": {
+            "question": "Do I need any teaching experience?",
+            "answer": "<p>No. Every lesson tells you exactly what to say and do, step by step, so any parent or caregiver can teach it at home.</p>"
+          }
+        },
+        "q3": {
+          "type": "question",
+          "settings": {
+            "question": "How long does each lesson take?",
+            "answer": "<p>About 15 minutes a day. Short, calm sessions work better than long ones, and most families fit them in before bed or after breakfast.</p>"
+          }
+        },
+        "q4": {
+          "type": "question",
+          "settings": {
+            "question": "Physical book or printable PDFs?",
+            "answer": "<p>The lessons are the same in both. The physical book ships in 1–2 business days; the printable PDFs let you start today and print the pages you need.</p>"
+          }
+        },
+        "q5": {
+          "type": "question",
+          "settings": {
+            "question": "What if it isn’t the right fit?",
+            "answer": "<p>Send the physical book back within 30 days for a full refund. If you are unsure which book to choose, write to us and we will help.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "q1",
+        "q2",
+        "q3",
+        "q4",
+        "q5"
+      ],
+      "settings": {
+        "eyebrow": "Before you start",
+        "heading": "Questions <em>parents</em> ask",
+        "text": "Everything families want to know before the first lesson.",
+        "open_first": true,
+        "help_heading": "Still not sure?",
+        "help_text": "Tell us about your child and we’ll help you pick the right book.",
+        "help_label": "Write to us",
+        "help_url": "/pages/contact",
+        "structured_data": true,
+        "surface": "paper"
+      }
+    },
     "recs_age": {
       "type": "book-recommendations",
       "settings": {
@@ -235,6 +295,7 @@
     "series",
     "author",
     "testimonials",
+    "faq",
     "recs_age",
     "recs_related"
   ]
