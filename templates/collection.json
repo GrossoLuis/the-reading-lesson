@@ -83,10 +83,109 @@
         "button_url": "",
         "surface": "paper-deep"
       }
+    },
+    "testimonials_gK8E7L": {
+      "type": "testimonials",
+      "blocks": {
+        "featured_CeWK94": {
+          "type": "featured",
+          "settings": {
+            "quote": "<p>“We’d tried another popular reading program first. My daughter would grimace and beg me to do anything else. With The Reading Lesson, we got past the first lessons <em>‘without tears and complaints’</em> — and it delivered results.”</p>",
+            "source": "<p><strong>Paraphrased from a NextGen Homeschool curriculum review.</strong> Families arriving after a first attempt that didn’t take is the most common story we hear.</p>"
+          }
+        },
+        "featured_yKd6Hy": {
+          "type": "featured",
+          "settings": {
+            "quote": "<p>“Refreshingly straightforward approach and uncluttered format. <em>Highly recommended.</em>”</p>",
+            "source": "<p><strong>Library Journal.</strong> Discovery Education independently praised the same thing: calm, uncluttered pages.</p>"
+          }
+        },
+        "featured_YBjN8g": {
+          "type": "featured",
+          "settings": {
+            "quote": "<p>“By far the <em>easiest to use</em>.”</p>",
+            "source": "<p><strong>Home Educating Family Association</strong>, after trying several reading programs. Every lesson tells you exactly what to say.</p>"
+          }
+        },
+        "highlight_V9CTxK": {
+          "type": "highlight",
+          "settings": {
+            "title": "Easiest to use",
+            "text": "<p>“By far the easiest to use,” wrote one reviewer for the Home Educating Family Association, after trying several reading programs. Every lesson tells you exactly what to say.</p>",
+            "color": "sky"
+          }
+        },
+        "highlight_AABf98": {
+          "type": "highlight",
+          "settings": {
+            "title": "Calm, uncluttered pages",
+            "text": "<p>“Refreshingly straightforward approach and uncluttered format. Highly recommended.” — <em>Library Journal</em>. Discovery Education independently praised the same thing. The calm is the method.</p>",
+            "color": "sun"
+          }
+        },
+        "highlight_YewpEH": {
+          "type": "highlight",
+          "settings": {
+            "title": "It simply works",
+            "text": "<p>“Take my advice. This book works!” — Jennifer LB Lesse, <em>A StoryBook Weaver’s Book Reviews</em>. Kids read their first tiny story before Lesson One is over.</p>",
+            "color": "leaf"
+          }
+        },
+        "review_zNaqWF": {
+          "type": "review",
+          "settings": {
+            "rating": 5,
+            "quote": "<p>“The single best program for teaching children to read I have found to date, and I have seen many. It worked. Not only was it simple enough for anyone to use, but the program is built on solid phonics and whole language principles.”</p>",
+            "author": "Amazon reviewer"
+          }
+        },
+        "review_wVzTHk": {
+          "type": "review",
+          "settings": {
+            "rating": 5,
+            "quote": "<p>“I got this a few weeks before my daughter turned 4. Amazingly, she often brings me the book in the morning when she wakes up and asks to do a page from her lesson book. She’s enjoying it.”</p>",
+            "author": "Amazon reviewer"
+          }
+        },
+        "review_irCz4C": {
+          "type": "review",
+          "settings": {
+            "rating": 5,
+            "quote": "<p>“We’ve successfully taught 7 children to read with The Reading Lesson and I’m currently teaching our 8th. Allow me to quell any fears you may have. This curriculum is wonderful and most importantly, it works.”</p>",
+            "author": "Amazon reviewer"
+          }
+        }
+      },
+      "block_order": [
+        "featured_CeWK94",
+        "featured_yKd6Hy",
+        "featured_YBjN8g",
+        "highlight_V9CTxK",
+        "highlight_AABf98",
+        "highlight_YewpEH",
+        "review_zNaqWF",
+        "review_wVzTHk",
+        "review_irCz4C"
+      ],
+      "name": "Testimonials",
+      "settings": {
+        "eyebrow": "What parents keep saying",
+        "heading": "Three decades of <em>reviews</em>",
+        "featured_autoplay": true,
+        "featured_speed": 5,
+        "featured_label": "Featured reviews",
+        "families_eyebrow": "From families like yours",
+        "families_heading": "What parents say after Lesson 20",
+        "link_label": "Read thousands of parent reviews on Amazon",
+        "link_url": "",
+        "surface": "paper"
+      }
     }
   },
   "order": [
     "main",
-    "learning_path_q8LU76"
+    "learning_path_q8LU76",
+    "testimonials_gK8E7L"
   ]
 }
