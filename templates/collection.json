@@ -11,6 +11,27 @@
   "sections": {
     "main": {
       "type": "collection",
+      "blocks": {
+        "card_image_DhtkKc": {
+          "type": "card_image",
+          "settings": {
+            "column": 2,
+            "row": 1,
+            "image": "shopify://shop_images/488655527_10082285701783917_838452450358685997_n.jpg",
+            "overlay_opacity": 30,
+            "title": "Find your next favourite",
+            "title_color": "#ffffff",
+            "title_position": "bottom",
+            "content_alignment": "left",
+            "button_label": "Shop now",
+            "button_url": "",
+            "button_style": "primary"
+          }
+        }
+      },
+      "block_order": [
+        "card_image_DhtkKc"
+      ],
       "settings": {
         "eyebrow": "Collection",
         "show_description": true,
