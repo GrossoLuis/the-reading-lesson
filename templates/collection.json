@@ -15,7 +15,7 @@
         "eyebrow": "Collection",
         "show_description": true,
         "note": "",
-        "products_per_page": 24,
+        "products_per_page": 8,
         "columns": 4,
         "new_days": 30,
         "enable_filters": true,
