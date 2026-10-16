@@ -60,6 +60,7 @@
         "chapter_families",
         "chapter_today"
       ],
+      "disabled": true,
       "settings": {
         "eyebrow": "Our story",
         "headline": "We began as two parents, trying to find the best way to teach their children to read",
@@ -73,9 +74,80 @@
         "button_label": "Shop the program",
         "button_url": "/collections/all"
       }
+    },
+    "story_scroll_mtmWAg": {
+      "type": "story-scroll",
+      "blocks": {
+        "chapter_d79qyy": {
+          "type": "chapter",
+          "settings": {
+            "color": "sky",
+            "label": "Early 1990s",
+            "statement": "It started with a curious child and <em>no program</em> we liked",
+            "text": "<p>Tell this part of the story here.</p>",
+            "stat": "",
+            "stat_caption": "",
+            "show_placeholder": true,
+            "image_shape": "arch",
+            "image_side": "right",
+            "image_caption": ""
+          }
+        },
+        "chapter_6DzHiT": {
+          "type": "chapter",
+          "settings": {
+            "color": "sun",
+            "label": "Early 1990s",
+            "statement": "It started with a curious child and <em>no program</em> we liked",
+            "text": "<p>Tell this part of the story here.</p>",
+            "stat": "",
+            "stat_caption": "",
+            "show_placeholder": true,
+            "image_shape": "circle",
+            "image_side": "left",
+            "image_caption": ""
+          }
+        },
+        "quote_PzyEA4": {
+          "type": "quote",
+          "settings": {
+            "color": "ink",
+            "quote": "A <em>calm</em> page and fifteen patient minutes a day beat every app ever made.",
+            "caption": "what we still believe"
+          }
+        },
+        "closing_hnVLUw": {
+          "type": "closing",
+          "settings": {
+            "color": "paper",
+            "heading": "Still a small <em>family</em> business",
+            "text": "",
+            "show_placeholder": true,
+            "image_caption": "",
+            "button_label": "Shop the program",
+            "button_url": "shopify://collections/all",
+            "button_style": "purchase"
+          }
+        }
+      },
+      "block_order": [
+        "chapter_d79qyy",
+        "chapter_6DzHiT",
+        "quote_PzyEA4",
+        "closing_hnVLUw"
+      ],
+      "name": "Story scroll",
+      "settings": {
+        "eyebrow": "Our story",
+        "headline": "Two parents, one kitchen table and a child who wanted to <em>read</em>",
+        "intro": "",
+        "scroll_cue": "Scroll to read our story",
+        "opening_color": "paper"
+      }
     }
   },
   "order": [
-    "story"
+    "story",
+    "story_scroll_mtmWAg"
   ]
 }
