@@ -22,6 +22,33 @@
         "enable_sorting": false
       }
     },
+    "book_finder_Ndj8Pg": {
+      "type": "book-finder",
+      "name": "Book finder",
+      "settings": {
+        "eyebrow": "Book finder",
+        "heading": "Which book is right for <em>my child?</em>",
+        "text": "<p>Answer four quick questions and we’ll pick the books that fit where your child is today.</p>",
+        "collection": "",
+        "results_count": 3,
+        "reading_collection": "",
+        "writing_collection": "",
+        "math_collection": "",
+        "question_age": "How old is your child?",
+        "include_toddlers": false,
+        "question_subject": "What would you like to practise?",
+        "question_level": "Where are they with reading?",
+        "level_1": "Not reading yet, still learning letters",
+        "level_2": "Knows letter sounds, starting to blend",
+        "level_3": "Reads simple words and short sentences",
+        "level_4": "Reads short books on their own",
+        "level_5": "Reads longer books with ease",
+        "question_format": "Which format do you prefer?",
+        "results_heading": "Our picks for your child",
+        "empty_text": "We couldn’t find an exact match yet. Get in touch and we’ll help you choose.",
+        "surface": "paper"
+      }
+    },
     "testimonials_gK8E7L": {
       "type": "testimonials",
       "blocks": {
@@ -123,6 +150,7 @@
   },
   "order": [
     "main",
+    "book_finder_Ndj8Pg",
     "testimonials_gK8E7L"
   ]
 }
