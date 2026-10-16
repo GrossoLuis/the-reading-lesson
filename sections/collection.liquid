@@ -7,6 +7,8 @@
   - Filters: Shopify storefront filters (Search & Discovery app) in a sidebar on
     desktop and a slide-in panel on mobile.
   - Grid of book cards (snippets/book-card.liquid) and pagination.
+  - Card Image blocks: a promo image card with title and button, placed at a set
+    column and row of the grid.
 
   Filtering, sorting and paging re-render this section through the Section Rendering
   API without a page reload, and keep the URL in sync (assets/collection-page.js).
@@ -350,6 +352,76 @@
                 role="list"
                 style="--columns: {{ s.columns }};"
               >
+                {%- comment -%}
+                  Card Image blocks sit at the column and row set in the editor, on the
+                  first page only. The column is clamped to the desktop grid; below
+                  1200px the grid changes width, so only the row is kept.
+                {%- endcomment -%}
+                {%- if paginate.current_page == 1 -%}
+                  {%- liquid
+                    assign desktop_columns = s.columns
+                    if has_filters
+                      assign desktop_columns = desktop_columns | minus: 1
+                    endif
+                  -%}
+                  {%- for block in section.blocks -%}
+                    {%- if block.type == 'card_image' -%}
+                      {%- liquid
+                        assign b = block.settings
+                        assign card_column = b.column | at_most: desktop_columns
+                      -%}
+                      <li
+                        class="collection__item collection__card-item"
+                        style="--card-column: {{ card_column }}; --card-row: {{ b.row }};"
+                        {{ block.shopify_attributes }}
+                      >
+                        <div class="plp-card">
+                          <div class="plp-card__media plp-card__media--{{ b.title_position }}">
+                            {%- if b.image != blank -%}
+                              {{
+                                b.image
+                                | image_url: width: 1200
+                                | image_tag:
+                                  class: 'plp-card__image',
+                                  widths: '320, 480, 640, 840, 1000, 1200',
+                                  sizes: '(min-width: 1200px) 280px, (min-width: 750px) 30vw, 50vw',
+                                  loading: 'lazy',
+                                  alt: b.image.alt
+                              }}
+                            {%- else -%}
+                              {{ 'image' | placeholder_svg_tag: 'plp-card__image plp-card__placeholder' }}
+                            {%- endif -%}
+                            <span
+                              class="plp-card__overlay"
+                              style="opacity: {{ b.overlay_opacity | divided_by: 100.0 }};"
+                              aria-hidden="true"
+                            ></span>
+                            {%- if b.title != blank or b.button_label != blank -%}
+                              <div class="plp-card__content plp-card__content--{{ b.content_alignment | default: 'center' }}">
+                                {%- if b.title != blank -%}
+                                  <p
+                                    class="plp-card__title h4"
+                                    style="color: {{ b.title_color }};"
+                                  >
+                                    {{ b.title }}
+                                  </p>
+                                {%- endif -%}
+                                {%- if b.button_label != blank -%}
+                                  {%- render 'brand-button',
+                                    label: b.button_label,
+                                    url: b.button_url,
+                                    style: b.button_style,
+                                    class: 'plp-card__button'
+                                  -%}
+                                {%- endif -%}
+                              </div>
+                            {%- endif -%}
+                          </div>
+                        </div>
+                      </li>
+                    {%- endif -%}
+                  {%- endfor -%}
+                {%- endif -%}
                 {%- for product in collection.products -%}
                   <li class="collection__item">
                     {%- liquid
@@ -951,6 +1023,103 @@
     width: 100%;
   }
 
+  /* ---------- Card Image block ---------- */
+
+  .collection__grid {
+    /* Products fill the cells around cards placed at a fixed column and row. */
+    grid-auto-flow: row dense;
+  }
+
+  .collection__card-item {
+    grid-column: var(--card-column);
+    grid-row: var(--card-row);
+  }
+
+  .plp-card {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .plp-card__media {
+    position: relative;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 280px;
+    padding: var(--space-5);
+    overflow: hidden;
+    background: var(--color-paper-deep);
+    border-radius: var(--radius-image);
+  }
+
+  .plp-card__media--top {
+    justify-content: flex-start;
+  }
+
+  .plp-card__media--middle {
+    justify-content: center;
+  }
+
+  .plp-card__media--bottom {
+    justify-content: flex-end;
+  }
+
+  .plp-card__image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .plp-card__placeholder {
+    fill: rgb(var(--color-ink-rgb) / 0.2);
+  }
+
+  .plp-card__overlay {
+    position: absolute;
+    inset: 0;
+    /* Neutral black, so a strong overlay darkens the photo instead of tinting it. */
+    background: #000;
+    pointer-events: none;
+  }
+
+  .plp-card__content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .plp-card__content--left {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .plp-card__content--center {
+    align-items: center;
+    text-align: center;
+  }
+
+  .plp-card__content--right {
+    align-items: flex-end;
+    text-align: right;
+  }
+
+  .plp-card__title {
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .plp-card__button {
+    min-height: 44px;
+    max-width: 100%;
+    padding-inline: var(--space-5);
+    white-space: normal;
+    text-align: center;
+  }
+
   .collection__empty {
     display: grid;
     justify-items: start;
@@ -1028,6 +1197,10 @@
 
     .collection__body--filters .collection__grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .collection__card-item {
+      grid-column: auto;
     }
   }
 
@@ -1235,6 +1408,127 @@
       "id": "enable_sorting",
       "label": "Enable sorting",
       "default": true
+    }
+  ],
+  "max_blocks": 6,
+  "blocks": [
+    {
+      "type": "card_image",
+      "name": "Card Image",
+      "settings": [
+        {
+          "type": "header",
+          "content": "Position in the grid"
+        },
+        {
+          "type": "paragraph",
+          "content": "Shown on the first page only. On tablet and mobile the card keeps its row and takes the next free column."
+        },
+        {
+          "type": "range",
+          "id": "column",
+          "label": "Column",
+          "info": "Capped to the number of columns on desktop.",
+          "min": 1,
+          "max": 5,
+          "step": 1,
+          "default": 1
+        },
+        {
+          "type": "range",
+          "id": "row",
+          "label": "Row",
+          "min": 1,
+          "max": 12,
+          "step": 1,
+          "default": 1
+        },
+        {
+          "type": "header",
+          "content": "Image"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "range",
+          "id": "overlay_opacity",
+          "label": "Overlay opacity",
+          "min": 0,
+          "max": 90,
+          "step": 5,
+          "unit": "%",
+          "default": 30
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Find your next favourite"
+        },
+        {
+          "type": "color",
+          "id": "title_color",
+          "label": "Title color",
+          "default": "#FFFFFF"
+        },
+        {
+          "type": "select",
+          "id": "title_position",
+          "label": "Content position",
+          "info": "Places the title and the button.",
+          "options": [
+            { "value": "top", "label": "Top" },
+            { "value": "middle", "label": "Middle" },
+            { "value": "bottom", "label": "Bottom" }
+          ],
+          "default": "bottom"
+        },
+        {
+          "type": "select",
+          "id": "content_alignment",
+          "label": "Content alignment",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "center"
+        },
+        {
+          "type": "header",
+          "content": "Button"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Label",
+          "info": "Leave empty to hide the button.",
+          "default": "Shop now"
+        },
+        {
+          "type": "url",
+          "id": "button_url",
+          "label": "Link"
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Color",
+          "options": [
+            { "value": "primary", "label": "Ink" },
+            { "value": "secondary", "label": "Outline" },
+            { "value": "purchase", "label": "Tomato" },
+            { "value": "sun", "label": "Sun" },
+            { "value": "sky", "label": "Sky" },
+            { "value": "leaf", "label": "Leaf" },
+            { "value": "grape", "label": "Grape" }
+          ],
+          "default": "primary"
+        }
+      ]
     }
   ]
 }
