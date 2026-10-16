@@ -24,7 +24,7 @@
             "title_position": "bottom",
             "content_alignment": "left",
             "button_label": "Shop now",
-            "button_url": "",
+            "button_url": "shopify://products/teach-me-handwriting-physical-book",
             "button_style": "primary"
           }
         }
