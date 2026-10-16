@@ -21,9 +21,72 @@
         "enable_filters": true,
         "enable_sorting": false
       }
+    },
+    "learning_path_q8LU76": {
+      "type": "learning-path",
+      "blocks": {
+        "card_Hhinzd": {
+          "type": "card",
+          "settings": {
+            "category": "reading",
+            "other_label": "More",
+            "collection": "",
+            "product": "",
+            "step_label": "Start here",
+            "title": "The Reading Lesson",
+            "text": "<p>Zero to a second-grade reading level in 20 lessons. Ages 3–⁠8.</p>",
+            "link": "",
+            "link_label": "Explore"
+          }
+        },
+        "card_wDAbcW": {
+          "type": "card",
+          "settings": {
+            "category": "writing",
+            "other_label": "More",
+            "collection": "",
+            "product": "",
+            "step_label": "Alongside it",
+            "title": "Handwriting companions",
+            "text": "<p>Writing what they're reading builds the memory. Practice pages that follow the lessons.</p>",
+            "link": "",
+            "link_label": "Explore"
+          }
+        },
+        "card_FfxpMg": {
+          "type": "card",
+          "settings": {
+            "category": "math",
+            "other_label": "More",
+            "collection": "",
+            "product": "",
+            "step_label": "Then",
+            "title": "The Verbal Math Lesson",
+            "text": "<p>Math out loud. No pencil, no paper, no worksheets. Because small hands shouldn't decide how a child feels about math.</p>",
+            "link": "",
+            "link_label": "Explore"
+          }
+        }
+      },
+      "block_order": [
+        "card_Hhinzd",
+        "card_wDAbcW",
+        "card_FfxpMg"
+      ],
+      "name": "Learning path",
+      "settings": {
+        "eyebrow": "The rest of the shelf",
+        "heading": "What families <em>do next</em>",
+        "text": "<p>Same method, same calm pages, one skill at a time. Every title is available here in print or as a full-color ebook, shipped and delivered direct from our family.</p>",
+        "show_count": true,
+        "button_label": "View all books",
+        "button_url": "",
+        "surface": "paper-deep"
+      }
     }
   },
   "order": [
-    "main"
+    "main",
+    "learning_path_q8LU76"
   ]
 }
