@@ -122,6 +122,7 @@
             "color": "paper",
             "heading": "Still a small <em>family</em> business",
             "text": "",
+            "image": "shopify://shop_images/family.jpg",
             "show_placeholder": true,
             "image_caption": "",
             "button_label": "Shop the program",
