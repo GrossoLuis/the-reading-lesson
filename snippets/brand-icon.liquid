@@ -3,7 +3,7 @@
   drawn in currentColor so they follow the text colour.
 
   @param {string} name - search, account, heart, bag, menu, close, chevron-down, chevron-right, arrow-right,
-    arrow-left, pause, play, truck, gift, returns, book, star, expand
+    arrow-left, pause, play, truck, gift, returns, book, star, expand, download
   @param {number} [size] - Rendered size in px. Defaults to 22.
 
   @example
@@ -62,5 +62,7 @@
       <path d="m12 4.75 2.2 4.6 5.05.65-3.7 3.5.95 5-4.5-2.45-4.5 2.45.95-5-3.7-3.5 5.05-.65z"/>
     {%- when 'expand' -%}
       <path d="M14.25 4.75h5v5M19.25 4.75l-5.5 5.5M9.75 19.25h-5v-5M4.75 19.25l5.5-5.5"/>
+    {%- when 'download' -%}
+      <path d="M12 4.75v10.5M7.75 11 12 15.25 16.25 11M5.75 19.25h12.5"/>
   {%- endcase -%}
 </svg>

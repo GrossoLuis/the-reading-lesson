@@ -1,0 +1,1230 @@
+{%- comment -%}
+  Story scroll: the About page told as a scroll story.
+
+  - Opening: pinned while the headline fills in, letter by letter, as you scroll, with
+    floating shapes around it.
+  - Scenes (blocks), each with its colour: as a scene reaches the middle of the screen
+    the whole section takes its colour.
+    · Chapter: label, a big statement that fills in letter by letter, text, a number
+      that counts up, and an image in a soft shape (arch, circle, blob, pill) with
+      parallax.
+    · Quote: a large quote that fills in, usually on the dark ink scene.
+    · Closing: heading, text, the photo in the colour-bar frame and a button.
+  - A pill at the bottom shows the current chapter ("02 / 05 · The kitchen table").
+
+  Animation: GSAP 3.12.5 + ScrollTrigger (assets/gsap*.min.js), driven by
+  assets/story-scroll.js. Horizon scrolls .page-wrapper on desktop, the window on
+  mobile. With reduced motion, or without GSAP, the text shows filled and the colours
+  still follow the scroll.
+{%- endcomment -%}
+
+{%- liquid
+  assign s = section.settings
+  assign scenes = section.blocks
+  assign scene_total = scenes.size | prepend: '0' | slice: -2, 2
+-%}
+
+<script
+  src="{{ 'gsap.min.js' | asset_url }}"
+  defer
+></script>
+<script
+  src="{{ 'gsap-scrolltrigger.min.js' | asset_url }}"
+  defer
+></script>
+<script
+  type="module"
+  src="{{ 'story-scroll.js' | asset_url }}"
+></script>
+
+{%- comment -%}
+  Hides the texts that fill in until they're split, so they don't flash full first.
+  Only when motion is allowed; a timeout undoes it if GSAP never arrives.
+{%- endcomment -%}
+<script>
+  (function () {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var root = document.documentElement;
+    root.classList.add('story-scroll-motion');
+    setTimeout(function () {
+      if (!window.gsap) root.classList.remove('story-scroll-motion');
+    }, 4000);
+  })();
+</script>
+
+<story-scroll
+  class="story-scroll"
+  data-scene="{{ s.opening_color }}"
+  data-opening-color="{{ s.opening_color }}"
+>
+  {%- comment -%} ---------- Opening ---------- {%- endcomment -%}
+  <header
+    class="story-scroll__opening"
+    data-opening
+  >
+    <div class="story-scroll__opening-sticky">
+      <span
+        class="story-scroll__shape story-scroll__shape--circle"
+        data-speed="-0.6"
+        aria-hidden="true"
+      ></span>
+      <span
+        class="story-scroll__shape story-scroll__shape--ring"
+        data-speed="0.8"
+        aria-hidden="true"
+      ></span>
+      <span
+        class="story-scroll__shape story-scroll__shape--letter story-scroll__shape--a"
+        data-speed="-1"
+        aria-hidden="true"
+        >a</span
+      >
+      <span
+        class="story-scroll__shape story-scroll__shape--letter story-scroll__shape--b"
+        data-speed="1.2"
+        aria-hidden="true"
+        >b</span
+      >
+      <svg
+        class="story-scroll__shape story-scroll__shape--squiggle"
+        data-speed="0.5"
+        viewBox="0 0 120 24"
+        fill="none"
+        aria-hidden="true"
+      >
+        <path
+          d="M2 12c8-10 16-10 24 0s16 10 24 0 16-10 24 0 16 10 24 0 16-10 20-4"
+          stroke="currentColor"
+          stroke-width="5"
+          stroke-linecap="round"
+        />
+      </svg>
+
+      <div class="story-scroll__opening-inner">
+        {%- if s.eyebrow != blank -%}
+          <p class="story-scroll__eyebrow text-eyebrow">{{ s.eyebrow }}</p>
+        {%- endif -%}
+        {%- if s.headline != blank -%}
+          <h1
+            class="story-scroll__headline text-display"
+            data-fill
+          >
+            {{ s.headline }}
+          </h1>
+        {%- endif -%}
+        {%- if s.intro != blank -%}
+          <div class="story-scroll__intro text-lead">{{ s.intro }}</div>
+        {%- endif -%}
+        {%- if s.scroll_cue != blank -%}
+          <p class="story-scroll__cue text-small">
+            <span>{{ s.scroll_cue }}</span>
+            <span
+              class="story-scroll__cue-line"
+              aria-hidden="true"
+            ></span>
+          </p>
+        {%- endif -%}
+      </div>
+    </div>
+  </header>
+
+  {%- comment -%} ---------- Scenes ---------- {%- endcomment -%}
+  {%- for block in scenes -%}
+    {%- liquid
+      assign b = block.settings
+      assign number = forloop.index | prepend: '0' | slice: -2, 2
+      assign label = b.label | default: b.caption | default: b.heading | default: block.type | strip_html
+    -%}
+
+    <section
+      class="story-scroll__scene story-scroll__scene--{{ block.type }}"
+      data-scene-color="{{ b.color }}"
+      data-scene-number="{{ number }}"
+      data-scene-label="{{ label | escape }}"
+      {{ block.shopify_attributes }}
+    >
+      {%- case block.type -%}
+        {%- when 'chapter' -%}
+          <div class="story-scroll__chapter story-scroll__chapter--image-{{ b.image_side }}{% if b.image == blank and b.show_placeholder == false %} story-scroll__chapter--no-image{% endif %}">
+            <div class="story-scroll__chapter-text">
+              <p class="story-scroll__label">
+                <span class="story-scroll__label-number">{{ number }}</span>
+                {%- if b.label != blank -%}
+                  <span>{{ b.label }}</span>
+                {%- endif -%}
+              </p>
+
+              {%- if b.statement != blank -%}
+                <h2
+                  class="story-scroll__statement"
+                  data-fill
+                >
+                  {{ b.statement }}
+                </h2>
+              {%- endif -%}
+
+              {%- if b.text != blank -%}
+                <div
+                  class="story-scroll__body"
+                  data-rise
+                >
+                  {{ b.text }}
+                </div>
+              {%- endif -%}
+
+              {%- if b.stat != blank -%}
+                <div
+                  class="story-scroll__stat"
+                  data-rise
+                >
+                  <span
+                    class="story-scroll__stat-number"
+                    data-count
+                    >{{ b.stat }}</span
+                  >
+                  {%- if b.stat_caption != blank -%}
+                    <span class="story-scroll__stat-caption">{{ b.stat_caption }}</span>
+                  {%- endif -%}
+                </div>
+              {%- endif -%}
+            </div>
+
+            {%- if b.image != blank or b.show_placeholder -%}
+              <div class="story-scroll__media">
+                <span
+                  class="story-scroll__media-blob"
+                  data-speed="-0.8"
+                  aria-hidden="true"
+                ></span>
+                <div
+                  class="story-scroll__image story-scroll__image--{{ b.image_shape }}"
+                  data-image
+                >
+                  {%- if b.image != blank -%}
+                    {{
+                      b.image
+                      | image_url: width: 1400
+                      | image_tag:
+                        widths: '400, 600, 800, 1000, 1200, 1400',
+                        sizes: '(min-width: 990px) 40vw, 90vw',
+                        loading: 'lazy',
+                        alt: b.image.alt
+                    }}
+                  {%- else -%}
+                    {{ 'image' | placeholder_svg_tag: 'story-scroll__placeholder' }}
+                  {%- endif -%}
+                </div>
+                {%- if b.image_caption != blank -%}
+                  <p class="story-scroll__media-caption">{{ b.image_caption }}</p>
+                {%- endif -%}
+              </div>
+            {%- endif -%}
+          </div>
+
+        {%- when 'quote' -%}
+          <figure class="story-scroll__quote">
+            <span
+              class="story-scroll__quote-mark"
+              aria-hidden="true"
+              >“</span
+            >
+            <blockquote
+              class="story-scroll__quote-text"
+              data-fill
+            >
+              {{ b.quote }}
+            </blockquote>
+            {%- if b.caption != blank -%}
+              <figcaption
+                class="story-scroll__quote-caption"
+                data-rise
+              >
+                — {{ b.caption }}
+              </figcaption>
+            {%- endif -%}
+          </figure>
+
+        {%- when 'closing' -%}
+          <div class="story-scroll__closing">
+            <div class="story-scroll__closing-text">
+              {%- if b.heading != blank -%}
+                <h2
+                  class="story-scroll__statement"
+                  data-fill
+                >
+                  {{ b.heading }}
+                </h2>
+              {%- endif -%}
+              {%- if b.text != blank -%}
+                <div
+                  class="story-scroll__body"
+                  data-rise
+                >
+                  {{ b.text }}
+                </div>
+              {%- endif -%}
+              {%- if b.button_label != blank -%}
+                <div data-rise>
+                  {%- render 'brand-button',
+                    label: b.button_label,
+                    url: b.button_url,
+                    style: b.button_style,
+                    arrow: true
+                  -%}
+                </div>
+              {%- endif -%}
+            </div>
+
+            {%- if b.image != blank or b.show_placeholder -%}
+              <figure class="story-scroll__photo">
+                <div
+                  class="story-scroll__photo-frame"
+                  data-photo
+                >
+                  {%- if b.image != blank -%}
+                    {{
+                      b.image
+                      | image_url: width: 1800
+                      | image_tag:
+                        widths: '600, 900, 1200, 1500, 1800',
+                        sizes: '(min-width: 990px) 55vw, 92vw',
+                        loading: 'lazy',
+                        alt: b.image.alt
+                    }}
+                  {%- else -%}
+                    {{ 'lifestyle-1' | placeholder_svg_tag: 'story-scroll__placeholder' }}
+                  {%- endif -%}
+                </div>
+                {%- if b.image_caption != blank -%}
+                  <figcaption class="story-scroll__media-caption">{{ b.image_caption }}</figcaption>
+                {%- endif -%}
+              </figure>
+            {%- endif -%}
+          </div>
+      {%- endcase -%}
+    </section>
+  {%- endfor -%}
+
+  {%- comment -%} ---------- Chapter pill ---------- {%- endcomment -%}
+  {%- if scenes.size > 0 -%}
+    <div
+      class="story-scroll__pill"
+      data-pill
+      aria-hidden="true"
+    >
+      <span class="story-scroll__pill-dot"></span>
+      <span class="story-scroll__pill-count"
+        ><span data-pill-number>01</span> / {{ scene_total }}</span
+      >
+      <span
+        class="story-scroll__pill-label"
+        data-pill-label
+      ></span>
+      <span class="story-scroll__pill-bar"><span data-pill-bar></span></span>
+    </div>
+  {%- endif -%}
+</story-scroll>
+
+{% stylesheet %}
+  /* ---------- Scene colours ---------- */
+
+  .story-scroll {
+    --scene-bg: var(--color-paper);
+    --scene-fg: var(--color-ink);
+    --scene-fg-rgb: var(--color-ink-rgb);
+    --scene-accent: var(--color-tomato);
+    --scene-soft: var(--color-paper-deep);
+    --header-offset: var(--header-height, 0px);
+
+    position: relative;
+    display: block;
+    color: var(--scene-fg);
+    background: var(--scene-bg);
+    /* clip, not hidden: hidden would stop the sticky opening and pill. */
+    overflow-x: clip;
+    transition: background-color 700ms ease, color 700ms ease;
+  }
+
+  .story-scroll[data-scene='paper'] {
+    --scene-accent: var(--color-tomato);
+  }
+
+  .story-scroll[data-scene='sky'] {
+    --scene-bg: var(--color-sky-soft);
+    --scene-accent: var(--color-sky-deep);
+    --scene-soft: var(--color-sky);
+  }
+
+  .story-scroll[data-scene='sun'] {
+    --scene-bg: var(--color-sun-soft);
+    --scene-accent: var(--color-sun-deep);
+    --scene-soft: var(--color-sun);
+  }
+
+  .story-scroll[data-scene='leaf'] {
+    --scene-bg: var(--color-leaf-soft);
+    --scene-accent: var(--color-leaf-deep);
+    --scene-soft: var(--color-leaf);
+  }
+
+  .story-scroll[data-scene='grape'] {
+    --scene-bg: var(--color-grape-soft);
+    --scene-accent: var(--color-grape);
+    --scene-soft: var(--color-grape);
+  }
+
+  .story-scroll[data-scene='tomato'] {
+    --scene-bg: var(--color-tomato-soft);
+    --scene-accent: var(--color-tomato);
+    --scene-soft: var(--color-tomato);
+  }
+
+  .story-scroll[data-scene='ink'] {
+    --scene-bg: var(--color-ink);
+    --scene-fg: var(--color-paper);
+    --scene-fg-rgb: var(--color-paper-rgb);
+    --scene-accent: var(--color-sun);
+    --scene-soft: var(--color-grape);
+  }
+
+  /* ---------- Letter fill (split by assets/story-scroll.js) ---------- */
+
+  .story-scroll [data-fill] em,
+  .story-scroll [data-fill] i {
+    font-family: var(--font-accent--family);
+    font-style: var(--font-accent--style);
+    font-weight: var(--font-accent--weight);
+    color: var(--scene-accent);
+    transition: color 700ms ease;
+  }
+
+  .story-scroll .sf-word {
+    display: inline-block;
+    white-space: nowrap;
+  }
+
+  .story-scroll .sf-char {
+    display: inline-block;
+  }
+
+  .story-scroll-motion .story-scroll [data-fill]:not([data-split]) {
+    opacity: 0;
+  }
+
+  /* Before the script fills them, letters wait pale (only once JS has split them). */
+  .story-scroll.is-animated .sf-char {
+    opacity: 0.16;
+  }
+
+  .story-scroll .sf-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  /* ---------- Opening ---------- */
+
+  .story-scroll__opening {
+    position: relative;
+    height: 210vh;
+  }
+
+  .story-scroll__opening-sticky {
+    position: sticky;
+    top: var(--header-offset);
+    display: grid;
+    place-items: center;
+    height: calc(100dvh - var(--header-offset));
+    overflow: hidden;
+  }
+
+  .story-scroll__opening-inner {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    justify-items: center;
+    gap: var(--space-5);
+    max-width: min(1100px, 92vw);
+    padding-inline: var(--page-margin);
+    text-align: center;
+  }
+
+  .story-scroll__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: 0;
+    padding: 6px var(--space-4);
+    color: var(--scene-fg);
+    background: rgb(var(--scene-fg-rgb) / 0.06);
+    border-radius: var(--radius-full);
+  }
+
+  .story-scroll__eyebrow::before {
+    content: '';
+    width: 8px;
+    aspect-ratio: 1;
+    background: var(--scene-accent);
+    border-radius: var(--radius-full);
+  }
+
+  .story-scroll__headline {
+    margin: 0;
+    font-size: clamp(40px, 6.4vw, 96px);
+    line-height: 1.04;
+    letter-spacing: -0.02em;
+    color: var(--scene-fg);
+    text-wrap: balance;
+  }
+
+  .story-scroll__intro {
+    max-width: 60ch;
+    color: rgb(var(--scene-fg-rgb) / 0.72);
+  }
+
+  .story-scroll__intro > * {
+    margin: 0;
+  }
+
+  .story-scroll__cue {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-3);
+    margin: var(--space-4) 0 0;
+    color: rgb(var(--scene-fg-rgb) / 0.6);
+  }
+
+  .story-scroll__cue-line {
+    width: 2px;
+    height: 48px;
+    overflow: hidden;
+    background: rgb(var(--scene-fg-rgb) / 0.15);
+    border-radius: 2px;
+  }
+
+  .story-scroll__cue-line::after {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 40%;
+    background: var(--scene-accent);
+    border-radius: inherit;
+    animation: story-scroll-cue 1.8s ease-in-out infinite;
+  }
+
+  @keyframes story-scroll-cue {
+    from {
+      transform: translateY(-100%);
+    }
+    to {
+      transform: translateY(260%);
+    }
+  }
+
+  /* ---------- Floating shapes ---------- */
+
+  .story-scroll__shape {
+    position: absolute;
+    pointer-events: none;
+  }
+
+  .story-scroll__shape--circle {
+    top: 14%;
+    left: 8%;
+    width: clamp(70px, 9vw, 140px);
+    aspect-ratio: 1;
+    background: var(--color-sun);
+    border-radius: 50%;
+  }
+
+  .story-scroll__shape--ring {
+    right: 9%;
+    bottom: 14%;
+    width: clamp(90px, 12vw, 180px);
+    aspect-ratio: 1;
+    border: clamp(10px, 1.4vw, 18px) solid var(--color-sky);
+    border-radius: 50%;
+  }
+
+  .story-scroll__shape--letter {
+    font-family: var(--font-accent--family);
+    font-style: italic;
+    font-size: clamp(80px, 12vw, 190px);
+    line-height: 1;
+  }
+
+  .story-scroll__shape--a {
+    top: 10%;
+    right: 14%;
+    color: var(--color-grape);
+    transform: rotate(12deg);
+  }
+
+  .story-scroll__shape--b {
+    bottom: 8%;
+    left: 14%;
+    color: var(--color-leaf);
+    transform: rotate(-10deg);
+  }
+
+  .story-scroll__shape--squiggle {
+    top: 62%;
+    left: 4%;
+    width: clamp(90px, 10vw, 150px);
+    color: var(--color-tomato);
+  }
+
+  /* ---------- Scenes ---------- */
+
+  .story-scroll__scene {
+    position: relative;
+    display: grid;
+    align-items: center;
+    min-height: 100dvh;
+    padding: clamp(var(--space-8), 10vh, var(--space-10, 96px)) var(--page-margin);
+  }
+
+  .story-scroll__chapter,
+  .story-scroll__closing {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: clamp(var(--space-7), 7vw, 120px);
+    align-items: center;
+    width: 100%;
+    max-width: var(--page-width);
+    margin-inline: auto;
+  }
+
+  .story-scroll__chapter--image-left .story-scroll__media {
+    order: -1;
+  }
+
+  .story-scroll__chapter--no-image {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 920px;
+  }
+
+  .story-scroll__chapter-text,
+  .story-scroll__closing-text {
+    display: grid;
+    gap: var(--space-5);
+    align-content: center;
+  }
+
+  .story-scroll__label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgb(var(--scene-fg-rgb) / 0.7);
+  }
+
+  .story-scroll__label-number {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    font-family: var(--font-heading--family);
+    font-size: 15px;
+    letter-spacing: 0;
+    color: var(--color-paper);
+    background: var(--scene-accent);
+    border-radius: 50%;
+    transition: background-color 700ms ease;
+  }
+
+  .story-scroll__statement {
+    margin: 0;
+    font-family: var(--font-heading--family);
+    font-size: clamp(32px, 4.2vw, 64px);
+    font-weight: 600;
+    line-height: 1.08;
+    letter-spacing: -0.015em;
+    color: var(--scene-fg);
+    text-wrap: balance;
+  }
+
+  .story-scroll__body {
+    max-width: 56ch;
+    font-size: clamp(17px, 1.3vw, 19px);
+    line-height: 1.65;
+    color: rgb(var(--scene-fg-rgb) / 0.8);
+  }
+
+  .story-scroll__body > * {
+    margin: 0;
+  }
+
+  .story-scroll__body > * + * {
+    margin-top: var(--space-4);
+  }
+
+  .story-scroll__stat {
+    display: grid;
+    gap: var(--space-1);
+    padding-top: var(--space-4);
+    border-top: 2px dashed rgb(var(--scene-fg-rgb) / 0.2);
+  }
+
+  .story-scroll__stat-number {
+    font-family: var(--font-heading--family);
+    font-size: clamp(48px, 6vw, 88px);
+    font-weight: 600;
+    line-height: 1;
+    color: var(--scene-accent);
+    transition: color 700ms ease;
+  }
+
+  .story-scroll__stat-caption {
+    font-family: var(--font-accent--family);
+    font-style: var(--font-accent--style);
+    font-size: 20px;
+    color: rgb(var(--scene-fg-rgb) / 0.75);
+  }
+
+  /* ---------- Shaped images ---------- */
+
+  .story-scroll__media {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: var(--space-4);
+  }
+
+  .story-scroll__media-blob {
+    position: absolute;
+    top: 8%;
+    right: 2%;
+    width: 46%;
+    aspect-ratio: 1;
+    background: var(--scene-soft);
+    border-radius: 58% 42% 55% 45% / 46% 52% 48% 54%;
+    opacity: 0.55;
+    transition: background-color 700ms ease;
+  }
+
+  .story-scroll__chapter--image-left .story-scroll__media-blob {
+    right: auto;
+    left: 2%;
+  }
+
+  .story-scroll__image {
+    position: relative;
+    z-index: 1;
+    width: min(100%, 520px);
+    overflow: hidden;
+    background: var(--color-paper-deep);
+    box-shadow: 0 30px 60px -30px rgb(0 0 0 / 0.35);
+  }
+
+  .story-scroll__image img,
+  .story-scroll__image svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .story-scroll__image--arch {
+    aspect-ratio: 4 / 5;
+    border-radius: 999px 999px var(--radius-xl) var(--radius-xl);
+  }
+
+  .story-scroll__image--circle {
+    aspect-ratio: 1;
+    border-radius: 50%;
+  }
+
+  .story-scroll__image--blob {
+    aspect-ratio: 1;
+    border-radius: 62% 38% 54% 46% / 42% 56% 44% 58%;
+  }
+
+  .story-scroll__image--pill {
+    aspect-ratio: 3 / 5;
+    width: min(80%, 400px);
+    border-radius: 999px;
+  }
+
+  .story-scroll__image--tilted {
+    aspect-ratio: 4 / 5;
+    border-radius: var(--radius-xl);
+    transform: rotate(-3deg);
+  }
+
+  .story-scroll__media-caption {
+    margin: 0;
+    font-family: var(--font-accent--family);
+    font-style: var(--font-accent--style);
+    font-size: 18px;
+    color: rgb(var(--scene-fg-rgb) / 0.75);
+    text-align: center;
+  }
+
+  .story-scroll__placeholder {
+    fill: rgb(var(--scene-fg-rgb) / 0.25);
+  }
+
+  /* ---------- Quote ---------- */
+
+  .story-scroll__quote {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: var(--space-6);
+    max-width: 1100px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .story-scroll__quote-mark {
+    font-family: var(--font-accent--family);
+    font-size: clamp(120px, 16vw, 220px);
+    line-height: 0.6;
+    color: var(--scene-accent);
+    transition: color 700ms ease;
+  }
+
+  .story-scroll__quote-text {
+    margin: 0;
+    font-family: var(--font-heading--family);
+    font-size: clamp(34px, 5vw, 76px);
+    font-weight: 500;
+    line-height: 1.12;
+    letter-spacing: -0.015em;
+    color: var(--scene-fg);
+    text-wrap: balance;
+  }
+
+  .story-scroll__quote-text > * {
+    margin: 0;
+  }
+
+  .story-scroll__quote-caption {
+    font-family: var(--font-accent--family);
+    font-style: var(--font-accent--style);
+    font-size: 22px;
+    color: rgb(var(--scene-fg-rgb) / 0.75);
+  }
+
+  /* ---------- Closing photo: colour-bar frame ---------- */
+
+  .story-scroll__closing {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  }
+
+  .story-scroll__photo {
+    display: grid;
+    gap: var(--space-4);
+    margin: 0;
+  }
+
+  .story-scroll__photo-frame {
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+    border-style: solid;
+    border-width: var(--colour-bar-thickness);
+    border-color: var(--color-sky) var(--color-grape) var(--color-tomato) var(--color-sun);
+    border-radius: var(--radius-xl);
+  }
+
+  .story-scroll__photo-frame img,
+  .story-scroll__photo-frame svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* ---------- Chapter pill ---------- */
+
+  .story-scroll__pill {
+    position: sticky;
+    bottom: var(--space-5);
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    width: max-content;
+    max-width: calc(100% - 2 * var(--page-margin));
+    margin: calc(-56px - var(--space-5)) auto var(--space-5);
+    padding: 10px var(--space-4) 10px var(--space-3);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-ink);
+    background: rgb(255 255 255 / 0.86);
+    border-radius: var(--radius-full);
+    box-shadow: 0 10px 30px -12px rgb(0 0 0 / 0.35);
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 300ms ease, transform 300ms ease;
+  }
+
+  .story-scroll__pill.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  .story-scroll__pill-dot {
+    width: 12px;
+    aspect-ratio: 1;
+    background: var(--scene-accent);
+    border-radius: 50%;
+    transition: background-color 700ms ease;
+  }
+
+  .story-scroll__pill-count {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .story-scroll__pill-label {
+    max-width: 28ch;
+    overflow: hidden;
+    color: var(--color-ink-muted);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .story-scroll__pill-bar {
+    width: 72px;
+    height: 4px;
+    overflow: hidden;
+    background: rgb(var(--color-ink-rgb) / 0.1);
+    border-radius: 4px;
+  }
+
+  .story-scroll__pill-bar > span {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, var(--color-sky), var(--color-sun), var(--color-leaf), var(--color-grape), var(--color-tomato));
+    transform: scaleX(var(--story-progress, 0));
+    transform-origin: left;
+  }
+
+  /* ---------- Mobile ---------- */
+
+  @media screen and (max-width: 989px) {
+    .story-scroll__opening {
+      height: 170vh;
+    }
+
+    .story-scroll__chapter,
+    .story-scroll__closing {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-7);
+    }
+
+    .story-scroll__chapter--image-left .story-scroll__media {
+      order: 0;
+    }
+
+    .story-scroll__scene {
+      min-height: auto;
+      padding-block: var(--space-9);
+    }
+
+    .story-scroll__image {
+      width: min(86%, 420px);
+    }
+
+    .story-scroll__shape--letter {
+      opacity: 0.6;
+    }
+
+    .story-scroll__pill-label,
+    .story-scroll__pill-bar {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .story-scroll,
+    .story-scroll * {
+      transition: none !important;
+    }
+
+    .story-scroll__cue-line::after {
+      animation: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Story scroll",
+  "tag": "section",
+  "class": "story-scroll-section",
+  "max_blocks": 12,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Opening"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Our story"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "headline",
+      "label": "Headline",
+      "info": "Fills in letter by letter as you scroll. Put words in italics to give them the accent colour.",
+      "default": "Two parents, one kitchen table and a child who wanted to <em>read</em>"
+    },
+    {
+      "type": "richtext",
+      "id": "intro",
+      "label": "Intro"
+    },
+    {
+      "type": "text",
+      "id": "scroll_cue",
+      "label": "Scroll hint",
+      "default": "Scroll to read our story"
+    },
+    {
+      "type": "select",
+      "id": "opening_color",
+      "label": "Opening colour",
+      "options": [
+        { "value": "paper", "label": "Paper" },
+        { "value": "sky", "label": "Sky" },
+        { "value": "sun", "label": "Sun" },
+        { "value": "leaf", "label": "Leaf" },
+        { "value": "grape", "label": "Grape" },
+        { "value": "tomato", "label": "Tomato" },
+        { "value": "ink", "label": "Ink (dark)" }
+      ],
+      "default": "paper"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "chapter",
+      "name": "Chapter",
+      "settings": [
+        {
+          "type": "select",
+          "id": "color",
+          "label": "Colour",
+          "info": "The whole page takes this colour while the chapter is on screen.",
+          "options": [
+            { "value": "paper", "label": "Paper" },
+            { "value": "sky", "label": "Sky" },
+            { "value": "sun", "label": "Sun" },
+            { "value": "leaf", "label": "Leaf" },
+            { "value": "grape", "label": "Grape" },
+            { "value": "tomato", "label": "Tomato" },
+            { "value": "ink", "label": "Ink (dark)" }
+          ],
+          "default": "sky"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "Early 1990s"
+        },
+        {
+          "type": "inline_richtext",
+          "id": "statement",
+          "label": "Statement",
+          "info": "Fills in letter by letter. Italics take the accent colour.",
+          "default": "It started with a curious child and <em>no program</em> we liked"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "<p>Tell this part of the story here.</p>"
+        },
+        {
+          "type": "text",
+          "id": "stat",
+          "label": "Number or short fact",
+          "info": "Numbers count up when shown, e.g. 200,000+."
+        },
+        {
+          "type": "text",
+          "id": "stat_caption",
+          "label": "Number caption"
+        },
+        {
+          "type": "header",
+          "content": "Image"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_placeholder",
+          "label": "Show a placeholder when there is no image",
+          "default": true
+        },
+        {
+          "type": "select",
+          "id": "image_shape",
+          "label": "Shape",
+          "options": [
+            { "value": "arch", "label": "Arch" },
+            { "value": "circle", "label": "Circle" },
+            { "value": "blob", "label": "Blob" },
+            { "value": "pill", "label": "Pill" },
+            { "value": "tilted", "label": "Tilted card" }
+          ],
+          "default": "arch"
+        },
+        {
+          "type": "select",
+          "id": "image_side",
+          "label": "Image side",
+          "options": [
+            { "value": "right", "label": "Right" },
+            { "value": "left", "label": "Left" }
+          ],
+          "default": "right"
+        },
+        {
+          "type": "text",
+          "id": "image_caption",
+          "label": "Image caption"
+        }
+      ]
+    },
+    {
+      "type": "quote",
+      "name": "Quote",
+      "settings": [
+        {
+          "type": "select",
+          "id": "color",
+          "label": "Colour",
+          "options": [
+            { "value": "paper", "label": "Paper" },
+            { "value": "sky", "label": "Sky" },
+            { "value": "sun", "label": "Sun" },
+            { "value": "leaf", "label": "Leaf" },
+            { "value": "grape", "label": "Grape" },
+            { "value": "tomato", "label": "Tomato" },
+            { "value": "ink", "label": "Ink (dark)" }
+          ],
+          "default": "ink"
+        },
+        {
+          "type": "inline_richtext",
+          "id": "quote",
+          "label": "Quote",
+          "info": "Fills in letter by letter. Italics take the accent colour.",
+          "default": "A <em>calm</em> page and fifteen patient minutes a day beat every app ever made."
+        },
+        {
+          "type": "text",
+          "id": "caption",
+          "label": "Caption",
+          "default": "what we still believe"
+        }
+      ]
+    },
+    {
+      "type": "closing",
+      "name": "Closing",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "select",
+          "id": "color",
+          "label": "Colour",
+          "options": [
+            { "value": "paper", "label": "Paper" },
+            { "value": "sky", "label": "Sky" },
+            { "value": "sun", "label": "Sun" },
+            { "value": "leaf", "label": "Leaf" },
+            { "value": "grape", "label": "Grape" },
+            { "value": "tomato", "label": "Tomato" },
+            { "value": "ink", "label": "Ink (dark)" }
+          ],
+          "default": "paper"
+        },
+        {
+          "type": "inline_richtext",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Still a small <em>family</em> business"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Photo"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_placeholder",
+          "label": "Show a placeholder when there is no photo",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "image_caption",
+          "label": "Photo caption"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "default": "Shop the program"
+        },
+        {
+          "type": "url",
+          "id": "button_url",
+          "label": "Button link",
+          "default": "/collections/all"
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Button colour",
+          "options": [
+            { "value": "primary", "label": "Ink" },
+            { "value": "purchase", "label": "Tomato" },
+            { "value": "sun", "label": "Sun" },
+            { "value": "sky", "label": "Sky" },
+            { "value": "leaf", "label": "Leaf" },
+            { "value": "grape", "label": "Grape" }
+          ],
+          "default": "purchase"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Story scroll",
+      "blocks": [
+        { "type": "chapter", "settings": { "color": "sky" } },
+        { "type": "chapter", "settings": { "color": "sun", "image_side": "left", "image_shape": "circle" } },
+        { "type": "quote" },
+        { "type": "closing" }
+      ]
+    }
+  ]
+}
+{% endschema %}

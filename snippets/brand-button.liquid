@@ -4,10 +4,11 @@
   - primary: ink fill, white text. The main action of a section.
   - secondary: transparent with a line-strong hairline.
   - purchase: tomato. Only for buying (cart, Add to cart, sale).
+  - sun, sky, leaf, grape: brand accent fills, for editor-chosen buttons.
 
   @param {string} label - Button text.
   @param {string} [url] - Renders a link when set, a <button> otherwise.
-  @param {string} [style] - 'primary' (default), 'secondary' or 'purchase'.
+  @param {string} [style] - 'primary' (default), 'secondary', 'purchase', 'sun', 'sky', 'leaf' or 'grape'.
   @param {boolean} [arrow] - Adds the arrow after the label.
   @param {string} [class] - Extra classes.
 
@@ -107,6 +108,34 @@
     --brand-button-fg: var(--color-on-tomato);
     --brand-button-border: var(--color-tomato);
     --brand-button-hover-bg: var(--color-tomato-deep);
+  }
+
+  .brand-button--sun {
+    --brand-button-bg: var(--color-sun);
+    --brand-button-fg: var(--color-ink);
+    --brand-button-border: var(--color-sun);
+    --brand-button-hover-bg: var(--color-sun-deep);
+  }
+
+  .brand-button--sky {
+    --brand-button-bg: var(--color-sky);
+    --brand-button-fg: var(--color-ink);
+    --brand-button-border: var(--color-sky);
+    --brand-button-hover-bg: var(--color-sky-deep);
+  }
+
+  .brand-button--leaf {
+    --brand-button-bg: var(--color-leaf);
+    --brand-button-fg: var(--color-ink);
+    --brand-button-border: var(--color-leaf);
+    --brand-button-hover-bg: var(--color-leaf-deep);
+  }
+
+  .brand-button--grape {
+    --brand-button-bg: var(--color-grape);
+    --brand-button-fg: var(--color-on-grape);
+    --brand-button-border: var(--color-grape);
+    --brand-button-hover-bg: rgb(var(--color-grape-rgb) / 0.88);
   }
 
   @media (prefers-reduced-motion: reduce) {
