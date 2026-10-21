@@ -50,7 +50,7 @@
         "eyebrow": "Book finder",
         "heading": "Which book is right for <em>my child?</em>",
         "text": "<p>Answer four quick questions and we’ll pick the books that fit where your child is today.</p>",
-        "collection": "",
+        "collection": "first-grade",
         "results_count": 3,
         "reading_collection": "",
         "writing_collection": "",
