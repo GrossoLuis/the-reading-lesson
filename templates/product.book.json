@@ -43,13 +43,6 @@
             "open": false
           }
         },
-        "description": {
-          "type": "description",
-          "settings": {
-            "title": "About this book",
-            "open": true
-          }
-        },
         "shipping": {
           "type": "collapsible",
           "settings": {
@@ -65,7 +58,6 @@
         "trust_gift",
         "trust_returns",
         "book_details",
-        "description",
         "shipping"
       ],
       "settings": {
