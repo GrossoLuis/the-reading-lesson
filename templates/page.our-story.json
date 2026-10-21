@@ -82,9 +82,9 @@
           "type": "chapter",
           "settings": {
             "color": "sky",
-            "label": "Early 1990s",
-            "statement": "It started with a curious child and <em>no program</em> we liked",
-            "text": "<p>Tell this part of the story here.</p>",
+            "label": "Over 30 years ago",
+            "statement": "It started with a curious child and <em>no program</em> we liked.",
+            "text": "<p>In the early 1990s, two parents had a problem thousands of families know well: they had a curious child, and no reading program they actually liked. The popular options were cluttered, rigid, or ignored the messy reality that English isn’t perfectly phonetic.</p><p>So they wrote their own, at the kitchen table, one lesson at a time. Mom and dad worked together to build an intuitive program that families could stick to, lesson by lesson.</p>",
             "stat": "",
             "stat_caption": "",
             "show_placeholder": true,
