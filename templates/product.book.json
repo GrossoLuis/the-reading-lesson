@@ -104,6 +104,7 @@
     },
     "author": {
       "type": "book-author",
+      "disabled": true,
       "settings": {
         "eyebrow": "The person behind the pages",
         "heading_prefix": "Meet",
