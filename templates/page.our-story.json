@@ -87,6 +87,7 @@
             "text": "<p>In the early 1990s, two parents had a problem thousands of families know well: they had a curious child, and no reading program they actually liked. The popular options were cluttered, rigid, or ignored the messy reality that English isn’t perfectly phonetic.</p><p>So they wrote their own, at the kitchen table, one lesson at a time. Mom and dad worked together to build an intuitive program that families could stick to, lesson by lesson.</p>",
             "stat": "",
             "stat_caption": "",
+            "image": "shopify://shop_images/Screenshot_2026-09-16_at_10.38.13_AM.png",
             "show_placeholder": true,
             "image_shape": "arch",
             "image_side": "right",
@@ -97,11 +98,12 @@
           "type": "chapter",
           "settings": {
             "color": "sun",
-            "label": "Early 1990s",
-            "statement": "It started with a curious child and <em>no program</em> we liked",
-            "text": "<p>Tell this part of the story here.</p>",
-            "stat": "",
+            "label": "Over 30 years ago",
+            "statement": "The final product worked.",
+            "text": "<p>The result was tested first on us, their kids, and then with patients from the practice, including many children with attention and developmental differences. It worked, so they printed it. The program grew the way small things do, one family telling another. Homeschooling families found it first and passed it around their co-ops. Then came classroom teachers, tutors, speech therapists, grandparents, and parents who had simply run out of other things to try.</p><p>Thirty years later, The Reading Lesson has taught over 200,000 children to read, and the child it was written for runs the company. We’re still a small family business. We still answer our own email. And we still believe a calm page and fifteen patient minutes a day beat every app ever made.</p>",
+            "stat": "Written by parents. Proven by families.",
             "stat_caption": "",
+            "image": "shopify://shop_images/GUEST_99672d66-4176-4f24-a104-c82e941c72f0.avif",
             "show_placeholder": true,
             "image_shape": "circle",
             "image_side": "left",
@@ -112,7 +114,7 @@
           "type": "quote",
           "settings": {
             "color": "ink",
-            "quote": "A <em>calm</em> page and fifteen patient minutes a day beat every app ever made.",
+            "quote": "A <em>calm,</em> <em>distraction-free</em> lesson and fifteen &nbsp;minutes a day can make your child a confident reader.",
             "caption": "what we still believe"
           }
         },
@@ -120,11 +122,11 @@
           "type": "closing",
           "settings": {
             "color": "paper",
-            "heading": "Still a small <em>family</em> business",
-            "text": "",
+            "heading": "Still a small <em>family</em> business.",
+            "text": "<p>All our products are lovingly developed by our family for yours. We create, design, and publish all our own products to ensure that our customers get the highest quality educational products available.</p>",
             "image": "shopify://shop_images/family.jpg",
             "show_placeholder": true,
-            "image_caption": "",
+            "image_caption": "The Reading Lesson's authors and first generation (and second) generation of  Reading Lesson readers.",
             "button_label": "Shop the program",
             "button_url": "shopify://collections/all",
             "button_style": "purchase"
