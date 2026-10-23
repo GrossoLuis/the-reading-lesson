@@ -94,28 +94,6 @@
         "surface": "paper-deep"
       }
     },
-    "series": {
-      "type": "book-series",
-      "disabled": true,
-      "settings": {
-        "eyebrow": "A series in [count] books",
-        "surface": "grape-soft"
-      }
-    },
-    "author": {
-      "type": "book-author",
-      "disabled": true,
-      "settings": {
-        "eyebrow": "The person behind the pages",
-        "heading_prefix": "Meet",
-        "sticker": "Written with love",
-        "link_label": "All books by [author]",
-        "show_books": true,
-        "books_heading": "More by [author]",
-        "books_limit": 4,
-        "surface": "paper"
-      }
-    },
     "testimonials": {
       "type": "testimonials",
       "blocks": {
@@ -288,8 +266,6 @@
     "main",
     "love",
     "look_inside",
-    "series",
-    "author",
     "testimonials",
     "faq",
     "recs_related"
