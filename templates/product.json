@@ -48,11 +48,18 @@
           "settings": {
             "title": "Shipping & returns",
             "content": "<p>Orders ship in 1–2 business days. Shipping is free on orders over $40.</p><p>Not the right fit? Return it within 30 days for a full refund.</p>",
+            "page": "",
             "open": false
           }
         }
       },
-      "block_order": ["trust_shipping", "trust_gift", "trust_returns", "description", "shipping"],
+      "block_order": [
+        "trust_shipping",
+        "trust_gift",
+        "trust_returns",
+        "description",
+        "shipping"
+      ],
       "settings": {
         "image_fit": "contain",
         "show_breadcrumbs": true,
@@ -63,9 +70,67 @@
         "show_quantity": true,
         "show_dynamic_checkout": true,
         "stock_note": "Ships in 1–2 business days",
-        "low_stock_threshold": 5
+        "low_stock_threshold": 5,
+        "show_sticky_cart": false,
+        "show_book_meta": false,
+        "structured_data": "product"
+      }
+    },
+    "book_faq_gyNwXF": {
+      "type": "book-faq",
+      "blocks": {
+        "question_AJLWC3": {
+          "type": "question",
+          "settings": {
+            "question": "Is my child ready to start?",
+            "answer": "<p>If your child knows a few letters and can sit with you for 15 minutes, they're ready. No prior reading is needed.</p>"
+          }
+        },
+        "question_MRCjDx": {
+          "type": "question",
+          "settings": {
+            "question": "Is my child ready to start?",
+            "answer": "<p>If your child knows a few letters and can sit with you for 15 minutes, they're ready. No prior reading is needed.</p>"
+          }
+        },
+        "question_bBT3GF": {
+          "type": "question",
+          "settings": {
+            "question": "Is my child ready to start?",
+            "answer": "<p>If your child knows a few letters and can sit with you for 15 minutes, they're ready. No prior reading is needed.</p>"
+          }
+        },
+        "question_xKGVfe": {
+          "type": "question",
+          "settings": {
+            "question": "Is my child ready to start?",
+            "answer": "<p>If your child knows a few letters and can sit with you for 15 minutes, they're ready. No prior reading is needed.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "question_AJLWC3",
+        "question_MRCjDx",
+        "question_bBT3GF",
+        "question_xKGVfe"
+      ],
+      "name": "Questions parents ask",
+      "settings": {
+        "eyebrow": "Before you start",
+        "heading": "Questions <em>parents</em> ask",
+        "text": "Everything families want to know before the first lesson.",
+        "open_first": true,
+        "help_heading": "Still not sure?",
+        "help_text": "Tell us about your child and we'll help you pick the right book.",
+        "help_label": "Write to us",
+        "help_url": "",
+        "structured_data": true,
+        "surface": "paper"
       }
     }
   },
-  "order": ["main"]
+  "order": [
+    "main",
+    "book_faq_gyNwXF"
+  ]
 }
