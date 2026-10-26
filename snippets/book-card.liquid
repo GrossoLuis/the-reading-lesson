@@ -1,14 +1,13 @@
 {%- doc -%}
   Product card from the brand guidelines ("Fresh on the shelf"): the cover on a soft
   tint, a badge and a wishlist heart over it, then ages and rating, the title in
-  Besley, the author, and the price with a round "+" to add to cart.
+  Besley, and the price with a round "+" to add to cart.
 
   - Tint: metafield custom.card_colour, else the same soft colour everywhere (picked
     from its id).
   - Ages: metafield custom.age_range ("Ages 3–5"), else the product type, else its first
     collection.
-  - Author: metafield custom.author, an Author metaobject (its name) or plain text.
-    Rating: the standard reviews.rating metafields.
+  - Rating: the standard reviews.rating metafields.
   - Badges, in order: Sold out, sale (-25%), metafield custom.badge, Staff pick (tag
     "staff-pick"), New. Metafields: METAFIELDS.md.
   - "+" adds straight to the cart (assets/book-card.js): the product's selected or first
@@ -58,8 +57,6 @@
     endfor
   endif
 
-  assign author = product.metafields.custom.author.value
-  assign author = author.name.value | default: author
   assign badge_field = product.metafields.custom.badge.value
 
   assign badge = blank
@@ -188,10 +185,6 @@
         {{- product.title -}}
       </a>
     </h3>
-
-    {%- if author != blank -%}
-      <p class="book-card__author">{{ author }}</p>
-    {%- endif -%}
 
     <div class="book-card__footer">
       <p class="book-card__price{% if on_sale %} book-card__price--sale{% endif %}">
@@ -445,12 +438,6 @@
     outline: var(--focus-ring-width) solid var(--color-focus-ring, var(--color-grape));
     outline-offset: var(--focus-ring-offset);
     border-radius: var(--radius-image);
-  }
-
-  .book-card__author {
-    margin: 0;
-    font-size: 13.5px;
-    color: var(--color-ink-muted);
   }
 
   .book-card__footer {

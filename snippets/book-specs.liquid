@@ -16,8 +16,6 @@
   assign book = product.metafields.custom
   assign current_variant = product.selected_or_first_available_variant
 
-  assign author = book.author.value
-  assign author_name = author.name.value | default: author
   assign series = book.series.value
   assign series_position = 0
   if series != blank
@@ -62,16 +60,6 @@
 -%}
 
 {%- capture lines -%}
-  {%- if author_name != blank -%}
-    <li>
-      <span class="book-specs__label">Author:</span>
-      {% if author.system.url != blank -%}
-        <a href="{{ author.system.url }}">{{ author_name }}</a>
-      {%- else -%}
-        {{ author_name }}
-      {%- endif %}
-    </li>
-  {%- endif -%}
   {%- if format_index >= 0 -%}
     <li>
       <span class="book-specs__label">Format:</span>
