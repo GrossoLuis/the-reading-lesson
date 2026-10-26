@@ -4,15 +4,14 @@
   hide their heading.
 
   Sources:
-  - author: books whose custom.author is `value` (an Author metaobject, or the same text).
   - age: books whose custom.age_range is `value`.
   - products: the `products` list as given (series books, recommendations).
 
-  Author and age look through the first 250 products of the catalogue: Liquid can't
-  query products by metafield.
+  Age looks through the first 250 products of the catalogue: Liquid can't query
+  products by metafield.
 
-  @param {string} source - 'author', 'age' or 'products'.
-  @param {object} [value] - The author metaobject or the age range to match.
+  @param {string} source - 'age' or 'products'.
+  @param {string} [value] - The age range to match.
   @param {product[]} [products] - For source 'products'.
   @param {number} [exclude] - A product id to leave out (the current product).
   @param {number} [limit] - Maximum books. Defaults to 4.
@@ -26,7 +25,7 @@
 
 {%- liquid
   assign limit = limit | default: 4
-  assign match_key = value.system.id | default: value
+  assign match_key = value
   assign sizes = '(min-width: 1200px) 300px, (min-width: 990px) 23vw, (min-width: 750px) 30vw, 70vw'
 -%}
 
@@ -54,14 +53,7 @@
       {%- assign shown = 0 -%}
       {%- for book in collections.all.products -%}
         {%- if book.id == exclude -%}{%- continue -%}{%- endif -%}
-        {%- liquid
-          if source == 'author'
-            assign book_author = book.metafields.custom.author.value
-            assign book_key = book_author.system.id | default: book_author
-          else
-            assign book_key = book.metafields.custom.age_range.value
-          endif
-        -%}
+        {%- assign book_key = book.metafields.custom.age_range.value -%}
         {%- if book_key != blank and book_key == match_key -%}
           {%- assign shown = shown | plus: 1 -%}
           <li class="book-shelf__item">

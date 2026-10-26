@@ -17,11 +17,14 @@
   Book template (templates/product.book.json) turns on three settings, all off by default
   so the standard product template is unchanged:
   - Book details: age seal on the gallery, card colour behind it, badge and reading level
-    chips, "by <author>" and "Book 2 of 4 in <series>" from the book metafields.
+    chips and "Book 2 of 4 in <series>" from the book metafields.
   - Sticky add to cart: a compact bar on phones once the main button scrolls away.
   - Structured data as a book (snippets/book-structured-data.liquid).
   The "Book details" block adds an accordion with the book's specs as plain lines
   (snippets/book-specs.liquid); it renders nothing for a product without them.
+
+  Buy with Amazon: when the product's custom.amazon_url metafield (URL) is filled, a
+  button under Add to cart opens that Amazon listing in a new tab.
 {%- endcomment -%}
 
 <script
@@ -68,7 +71,6 @@
   assign book_age = blank
   assign book_badge = blank
   assign book_level = blank
-  assign book_author = blank
   assign book_series = blank
   assign book_tint = blank
   assign series_position = 0
@@ -78,7 +80,6 @@
     assign book_age = book.age_range.value
     assign book_badge = book.badge.value
     assign book_level = book.reading_level.value
-    assign book_author = book.author.value
     assign book_series = book.series.value
     if book.card_colour.value != blank
       assign book_tint = book.card_colour.value | downcase
@@ -316,27 +317,14 @@
 
           <h1 class="pdp__title h3">{{ product.title }}</h1>
 
-          {%- if book_author != blank or series_position > 0 -%}
+          {%- if series_position > 0 -%}
             <div class="pdp__byline">
-              {%- if book_author != blank -%}
-                {%- assign author_name = book_author.name.value | default: book_author -%}
-                <p class="pdp__author">
-                  by
-                  {% if book_author.system.url != blank -%}
-                    <a href="{{ book_author.system.url }}">{{ author_name }}</a>
-                  {%- else -%}
-                    <span>{{ author_name }}</span>
-                  {%- endif %}
-                </p>
-              {%- endif -%}
-              {%- if series_position > 0 -%}
-                <p class="pdp__series text-small">
-                  <a href="#book-series">
-                    Book {{ series_position }} of {{ series_size }} in
-                    <em>{{ book_series.name.value }}</em>
-                  </a>
-                </p>
-              {%- endif -%}
+              <p class="pdp__series text-small">
+                <a href="#book-series">
+                  Book {{ series_position }} of {{ series_size }} in
+                  <em>{{ book_series.name.value }}</em>
+                </a>
+              </p>
             </div>
           {%- endif -%}
 
@@ -514,6 +502,19 @@
               <div class="pdp__dynamic-checkout">
                 {{ form | payment_button }}
               </div>
+            {%- endif -%}
+
+            {%- assign amazon_url = product.metafields.custom.amazon_url.value -%}
+            {%- if amazon_url != blank -%}
+              <a
+                href="{{ amazon_url }}"
+                class="brand-button pdp__amazon"
+                target="_blank"
+                rel="noopener"
+              >
+                <span>{{ s.amazon_label | default: 'Buy with Amazon' }}</span>
+                <span class="visually-hidden">(opens in a new tab)</span>
+              </a>
             {%- endif -%}
 
             <p
@@ -1356,6 +1357,18 @@
     color: var(--color-ink-muted);
   }
 
+  /* Amazon's button yellow, ink text */
+  .pdp__amazon {
+    --brand-button-bg: #ffd814;
+    --brand-button-border: #fcd200;
+    --brand-button-fg: var(--color-ink);
+    --brand-button-hover-bg: #f7ca00;
+    width: 100%;
+    min-height: 56px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
   .pdp__error {
     margin: 0;
     padding: var(--space-3) var(--space-4);
@@ -1696,30 +1709,6 @@
     flex-direction: column;
     gap: var(--space-1);
     margin-top: calc(var(--space-2) * -1);
-  }
-
-  .pdp__author {
-    margin: 0;
-    font-family: var(--font-heading--family);
-    font-size: 18px;
-    color: var(--color-ink-muted);
-  }
-
-  .pdp__author a,
-  .pdp__author span {
-    color: var(--color-ink);
-    font-style: italic;
-    font-weight: 600;
-  }
-
-  .pdp__author a {
-    text-decoration: underline;
-    text-decoration-color: var(--color-line-strong);
-    text-underline-offset: 4px;
-  }
-
-  .pdp__author a:hover {
-    text-decoration-color: currentColor;
   }
 
   .pdp__series {
@@ -2138,6 +2127,13 @@
     },
     {
       "type": "text",
+      "id": "amazon_label",
+      "label": "Amazon button label",
+      "info": "Shown only on products whose Amazon link metafield (custom.amazon_url) is filled.",
+      "default": "Buy with Amazon"
+    },
+    {
+      "type": "text",
       "id": "stock_note",
       "label": "Note next to the stock status",
       "default": "Ships in 1–2 business days"
@@ -2166,7 +2162,7 @@
       "type": "checkbox",
       "id": "show_book_meta",
       "label": "Show book details",
-      "info": "Age seal, card colour, badge, reading level, author and series, from the product's metafields.",
+      "info": "Age seal, card colour, badge, reading level and series, from the product's metafields.",
       "default": false
     },
     {
@@ -2175,7 +2171,7 @@
       "label": "Search engine data",
       "options": [
         { "value": "product", "label": "Product" },
-        { "value": "book", "label": "Book (author, ISBN, pages, age)" }
+        { "value": "book", "label": "Book (ISBN, pages, age)" }
       ],
       "default": "product"
     }
