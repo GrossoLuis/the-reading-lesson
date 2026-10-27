@@ -1,0 +1,50 @@
+{
+  "sections": {
+    "main": {
+      "type": "policy",
+      "blocks": {
+        "point_free": {
+          "type": "point",
+          "settings": {
+            "icon": "truck",
+            "color": "sky",
+            "title": "Free shipping over $40",
+            "text": "Orders of $40 or more ship free."
+          }
+        },
+        "point_gift": {
+          "type": "point",
+          "settings": {
+            "icon": "gift",
+            "color": "sun",
+            "title": "Free gift wrapping",
+            "text": "Sending a book as a present? We wrap it at no extra cost."
+          }
+        },
+        "point_returns": {
+          "type": "point",
+          "settings": {
+            "icon": "returns",
+            "color": "leaf",
+            "title": "Easy 30-day returns",
+            "text": "Not quite right? Send it back within 30 days."
+          }
+        }
+      },
+      "block_order": ["point_free", "point_gift", "point_returns"],
+      "settings": {
+        "eyebrow": "The fine print",
+        "heading": "Shipping <em>policy</em>",
+        "text": "Where we ship, how long it takes and what it costs to get our books to your door.",
+        "updated": "",
+        "source": "shipping",
+        "aside_heading": "The short version",
+        "help_heading": "Where is my order?",
+        "help_label": "Write to our team",
+        "help_url": "/pages/contact",
+        "surface": "paper"
+      }
+    }
+  },
+  "order": ["main"]
+}
