@@ -1,0 +1,237 @@
+{
+  "sections": {
+    "main": {
+      "type": "product",
+      "blocks": {
+        "trust_shipping": {
+          "type": "trust",
+          "settings": {
+            "icon": "truck",
+            "title": "Free shipping over $40",
+            "text": "Nationwide, wrapped with care."
+          }
+        },
+        "trust_gift": {
+          "type": "trust",
+          "settings": {
+            "icon": "gift",
+            "title": "Ready to gift",
+            "text": "Add free gift wrapping at checkout."
+          }
+        },
+        "trust_returns": {
+          "type": "trust",
+          "settings": {
+            "icon": "returns",
+            "title": "Easy 30-day returns",
+            "text": "If it's not the right book, send it back."
+          }
+        },
+        "description": {
+          "type": "description",
+          "settings": {
+            "title": "About this bundle",
+            "open": true
+          }
+        },
+        "shipping": {
+          "type": "collapsible",
+          "settings": {
+            "title": "Shipping & returns",
+            "content": "<p>Orders ship in 1–2 business days. Shipping is free on orders over $40.</p><p>Not the right fit? Return it within 30 days for a full refund.</p>",
+            "page": "",
+            "open": false
+          }
+        }
+      },
+      "block_order": [
+        "trust_shipping",
+        "trust_gift",
+        "trust_returns",
+        "description",
+        "shipping"
+      ],
+      "settings": {
+        "image_fit": "contain",
+        "show_breadcrumbs": true,
+        "eyebrow_source": "collection",
+        "price_note": "Shipping calculated at checkout.",
+        "show_excerpt": true,
+        "excerpt_words": 30,
+        "show_quantity": true,
+        "show_dynamic_checkout": true,
+        "stock_note": "Ships in 1–2 business days",
+        "low_stock_threshold": 5,
+        "show_sticky_cart": true,
+        "show_book_meta": true,
+        "structured_data": "product",
+        "show_bundle_meta": true
+      }
+    },
+    "testimonials": {
+      "type": "testimonials",
+      "blocks": {
+        "featured_PXe8gt": {
+          "type": "featured",
+          "settings": {
+            "quote": "<p>“We’d tried another popular reading program first. My daughter would grimace and beg me to do anything else. With The Reading Lesson, we got past the first lessons <em>‘without tears and complaints’</em> — and it delivered results.”</p>",
+            "source": "<p><strong>Paraphrased from a NextGen Homeschool curriculum review.</strong> Families arriving after a first attempt that didn’t take is the most common story we hear.</p>"
+          }
+        },
+        "featured_tyz9Ty": {
+          "type": "featured",
+          "settings": {
+            "quote": "<p>“Refreshingly straightforward approach and uncluttered format. <em>Highly recommended.</em>”</p>",
+            "source": "<p><strong>Library Journal.</strong> Discovery Education independently praised the same thing: calm, uncluttered pages.</p>"
+          }
+        },
+        "featured_VDkgKy": {
+          "type": "featured",
+          "settings": {
+            "quote": "<p>“By far the <em>easiest to use</em>.”</p>",
+            "source": "<p><strong>Home Educating Family Association</strong>, after trying several reading programs. Every lesson tells you exactly what to say.</p>"
+          }
+        },
+        "highlight_6gtEPQ": {
+          "type": "highlight",
+          "settings": {
+            "title": "Easiest to use",
+            "text": "<p>“By far the easiest to use,” wrote one reviewer for the Home Educating Family Association, after trying several reading programs. Every lesson tells you exactly what to say.</p>",
+            "color": "sky"
+          }
+        },
+        "highlight_WinJGb": {
+          "type": "highlight",
+          "settings": {
+            "title": "Calm, uncluttered pages",
+            "text": "<p>“Refreshingly straightforward approach and uncluttered format. Highly recommended.” — <em>Library Journal</em>. Discovery Education independently praised the same thing. The calm is the method.</p>",
+            "color": "sun"
+          }
+        },
+        "highlight_iNXC9A": {
+          "type": "highlight",
+          "settings": {
+            "title": "It simply works",
+            "text": "<p>“Take my advice. This book works!” — Jennifer LB Lesse, <em>A StoryBook Weaver’s Book Reviews</em>. Kids read their first tiny story before Lesson One is over.</p>",
+            "color": "leaf"
+          }
+        },
+        "review_aBeEJG": {
+          "type": "review",
+          "settings": {
+            "rating": 5,
+            "quote": "<p>“The single best program for teaching children to read I have found to date, and I have seen many. It worked. Not only was it simple enough for anyone to use, but the program is built on solid phonics and whole language principles.”</p>",
+            "author": "Amazon reviewer"
+          }
+        },
+        "review_DJgXpq": {
+          "type": "review",
+          "settings": {
+            "rating": 5,
+            "quote": "<p>“I got this a few weeks before my daughter turned 4. Amazingly, she often brings me the book in the morning when she wakes up and asks to do a page from her lesson book. She’s enjoying it.”</p>",
+            "author": "Amazon reviewer"
+          }
+        },
+        "review_hELq49": {
+          "type": "review",
+          "settings": {
+            "rating": 5,
+            "quote": "<p>“We’ve successfully taught 7 children to read with The Reading Lesson and I’m currently teaching our 8th. Allow me to quell any fears you may have. This curriculum is wonderful and most importantly, it works.”</p>",
+            "author": "Amazon reviewer"
+          }
+        }
+      },
+      "block_order": [
+        "featured_PXe8gt",
+        "featured_tyz9Ty",
+        "featured_VDkgKy",
+        "highlight_6gtEPQ",
+        "highlight_WinJGb",
+        "highlight_iNXC9A",
+        "review_aBeEJG",
+        "review_DJgXpq",
+        "review_hELq49"
+      ],
+      "name": "Testimonials",
+      "settings": {
+        "eyebrow": "What parents keep saying",
+        "heading": "Three decades of <em>reviews</em>",
+        "featured_autoplay": true,
+        "featured_speed": 3,
+        "featured_label": "Featured reviews",
+        "families_eyebrow": "From families like yours",
+        "families_heading": "What parents say after Lesson 20",
+        "link_label": "Read thousands of parent reviews on Amazon",
+        "link_url": "",
+        "surface": "paper"
+      }
+    },
+    "faq": {
+      "type": "book-faq",
+      "blocks": {
+        "q1": {
+          "type": "question",
+          "settings": {
+            "question": "What comes in the bundle?",
+            "answer": "<p>Every book listed under <em>Inside this bundle</em>, shipped together in one box. Click any book to see its pages and details.</p>"
+          }
+        },
+        "q2": {
+          "type": "question",
+          "settings": {
+            "question": "Is it cheaper than buying the books one by one?",
+            "answer": "<p>Yes. The bundle price is lower than the books added up, and the saving is shown just above the books.</p>"
+          }
+        },
+        "q3": {
+          "type": "question",
+          "settings": {
+            "question": "In what order should we read them?",
+            "answer": "<p>Follow the numbers: Book 1 first, then Book 2 and so on. Each one builds on the last.</p>"
+          }
+        },
+        "q4": {
+          "type": "question",
+          "settings": {
+            "question": "Can I return just one book?",
+            "answer": "<p>Bundles are returned as a whole within 30 days. If one book isn’t right, write to us and we’ll find a solution together.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "q1",
+        "q2",
+        "q3",
+        "q4"
+      ],
+      "settings": {
+        "eyebrow": "About bundles",
+        "heading": "Good to <em>know</em>",
+        "text": "The questions families ask before picking a bundle.",
+        "open_first": true,
+        "help_heading": "Not sure which bundle?",
+        "help_text": "Tell us about your child and we’ll help you pick.",
+        "help_label": "Write to us",
+        "help_url": "/pages/contact",
+        "structured_data": true,
+        "surface": "paper"
+      }
+    },
+    "recs_related": {
+      "type": "book-recommendations",
+      "settings": {
+        "source": "related",
+        "eyebrow": "",
+        "heading": "You may also like",
+        "limit": 4,
+        "surface": "paper"
+      }
+    }
+  },
+  "order": [
+    "main",
+    "testimonials",
+    "faq",
+    "recs_related"
+  ]
+}

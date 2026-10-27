@@ -1,0 +1,50 @@
+{
+  "sections": {
+    "main": {
+      "type": "policy",
+      "blocks": {
+        "point_data": {
+          "type": "point",
+          "settings": {
+            "icon": "check",
+            "color": "sky",
+            "title": "Only what we need",
+            "text": "We collect the details it takes to send your order and answer your messages."
+          }
+        },
+        "point_safe": {
+          "type": "point",
+          "settings": {
+            "icon": "heart",
+            "color": "leaf",
+            "title": "Kept safe",
+            "text": "Payments are handled by Shopify. We never see or store your card number."
+          }
+        },
+        "point_ask": {
+          "type": "point",
+          "settings": {
+            "icon": "mail",
+            "color": "grape",
+            "title": "Your data, your call",
+            "text": "Write to us any time to see, correct or delete what we hold about you."
+          }
+        }
+      },
+      "block_order": ["point_data", "point_safe", "point_ask"],
+      "settings": {
+        "eyebrow": "The fine print",
+        "heading": "Privacy <em>policy</em>",
+        "text": "How we collect, use and look after your information when you shop with The Reading Lesson.",
+        "updated": "",
+        "source": "privacy",
+        "aside_heading": "The short version",
+        "help_heading": "Still have a question?",
+        "help_label": "Write to our team",
+        "help_url": "/pages/contact",
+        "surface": "paper"
+      }
+    }
+  },
+  "order": ["main"]
+}
