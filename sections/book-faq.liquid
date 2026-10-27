@@ -15,7 +15,10 @@
 -%}
 
 {%- if questions.size > 0 -%}
-  <div class="book-faq surface-{{ s.surface }}">
+  <div
+    id="faq"
+    class="book-faq surface-{{ s.surface }}"
+  >
     <div class="book-faq__container">
       <header class="book-faq__intro">
         {%- if s.eyebrow != blank -%}

@@ -23,6 +23,15 @@
   The "Book details" block adds an accordion with the book's specs as plain lines
   (snippets/book-specs.liquid); it renders nothing for a product without them.
 
+  Bundle template (templates/product.bundle.json) turns on the bundle layout, from the
+  books in the custom.bundle_products metafield:
+  - Gallery: their covers fanned out as the first image (snippets/bundle-fan.liquid)
+    and a "4 books" seal.
+  - A "4-book bundle" chip and "Save 20%" next to it; when the bundle has no
+    compare-at price, the price shows the books' total struck through.
+  - "What's in the box" above Add to cart: each book with its cover and price, then
+    what they cost one by one and the saving. Links to the bundle contents section.
+
   Buy with Amazon: when the product's custom.amazon_url metafield (URL) is filled, a
   button under Add to cart opens that Amazon listing in a new tab.
 {%- endcomment -%}
@@ -96,6 +105,102 @@
       endfor
     endif
   endif
+
+  assign bundle_items = blank
+  assign bundle_count = 0
+  assign bundle_value = 0
+  assign bundle_savings = 0
+  if s.show_bundle_meta
+    assign bundle_items = book.bundle_products.value
+    if bundle_items == blank
+      assign bundle_items = s.bundle_products
+    endif
+    assign bundle_count = bundle_items.size | default: 0
+
+    comment
+      What the books cost one by one, per bundle format: a printable bundle (PDF, eBook,
+      printable, digital in its variant title) is compared with the books' printable
+      variants, any other with their physical ones. bundle_formats holds, per bundle
+      variant, the total and each book's price for assets-free updates on format change.
+    endcomment
+    assign digital_words = 'pdf,ebook,printable,digital' | split: ','
+    assign bundle_prices = ''
+    capture bundle_formats
+      for v in product.variants
+        assign v_title = v.title | downcase
+        assign v_digital = false
+        for word in digital_words
+          if v_title contains word
+            assign v_digital = true
+          endif
+        endfor
+
+        assign v_value = 0
+        assign v_prices = ''
+        for item in bundle_items
+          assign item_price = item.price
+          for iv in item.variants
+            assign iv_title = iv.title | downcase
+            assign iv_digital = false
+            for word in digital_words
+              if iv_title contains word
+                assign iv_digital = true
+              endif
+            endfor
+            if iv_digital == v_digital
+              assign item_price = iv.price
+              break
+            endif
+          endfor
+          assign v_value = v_value | plus: item_price
+          assign v_prices = v_prices | append: item_price | append: ','
+        endfor
+
+        if v.id == current_variant.id
+          assign bundle_value = v_value
+          assign bundle_prices = v_prices | split: ','
+        endif
+        echo '"' | append: v.id | append: '":{"value":' | append: v_value | append: ',"prices":[' | append: v_prices | append: '0]}'
+        unless forloop.last
+          echo ','
+        endunless
+      endfor
+    endcapture
+
+    if bundle_value > current_variant.price
+      assign bundle_savings = bundle_value | minus: current_variant.price
+      assign bundle_percent = bundle_savings | times: 100.0 | divided_by: bundle_value | round
+    endif
+  endif
+
+  comment
+    A bundle without its own compare-at price shows what its books cost one by one instead.
+  endcomment
+  assign compare_price = current_variant.compare_at_price
+  if bundle_savings > 0
+    unless compare_price > current_variant.price
+      assign compare_price = bundle_value
+    endunless
+  endif
+
+  comment
+    A bundle with its own photos gets the fanned covers as an extra first image.
+  endcomment
+  assign gallery_offset = 0
+  if bundle_count > 0 and media_count > 0
+    assign gallery_offset = 1
+  endif
+  assign gallery_count = media_count | plus: gallery_offset
+  assign active_index = featured_index | plus: gallery_offset
+  if gallery_offset > 0 and current_variant.featured_media == blank
+    assign active_index = 0
+  endif
+  if gallery_offset > 0
+    assign scroll_steps = gallery_count | minus: 1
+    if scroll_steps > 7
+      assign scroll_steps = 7
+    endif
+  endif
 -%}
 
 <product-page
@@ -131,28 +236,46 @@
     <div class="pdp__grid">
       {%- comment -%} ---------- Gallery ---------- {%- endcomment -%}
       <div
-        class="pdp__gallery{% if media_count < 2 %} pdp__gallery--single{% endif %}"
+        class="pdp__gallery{% if gallery_count < 2 %} pdp__gallery--single{% endif %}"
         style="--pdp-scroll-steps: {{ scroll_steps }};"
         data-gallery
-        data-media-count="{{ media_count }}"
-        data-initial-index="{{ featured_index }}"
+        data-media-count="{{ gallery_count }}"
+        data-initial-index="{{ active_index }}"
       >
         <div class="pdp__gallery-sticky">
-          {%- if media_count > 1 -%}
+          {%- if gallery_count > 1 -%}
             <ul
               class="pdp__thumbs"
               role="list"
               data-thumbs
             >
+              {%- if gallery_offset > 0 -%}
+                <li>
+                  <button
+                    type="button"
+                    class="pdp__thumb pdp__thumb--fan"
+                    data-thumb
+                    data-index="0"
+                    aria-label="Show the books in this bundle"
+                    {% if active_index == 0 %}
+                      aria-current="true"
+                    {% endif %}
+                  >
+                    {% render 'brand-icon', name: 'gift', size: 22 %}
+                    <span class="pdp__thumb-label">{{ bundle_count }} books</span>
+                  </button>
+                </li>
+              {%- endif -%}
               {%- for media in product.media -%}
+                {%- assign gi = forloop.index0 | plus: gallery_offset -%}
                 <li>
                   <button
                     type="button"
                     class="pdp__thumb"
                     data-thumb
-                    data-index="{{ forloop.index0 }}"
-                    aria-label="Show image {{ forloop.index }} of {{ media_count }}"
-                    {% if forloop.index0 == featured_index %}
+                    data-index="{{ gi }}"
+                    aria-label="Show image {{ gi | plus: 1 }} of {{ gallery_count }}"
+                    {% if gi == active_index %}
                       aria-current="true"
                     {% endif %}
                   >
@@ -176,6 +299,13 @@
               style="--pdp-stage-bg: var(--color-{{ book_tint }}-soft);"
             {% endif %}
           >
+            {%- if bundle_count > 0 -%}
+              <span class="pdp__bundle-seal">
+                <span class="pdp__bundle-seal-value">{{ bundle_count }}</span>
+                <span class="pdp__bundle-seal-label">books</span>
+              </span>
+            {%- endif -%}
+
             {%- if book_age != blank -%}
               <span
                 class="pdp__age-seal"
@@ -192,13 +322,28 @@
               data-slides
               aria-label="{{ product.title | escape }} images"
             >
-              {%- for media in product.media -%}
+              {%- if gallery_offset > 0 -%}
                 <li
-                  class="pdp__slide{% if forloop.index0 == featured_index %} is-active{% endif %}"
+                  class="pdp__slide pdp__slide--fan{% if active_index == 0 %} is-active{% endif %}"
                   data-slide
-                  data-index="{{ forloop.index0 }}"
+                  data-index="0"
+                  {% unless active_index == 0 %}
+                    aria-hidden="true"
+                  {% endunless %}
+                >
+                  <div class="pdp__media pdp__media--fan">
+                    {% render 'bundle-fan', products: bundle_items, sizes: '(min-width: 990px) 20vw, 40vw' %}
+                  </div>
+                </li>
+              {%- endif -%}
+              {%- for media in product.media -%}
+                {%- assign gi = forloop.index0 | plus: gallery_offset -%}
+                <li
+                  class="pdp__slide{% if gi == active_index %} is-active{% endif %}"
+                  data-slide
+                  data-index="{{ gi }}"
                   data-media-id="{{ media.id }}"
-                  {% unless forloop.index0 == featured_index %}
+                  {% unless gi == active_index %}
                     aria-hidden="true"
                   {% endunless %}
                 >
@@ -216,7 +361,7 @@
                         aria-label="Zoom image {{ forloop.index }}"
                       >
                         {%- liquid
-                          if forloop.index0 == featured_index
+                          if gi == active_index
                             assign loading = 'eager'
                             assign priority = 'high'
                           else
@@ -240,35 +385,45 @@
                 </li>
               {%- else -%}
                 <li class="pdp__slide is-active">
-                  <div class="pdp__media pdp__media--placeholder">
-                    {% render 'placeholder-book-cover', design: 'moon' %}
-                  </div>
+                  {%- if bundle_count > 0 -%}
+                    <div class="pdp__media pdp__media--fan">
+                      {% render 'bundle-fan', products: bundle_items, sizes: '(min-width: 990px) 20vw, 40vw' %}
+                    </div>
+                  {%- else -%}
+                    <div class="pdp__media pdp__media--placeholder">
+                      {% render 'placeholder-book-cover', design: 'moon' %}
+                    </div>
+                  {%- endif -%}
                 </li>
               {%- endfor -%}
             </ul>
 
-            {%- if media_count > 1 -%}
+            {%- if gallery_count > 1 -%}
               <div
                 class="pdp__stage-meta"
                 aria-hidden="true"
               >
                 <span class="pdp__counter">
-                  <span data-counter-current>{{ featured_index | plus: 1 | prepend: '0' | slice: -2, 2 }}</span>
+                  <span data-counter-current>{{ active_index | plus: 1 | prepend: '0' | slice: -2, 2 }}</span>
                   <span class="pdp__counter-sep">/</span>
-                  <span>{{ media_count | prepend: '0' | slice: -2, 2 }}</span>
+                  <span>{{ gallery_count | prepend: '0' | slice: -2, 2 }}</span>
                 </span>
                 <span class="pdp__progress">
                   <span
                     class="pdp__progress-bar"
                     data-progress
-                    style="--progress: {{ featured_index | plus: 1 | times: 100.0 | divided_by: media_count }}%;"
+                    style="--progress: {{ active_index | plus: 1 | times: 100.0 | divided_by: gallery_count }}%;"
                   ></span>
                 </span>
               </div>
 
               <div class="pdp__dots" data-dots aria-hidden="true">
+                {%- if gallery_offset > 0 -%}
+                  <span class="pdp__dot{% if active_index == 0 %} is-active{% endif %}"></span>
+                {%- endif -%}
                 {%- for media in product.media -%}
-                  <span class="pdp__dot{% if forloop.index0 == featured_index %} is-active{% endif %}"></span>
+                  {%- assign gi = forloop.index0 | plus: gallery_offset -%}
+                  <span class="pdp__dot{% if gi == active_index %} is-active{% endif %}"></span>
                 {%- endfor -%}
               </div>
             {%- endif -%}
@@ -301,11 +456,32 @@
             <p class="pdp__eyebrow text-eyebrow">{{ eyebrow }}</p>
           {%- endif -%}
 
-          {%- if book_badge != blank or book_level != blank -%}
+          {%- if book_badge != blank or book_level != blank or s.show_bundle_meta -%}
             <ul
               class="pdp__chips"
               role="list"
             >
+              {%- if s.show_bundle_meta -%}
+                <li class="pdp__chip pdp__chip--bundle">
+                  {% render 'brand-icon', name: 'gift', size: 16 %}
+                  {%- if bundle_count > 0 -%}
+                    {{ bundle_count }}-book bundle
+                  {%- else -%}
+                    Bundle
+                  {%- endif -%}
+                </li>
+                {%- if bundle_count > 0 -%}
+                  <li
+                    class="pdp__chip pdp__chip--bundle-save"
+                    data-bundle-percent
+                    {% unless bundle_percent > 0 %}
+                      hidden
+                    {% endunless %}
+                  >
+                    Save {{ bundle_percent }}%
+                  </li>
+                {%- endif -%}
+              {%- endif -%}
               {%- if book_badge != blank -%}
                 <li class="pdp__chip pdp__chip--{{ book_badge | handle }}">{{ book_badge }}</li>
               {%- endif -%}
@@ -327,6 +503,7 @@
               </p>
             </div>
           {%- endif -%}
+
 
           {%- assign rating = product.metafields.reviews.rating.value -%}
           {%- if rating != blank -%}
@@ -357,22 +534,22 @@
             <s
               class="pdp__price-compare"
               data-price-compare
-              {% unless current_variant.compare_at_price > current_variant.price %}
+              {% unless compare_price > current_variant.price %}
                 hidden
               {% endunless %}
             >
-              {{- current_variant.compare_at_price | money -}}
+              {{- compare_price | money -}}
             </s>
             <span
               class="pdp__badge pdp__badge--sale"
               data-price-badge
-              {% unless current_variant.compare_at_price > current_variant.price %}
+              {% unless compare_price > current_variant.price %}
                 hidden
               {% endunless %}
             >
               Save
               <span data-price-saving>
-                {{- current_variant.compare_at_price | minus: current_variant.price | money -}}
+                {{- compare_price | minus: current_variant.price | money -}}
               </span>
             </span>
           </div>
@@ -392,6 +569,93 @@
                 | strip_newlines
                 | truncatewords: s.excerpt_words
               -}}
+            </p>
+          {%- endif -%}
+
+          {%- if bundle_count > 0 -%}
+            <div
+              class="pdp__box"
+              data-bundle-box
+            >
+              <div class="pdp__box-header">
+                <p class="pdp__box-heading">
+                  {% render 'brand-icon', name: 'gift', size: 20 %}
+                  {{ s.bundle_heading | default: "What's in the box" }}
+                </p>
+                <a
+                  class="pdp__box-link text-small"
+                  href="#bundle-contents"
+                >
+                  {{- s.bundle_link_label | default: 'See every book' -}}
+                </a>
+              </div>
+
+              <ol
+                class="pdp__box-list"
+                role="list"
+              >
+                {%- for item in bundle_items -%}
+                  <li class="pdp__box-item">
+                    <span class="pdp__box-check">{% render 'brand-icon', name: 'check', size: 16 %}</span>
+                    <a
+                      class="pdp__box-cover"
+                      href="{{ item.url }}"
+                      tabindex="-1"
+                      aria-hidden="true"
+                    >
+                      {%- if item.featured_image -%}
+                        {{-
+                          item.featured_image
+                          | image_url: width: 120
+                          | image_tag: loading: 'lazy', alt: '', width: 48, height: 64
+                        -}}
+                      {%- else -%}
+                        {% render 'placeholder-book-cover', design: 'moon' %}
+                      {%- endif -%}
+                    </a>
+                    <span class="pdp__box-name">
+                      <span class="pdp__box-number text-small">Book {{ forloop.index }}</span>
+                      <a href="{{ item.url }}">{{ item.title | split: ' - ' | first }}</a>
+                    </span>
+                    <span
+                      class="pdp__box-price text-small"
+                      data-box-price
+                    >
+                      {{- bundle_prices[forloop.index0] | plus: 0 | money -}}
+                    </span>
+                  </li>
+                {%- endfor -%}
+              </ol>
+
+              <dl
+                class="pdp__box-total"
+                data-box-total
+                {% if bundle_savings <= 0 %}
+                  hidden
+                {% endif %}
+              >
+                <div>
+                  <dt>Bought one by one</dt>
+                  <dd><s data-box-value>{{ bundle_value | money }}</s></dd>
+                </div>
+                <div class="pdp__box-total-save">
+                  <dt>You save with the bundle</dt>
+                  <dd data-box-saving>{{ bundle_savings | money }}</dd>
+                </div>
+              </dl>
+
+              <script
+                type="application/json"
+                data-bundle-formats
+              >
+                { {{ bundle_formats }} }
+              </script>
+            </div>
+          {%- elsif s.show_bundle_meta and request.design_mode -%}
+            <p class="pdp__box-note text-small">
+              <strong>Bundle</strong> — pick the books in this section's <em>Books in this bundle</em>
+              setting (or in the product's Bundle books metafield) to list them here, fan their covers
+              and work out the saving. Visitors don't see this note.
             </p>
           {%- endif -%}
 
@@ -641,6 +905,17 @@
         </div>
       </div>
     </div>
+
+    {%- if bundle_count > 0 -%}
+      {%- render 'bundle-contents',
+        books: bundle_items,
+        price: current_variant.price,
+        value: bundle_value,
+        eyebrow: s.bundle_contents_eyebrow,
+        heading: s.bundle_contents_heading,
+        text: s.bundle_contents_text
+      -%}
+    {%- endif -%}
   </div>
 
   {%- comment -%} ---------- Sticky add to cart (phones) ---------- {%- endcomment -%}
@@ -1715,6 +1990,236 @@
     margin: 0;
   }
 
+  /* ---------- Bundle ---------- */
+
+  .pdp__chip--bundle {
+    gap: 6px;
+    color: var(--color-on-grape);
+    background: var(--color-grape);
+    border-color: transparent;
+  }
+
+  .pdp__chip[hidden],
+  .pdp__box-total[hidden] {
+    display: none;
+  }
+
+  .pdp__chip--bundle-save {
+    color: var(--color-leaf-deep);
+    background: var(--color-leaf-soft);
+    border-color: transparent;
+  }
+
+  .pdp__bundle-seal {
+    position: absolute;
+    top: var(--space-5);
+    left: var(--space-5);
+    z-index: 2;
+    display: grid;
+    place-content: center;
+    width: 84px;
+    aspect-ratio: 1;
+    text-align: center;
+    color: var(--color-on-grape);
+    background: var(--color-grape);
+    border-radius: var(--radius-full);
+    box-shadow: var(--shadow-sm);
+    transform: rotate(8deg);
+    pointer-events: none;
+  }
+
+  .pdp__bundle-seal-value {
+    font-family: var(--font-heading--family);
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  .pdp__bundle-seal-label {
+    font-family: var(--font-body--family);
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .pdp__media--fan {
+    width: min(100%, 640px);
+    filter: none;
+  }
+
+  .pdp__thumb--fan {
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 2px;
+    color: var(--color-on-grape);
+    background: var(--color-grape);
+  }
+
+  .pdp__thumb-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+
+  .pdp__box {
+    padding: var(--space-5);
+    background: var(--color-card);
+    border: var(--stroke-sm) solid var(--color-line);
+    border-radius: var(--radius-lg);
+  }
+
+  .pdp__box-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+
+  .pdp__box-heading {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0;
+    font-family: var(--font-heading--family);
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+
+  .pdp__box-heading .brand-icon {
+    color: var(--color-grape);
+  }
+
+  .pdp__box-link {
+    color: var(--color-link);
+    white-space: nowrap;
+    text-underline-offset: 3px;
+  }
+
+  .pdp__box-list {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .pdp__box-item {
+    display: grid;
+    grid-template-columns: 22px 48px minmax(0, 1fr) auto;
+    gap: var(--space-3);
+    align-items: center;
+    padding-block: var(--space-3);
+  }
+
+  .pdp__box-item + .pdp__box-item {
+    border-top: var(--stroke-sm) dashed var(--color-line);
+  }
+
+  .pdp__box-check {
+    display: grid;
+    place-items: center;
+    width: 22px;
+    aspect-ratio: 1;
+    color: #fff;
+    background: var(--color-leaf-deep);
+    border-radius: var(--radius-full);
+  }
+
+  .pdp__box-cover {
+    display: block;
+    width: 48px;
+    overflow: hidden;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .pdp__box-cover :is(img, svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+  }
+
+  .pdp__box-name {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .pdp__box-number {
+    color: var(--color-ink-muted);
+  }
+
+  .pdp__box-name a {
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--color-ink);
+    text-decoration: none;
+  }
+
+  .pdp__box-name a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .pdp__box-price {
+    color: var(--color-ink-muted);
+    text-decoration: line-through;
+    white-space: nowrap;
+  }
+
+  .pdp__box-total {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin: var(--space-3) 0 0;
+    padding-top: var(--space-4);
+    border-top: var(--stroke-sm) solid var(--color-line);
+  }
+
+  .pdp__box-total div {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+
+  .pdp__box-total dt {
+    color: var(--color-ink-muted);
+  }
+
+  .pdp__box-total dd {
+    margin: 0;
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+
+  .pdp__box-total-save {
+    margin-inline: calc(var(--space-3) * -1);
+    padding: var(--space-2) var(--space-3);
+    background: var(--color-leaf-soft);
+    border-radius: var(--radius-md);
+  }
+
+  .pdp__box-total-save :is(dt, dd) {
+    color: var(--color-leaf-deep);
+    font-weight: 700;
+  }
+
+  .pdp__box-note {
+    margin: 0;
+    padding: var(--space-4);
+    color: var(--color-ink-muted);
+    border: var(--stroke-sm) dashed var(--color-line-strong);
+    border-radius: var(--radius-md);
+  }
+
   .pdp__series a {
     color: var(--color-link);
     text-decoration: none;
@@ -2164,6 +2669,51 @@
       "label": "Show book details",
       "info": "Age seal, card colour, badge, reading level and series, from the product's metafields.",
       "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_bundle_meta",
+      "label": "Bundle layout",
+      "info": "Fanned covers in the gallery, a bundle chip, \"What's in the box\", the saving and \"Inside this bundle\" below.",
+      "default": false
+    },
+    {
+      "type": "product_list",
+      "id": "bundle_products",
+      "label": "Books in this bundle",
+      "info": "Pick them in reading order. A product whose Bundle books metafield (custom.bundle_products) is filled uses that instead, so one template can serve several bundles.",
+      "limit": 12
+    },
+    {
+      "type": "text",
+      "id": "bundle_heading",
+      "label": "\"What's in the box\" heading",
+      "default": "What's in the box"
+    },
+    {
+      "type": "text",
+      "id": "bundle_link_label",
+      "label": "\"What's in the box\" link label",
+      "default": "See every book"
+    },
+    {
+      "type": "text",
+      "id": "bundle_contents_eyebrow",
+      "label": "\"Inside this bundle\" eyebrow",
+      "default": "Inside this bundle"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "bundle_contents_heading",
+      "label": "\"Inside this bundle\" heading",
+      "info": "[count] becomes the number of books. Put a word in italics to give it the accent colour.",
+      "default": "[count] books, one <em>happy</em> reader"
+    },
+    {
+      "type": "text",
+      "id": "bundle_contents_text",
+      "label": "\"Inside this bundle\" text",
+      "default": "Everything arrives together in one box, in the order we recommend reading it."
     },
     {
       "type": "select",

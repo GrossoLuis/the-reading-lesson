@@ -1,0 +1,591 @@
+{%- comment -%}
+  Policy page (privacy, shipping, returns, terms): a warm header, then the policy text
+  beside a short summary.
+
+  - Header: eyebrow, display heading (italic word in the accent colour), intro text and
+    an optional "Last updated" sticker.
+  - Left: the policy text on a card. It comes from Settings → Policies when the section's
+    source is a store policy and that policy has text; otherwise from the page's own
+    content in the admin. In the editor a note explains where to write it when both are
+    empty.
+  - Right: one card per "Summary point" block (icon, title and text) on a soft brand
+    tint, and a "Questions?" card linking to the contact page. Sticky on desktop.
+{%- endcomment -%}
+
+{%- liquid
+  assign s = section.settings
+  assign points = section.blocks | where: 'type', 'point'
+
+  case s.source
+    when 'privacy'
+      assign policy = shop.privacy_policy
+    when 'shipping'
+      assign policy = shop.shipping_policy
+    when 'refund'
+      assign policy = shop.refund_policy
+    when 'terms'
+      assign policy = shop.terms_of_service
+  endcase
+
+  assign body = page.content
+  if policy.body != blank
+    assign body = policy.body
+  endif
+
+  assign title = page.title | default: policy.title
+-%}
+
+<div class="policy surface-{{ s.surface }}">
+  <div class="policy__container">
+    <header class="policy__header">
+      {%- if s.eyebrow != blank -%}
+        <p class="policy__eyebrow text-eyebrow">{{ s.eyebrow }}</p>
+      {%- endif -%}
+      <h1 class="policy__heading text-display">{{ s.heading | default: title }}</h1>
+      {%- if s.text != blank -%}
+        <p class="policy__text">{{ s.text }}</p>
+      {%- endif -%}
+
+      {%- if s.updated != blank -%}
+        <p class="policy__sticker">
+          {% render 'brand-icon', name: 'clock', size: 20 %}
+          <span>{{ s.updated }}</span>
+        </p>
+      {%- endif -%}
+    </header>
+
+    <div class="policy__layout{% if points.size == 0 and s.help_url == blank %} policy__layout--single{% endif %}">
+      {%- if body != blank -%}
+        <article class="policy__card surface-card">
+          <div class="policy__content rte">{{ body }}</div>
+        </article>
+      {%- elsif request.design_mode -%}
+        <article class="policy__card surface-card">
+          <p class="policy__note">
+            Write this policy in Settings → Policies, or in this page's content in Online Store → Pages.
+          </p>
+        </article>
+      {%- endif -%}
+
+      {%- if points.size > 0 or s.help_url != blank -%}
+        <aside class="policy__aside">
+          {%- if points.size > 0 -%}
+            {%- if s.aside_heading != blank -%}
+              <h2 class="policy__aside-heading h4">{{ s.aside_heading }}</h2>
+            {%- endif -%}
+            <ul
+              class="policy__points"
+              role="list"
+            >
+              {%- for block in points -%}
+                {%- assign b = block.settings -%}
+                <li
+                  class="policy__point surface-{{ b.color }}-soft"
+                  {{ block.shopify_attributes }}
+                >
+                  <span class="policy__point-icon">{% render 'brand-icon', name: b.icon, size: 22 %}</span>
+                  <div class="policy__point-body">
+                    <p class="policy__point-title">{{ b.title }}</p>
+                    {%- if b.text != blank -%}
+                      <p class="policy__point-text">{{ b.text }}</p>
+                    {%- endif -%}
+                  </div>
+                </li>
+              {%- endfor -%}
+            </ul>
+          {%- endif -%}
+
+          {%- if s.help_label != blank and s.help_url != blank -%}
+            <a
+              class="policy__help"
+              href="{{ s.help_url }}"
+            >
+              <span>
+                <span class="policy__help-heading">{{ s.help_heading }}</span>
+                <span class="policy__help-label">{{ s.help_label }}</span>
+              </span>
+              {% render 'brand-icon', name: 'arrow-right', size: 20 %}
+            </a>
+          {%- endif -%}
+        </aside>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+  .policy {
+    padding-block: var(--space-8) var(--space-9);
+  }
+
+  .policy__container {
+    max-width: var(--page-width);
+    margin-inline: auto;
+    padding-inline: var(--page-margin);
+  }
+
+  /* ---------- Header ---------- */
+
+  .policy__header {
+    max-width: 46rem;
+    margin-bottom: var(--space-8);
+  }
+
+  .policy__eyebrow {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: 0 0 var(--space-4);
+    color: var(--color-ink-muted);
+  }
+
+  .policy__eyebrow::before {
+    content: '';
+    flex: none;
+    width: 8px;
+    aspect-ratio: 1;
+    border-radius: var(--radius-full);
+    background: var(--color-tomato);
+  }
+
+  .policy__heading {
+    margin: 0;
+    color: var(--color-ink);
+    text-wrap: balance;
+  }
+
+  .policy__heading :is(em, i) {
+    font-family: var(--font-accent--family);
+    font-style: var(--font-accent--style);
+    font-weight: var(--font-accent--weight);
+    color: var(--color-grape);
+  }
+
+  .policy__text {
+    margin: var(--space-4) 0 0;
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--color-ink-muted);
+  }
+
+  .policy__sticker {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: var(--space-6) 0 0;
+    padding: var(--space-2) var(--space-4);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-ink);
+    background: var(--color-sun);
+    border-radius: var(--radius-full);
+    transform: rotate(-2deg);
+  }
+
+  /* ---------- Layout ---------- */
+
+  .policy__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
+    gap: clamp(var(--space-6), 5vw, var(--space-8));
+    align-items: start;
+  }
+
+  .policy__layout--single {
+    grid-template-columns: minmax(0, 52rem);
+  }
+
+  /* ---------- Policy text ---------- */
+
+  .policy__card {
+    padding: clamp(var(--space-6), 5vw, var(--space-8));
+    border: var(--stroke-sm) solid var(--color-line);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .policy__content {
+    max-width: 44rem;
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--color-ink-muted);
+  }
+
+  .policy__content > :first-child {
+    margin-top: 0;
+  }
+
+  .policy__content > :last-child {
+    margin-bottom: 0;
+  }
+
+  .policy__content :is(h2, h3, h4) {
+    margin: var(--space-7) 0 var(--space-3);
+    font-family: var(--font-heading--family);
+    line-height: 1.25;
+    color: var(--color-ink);
+    text-wrap: balance;
+  }
+
+  .policy__content h2 {
+    padding-top: var(--space-6);
+    font-size: 26px;
+    border-top: var(--stroke-sm) solid var(--color-line);
+  }
+
+  .policy__content > h2:first-child {
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .policy__content h3 {
+    font-size: 20px;
+  }
+
+  .policy__content h4 {
+    font-size: 17px;
+  }
+
+  .policy__content :is(p, ul, ol) {
+    margin: 0 0 var(--space-4);
+  }
+
+  .policy__content :is(ul, ol) {
+    padding-left: 1.25em;
+  }
+
+  .policy__content li + li {
+    margin-top: var(--space-2);
+  }
+
+  .policy__content li::marker {
+    color: var(--color-tomato);
+  }
+
+  .policy__content strong {
+    color: var(--color-ink);
+  }
+
+  .policy__content a {
+    color: var(--color-link);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .policy__content table {
+    width: 100%;
+    margin: 0 0 var(--space-5);
+    font-size: 15px;
+    border-collapse: collapse;
+  }
+
+  .policy__content :is(th, td) {
+    padding: var(--space-3);
+    text-align: left;
+    border-bottom: var(--stroke-sm) solid var(--color-line);
+  }
+
+  .policy__content th {
+    color: var(--color-ink);
+    background: var(--color-paper);
+  }
+
+  .policy__note {
+    margin: 0;
+    color: var(--color-ink-muted);
+  }
+
+  /* ---------- Summary ---------- */
+
+  .policy__aside {
+    position: sticky;
+    top: var(--space-7);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+
+  .policy__aside-heading {
+    margin: 0;
+    color: var(--color-ink);
+  }
+
+  .policy__points {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .policy__point {
+    display: flex;
+    gap: var(--space-4);
+    padding: var(--space-5);
+    background: var(--color-background);
+    border-radius: var(--radius-lg);
+  }
+
+  .policy__point-icon {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 44px;
+    aspect-ratio: 1;
+    color: var(--color-surface-accent, var(--color-ink));
+    background: var(--color-card);
+    border-radius: var(--radius-full);
+  }
+
+  .policy__point-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-width: 0;
+  }
+
+  .policy__point-title {
+    margin: 0;
+    font-family: var(--font-heading--family);
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+
+  .policy__point-text {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--color-ink-muted);
+  }
+
+  .policy__help {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-5) var(--space-6);
+    color: var(--color-ink);
+    text-decoration: none;
+    border: var(--stroke-sm) solid var(--color-ink);
+    border-radius: var(--radius-lg);
+    transition: background-color 200ms ease;
+  }
+
+  .policy__help:hover {
+    background: var(--color-card);
+  }
+
+  .policy__help > span {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .policy__help-heading {
+    font-size: 14px;
+    color: var(--color-ink-muted);
+  }
+
+  .policy__help-label {
+    font-weight: 600;
+  }
+
+  .policy__help .brand-icon {
+    flex: none;
+    transition: transform 200ms ease;
+  }
+
+  .policy__help:hover .brand-icon {
+    transform: translateX(4px);
+  }
+
+  .policy__help:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus-ring, var(--color-grape));
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  @media screen and (max-width: 989px) {
+    .policy__layout,
+    .policy__layout--single {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .policy__aside {
+      position: static;
+      order: -1;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .policy {
+      padding-block: var(--space-7) var(--space-8);
+    }
+
+    .policy__header {
+      margin-bottom: var(--space-6);
+    }
+
+    .policy__content {
+      font-size: 16px;
+    }
+
+    .policy__content h2 {
+      font-size: 22px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .policy__help,
+    .policy__help .brand-icon {
+      transition: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Policy",
+  "tag": "section",
+  "class": "section-policy",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Header"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "The fine print"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "info": "Leave empty to use the page title. Italic words show in the accent colour."
+    },
+    {
+      "type": "text",
+      "id": "text",
+      "label": "Intro"
+    },
+    {
+      "type": "text",
+      "id": "updated",
+      "label": "Last updated",
+      "info": "E.g. \"Last updated October 2026\". Hidden when empty."
+    },
+    {
+      "type": "header",
+      "content": "Policy text"
+    },
+    {
+      "type": "select",
+      "id": "source",
+      "label": "Policy",
+      "options": [
+        { "value": "page", "label": "Page content" },
+        { "value": "privacy", "label": "Privacy policy" },
+        { "value": "shipping", "label": "Shipping policy" },
+        { "value": "refund", "label": "Refund policy" },
+        { "value": "terms", "label": "Terms of service" }
+      ],
+      "default": "page",
+      "info": "Store policies are written in Settings → Policies. When the chosen policy is empty, the page's own content is shown."
+    },
+    {
+      "type": "header",
+      "content": "Summary"
+    },
+    {
+      "type": "text",
+      "id": "aside_heading",
+      "label": "Heading",
+      "default": "The short version"
+    },
+    {
+      "type": "text",
+      "id": "help_heading",
+      "label": "Help card heading",
+      "default": "Still have a question?"
+    },
+    {
+      "type": "text",
+      "id": "help_label",
+      "label": "Help card link label",
+      "default": "Write to our team"
+    },
+    {
+      "type": "url",
+      "id": "help_url",
+      "label": "Help card link"
+    },
+    {
+      "type": "select",
+      "id": "surface",
+      "label": "Background",
+      "options": [
+        { "value": "paper", "label": "Paper" },
+        { "value": "paper-deep", "label": "Paper deep" }
+      ],
+      "default": "paper"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "point",
+      "name": "Summary point",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "check", "label": "Check" },
+            { "value": "truck", "label": "Shipping" },
+            { "value": "gift", "label": "Gift" },
+            { "value": "returns", "label": "Returns" },
+            { "value": "clock", "label": "Time" },
+            { "value": "mail", "label": "Email" },
+            { "value": "pin", "label": "Location" },
+            { "value": "book", "label": "Book" },
+            { "value": "heart", "label": "Heart" }
+          ],
+          "default": "check"
+        },
+        {
+          "type": "select",
+          "id": "color",
+          "label": "Colour",
+          "options": [
+            { "value": "sky", "label": "Sky" },
+            { "value": "sun", "label": "Sun" },
+            { "value": "leaf", "label": "Leaf" },
+            { "value": "grape", "label": "Grape" },
+            { "value": "tomato", "label": "Tomato" }
+          ],
+          "default": "sky"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "In short"
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Text"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Policy"
+    }
+  ]
+}
+{% endschema %}
