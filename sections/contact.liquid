@@ -1,0 +1,842 @@
+{%- comment -%}
+  Contact page: a warm header, then the contact form beside the ways to reach us.
+
+  - Header: eyebrow, display heading (italic word in the accent colour), intro text and
+    the page's own content from the admin, if any. A sun sticker with the reply time.
+  - Left: the form on a white card. Name, email, an optional phone, a topic chosen from
+    the section's list, and the message. After sending it shows a thank-you note in
+    place of the fields; errors are listed above them.
+  - Right: one card per "Way to reach us" block (icon, title, text and a link), each on
+    a soft brand tint, and a "Quick answers" link to the FAQ underneath.
+{%- endcomment -%}
+
+{%- liquid
+  assign s = section.settings
+  assign channels = section.blocks | where: 'type', 'channel'
+  assign topics = s.topics | newline_to_br | split: '<br />'
+-%}
+
+<div class="contact surface-{{ s.surface }}">
+  <div class="contact__container">
+    <header class="contact__header">
+      {%- if s.eyebrow != blank -%}
+        <p class="contact__eyebrow text-eyebrow">{{ s.eyebrow }}</p>
+      {%- endif -%}
+      <h1 class="contact__heading text-display">{{ s.heading | default: page.title }}</h1>
+      {%- if s.text != blank -%}
+        <p class="contact__text">{{ s.text }}</p>
+      {%- endif -%}
+      {%- if page.content != blank -%}
+        <div class="contact__page-content">{{ page.content }}</div>
+      {%- endif -%}
+
+      {%- if s.sticker != blank -%}
+        <p class="contact__sticker">
+          {% render 'brand-icon', name: 'clock', size: 20 %}
+          <span>{{ s.sticker }}</span>
+        </p>
+      {%- endif -%}
+    </header>
+
+    <div class="contact__layout">
+      <div class="contact__form-card surface-paper-deep">
+        {%- if s.form_heading != blank -%}
+          <h2 class="contact__form-heading h4">{{ s.form_heading }}</h2>
+        {%- endif -%}
+
+        {%- form 'contact', id: 'ContactForm', class: 'contact__form' -%}
+          {%- if form.posted_successfully? -%}
+            <div
+              class="contact__success"
+              role="status"
+              tabindex="-1"
+              autofocus
+            >
+              <span class="contact__success-icon">{% render 'brand-icon', name: 'check', size: 28 %}</span>
+              <p class="contact__success-heading">{{ s.success_heading }}</p>
+              <p class="contact__success-text">{{ s.success_text }}</p>
+            </div>
+          {%- else -%}
+            {%- if form.errors -%}
+              <div
+                class="contact__errors text-small"
+                role="alert"
+              >
+                <p>Please check the form:</p>
+                <ul>
+                  {%- for field in form.errors -%}
+                    <li>
+                      {%- if field == 'form' -%}
+                        {{ form.errors.messages[field] }}
+                      {%- else -%}
+                        {{ form.errors.translated_fields[field] | capitalize }}
+                        {{ form.errors.messages[field] }}
+                      {%- endif -%}
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              </div>
+            {%- endif -%}
+
+            <div class="contact__row">
+              <div class="contact__field">
+                <label for="ContactForm-name">Name</label>
+                <input
+                  id="ContactForm-name"
+                  type="text"
+                  name="contact[name]"
+                  autocomplete="name"
+                  value="{{ form.name | default: customer.name }}"
+                >
+              </div>
+              <div class="contact__field">
+                <label for="ContactForm-email">Email <span aria-hidden="true">*</span></label>
+                <input
+                  id="ContactForm-email"
+                  type="email"
+                  name="contact[email]"
+                  autocomplete="email"
+                  spellcheck="false"
+                  autocapitalize="off"
+                  required
+                  value="{{ form.email | default: customer.email }}"
+                  {% if form.errors contains 'email' %}
+                    aria-invalid="true"
+                  {% endif %}
+                >
+              </div>
+            </div>
+
+            <div class="contact__row">
+              {%- if s.show_phone -%}
+                <div class="contact__field">
+                  <label for="ContactForm-phone">Phone <span class="contact__optional">(optional)</span></label>
+                  <input
+                    id="ContactForm-phone"
+                    type="tel"
+                    name="contact[phone]"
+                    autocomplete="tel"
+                    value="{{ form.phone }}"
+                  >
+                </div>
+              {%- endif -%}
+              {%- if topics.size > 0 and s.topics != blank -%}
+                <div class="contact__field">
+                  <label for="ContactForm-topic">What is it about?</label>
+                  <select
+                    id="ContactForm-topic"
+                    name="contact[topic]"
+                  >
+                    {%- for topic in topics -%}
+                      {%- assign topic = topic | strip -%}
+                      {%- if topic != blank -%}
+                        <option value="{{ topic | escape }}">{{ topic }}</option>
+                      {%- endif -%}
+                    {%- endfor -%}
+                  </select>
+                </div>
+              {%- endif -%}
+            </div>
+
+            <div class="contact__field">
+              <label for="ContactForm-body">Message <span aria-hidden="true">*</span></label>
+              <textarea
+                id="ContactForm-body"
+                name="contact[body]"
+                rows="6"
+                required
+                placeholder="{{ s.message_placeholder | escape }}"
+              >
+                {{- form.body -}}
+              </textarea>
+            </div>
+
+            <div class="contact__submit">
+              <button
+                type="submit"
+                class="brand-button brand-button--primary"
+              >
+                <span>{{ s.button_label | default: 'Send message' }}</span>
+                {% render 'brand-icon', name: 'arrow-right', size: 18 %}
+              </button>
+              <p class="contact__note text-small">* Required. We only use your email to reply.</p>
+            </div>
+          {%- endif -%}
+        {%- endform -%}
+      </div>
+
+      <aside
+        class="contact__aside"
+        aria-label="{{ s.aside_heading | default: 'Other ways to reach us' | escape }}"
+      >
+        {%- if s.aside_heading != blank -%}
+          <h2 class="contact__aside-heading h4">{{ s.aside_heading }}</h2>
+        {%- endif -%}
+
+        <ul
+          class="contact__channels"
+          role="list"
+        >
+          {%- for block in channels -%}
+            {%- assign b = block.settings -%}
+            <li
+              class="contact__channel surface-{{ b.color }}-soft"
+              {{ block.shopify_attributes }}
+            >
+              <span class="contact__channel-icon">{% render 'brand-icon', name: b.icon, size: 22 %}</span>
+              <div class="contact__channel-body">
+                <p class="contact__channel-title">{{ b.title }}</p>
+                {%- if b.text != blank -%}
+                  <p class="contact__channel-text">{{ b.text }}</p>
+                {%- endif -%}
+                {%- if b.link_label != blank and b.link_url != blank -%}
+                  <a
+                    class="contact__channel-link"
+                    href="{{ b.link_url }}"
+                  >
+                    {{- b.link_label -}}
+                  </a>
+                {%- endif -%}
+              </div>
+            </li>
+          {%- endfor -%}
+        </ul>
+
+        {%- if s.faq_label != blank and s.faq_url != blank -%}
+          <a
+            class="contact__faq"
+            href="{{ s.faq_url }}"
+          >
+            <span>
+              <span class="contact__faq-heading">{{ s.faq_heading }}</span>
+              <span class="contact__faq-label">{{ s.faq_label }}</span>
+            </span>
+            {% render 'brand-icon', name: 'arrow-right', size: 20 %}
+          </a>
+        {%- endif -%}
+      </aside>
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+  .contact {
+    padding-block: var(--space-8) var(--space-9);
+  }
+
+  .contact__container {
+    max-width: var(--page-width);
+    margin-inline: auto;
+    padding-inline: var(--page-margin);
+  }
+
+  /* ---------- Header ---------- */
+
+  .contact__header {
+    position: relative;
+    max-width: 46rem;
+    margin-bottom: var(--space-8);
+  }
+
+  .contact__eyebrow {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: 0 0 var(--space-4);
+    color: var(--color-ink-muted);
+  }
+
+  .contact__eyebrow::before {
+    content: '';
+    flex: none;
+    width: 8px;
+    aspect-ratio: 1;
+    border-radius: var(--radius-full);
+    background: var(--color-tomato);
+  }
+
+  .contact__heading {
+    margin: 0;
+    color: var(--color-ink);
+    text-wrap: balance;
+  }
+
+  .contact__heading :is(em, i) {
+    font-family: var(--font-accent--family);
+    font-style: var(--font-accent--style);
+    font-weight: var(--font-accent--weight);
+    color: var(--color-grape);
+  }
+
+  .contact__text,
+  .contact__page-content {
+    margin: var(--space-4) 0 0;
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--color-ink-muted);
+  }
+
+  .contact__page-content > :first-child {
+    margin-top: 0;
+  }
+
+  .contact__page-content > :last-child {
+    margin-bottom: 0;
+  }
+
+  .contact__sticker {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: var(--space-6) 0 0;
+    padding: var(--space-2) var(--space-4);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-ink);
+    background: var(--color-sun);
+    border-radius: var(--radius-full);
+    transform: rotate(-2deg);
+  }
+
+  /* ---------- Layout ---------- */
+
+  .contact__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: clamp(var(--space-6), 5vw, var(--space-8));
+    align-items: start;
+  }
+
+  /* ---------- Form ---------- */
+
+  /* Colour-bar frame, same as Hero and Book Love: sky top, grape right, tomato bottom, sun left. */
+  .contact__form-card {
+    padding: clamp(var(--space-6), 4vw, var(--space-8));
+    background: var(--color-paper-deep);
+    border-style: solid;
+    border-width: var(--colour-bar-thickness);
+    border-color: var(--color-sky) var(--color-grape) var(--color-tomato) var(--color-sun);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .contact__form-heading {
+    margin: 0 0 var(--space-6);
+    color: var(--color-ink);
+  }
+
+  .contact__form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+
+  .contact__row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: var(--space-5);
+  }
+
+  .contact__row:empty {
+    display: none;
+  }
+
+  .contact__field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    min-width: 0;
+  }
+
+  .contact__field label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+
+  .contact__optional {
+    font-weight: 400;
+    color: var(--color-ink-muted);
+  }
+
+  .contact__field :is(input, select, textarea) {
+    width: 100%;
+    min-height: 52px;
+    padding: var(--space-3) var(--space-4);
+    font: inherit;
+    font-size: 16px;
+    color: var(--color-ink);
+    background: var(--color-paper);
+    border: var(--stroke-sm) solid var(--color-line-strong);
+    border-radius: var(--radius-md);
+    transition: border-color 150ms ease, background-color 150ms ease;
+  }
+
+  .contact__field textarea {
+    min-height: 9rem;
+    resize: vertical;
+  }
+
+  .contact__field select {
+    appearance: none;
+    padding-right: var(--space-7);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23222' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m7.75 10 4.25 4.25L16.25 10'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right var(--space-3) center;
+    background-size: 20px;
+  }
+
+  .contact__field :is(input, select, textarea):hover {
+    border-color: var(--color-ink-muted);
+  }
+
+  .contact__field :is(input, select, textarea):focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus-ring, var(--color-grape));
+    outline-offset: 1px;
+    border-color: var(--color-ink);
+    background: var(--color-card);
+  }
+
+  .contact__field [aria-invalid='true'] {
+    border-color: var(--color-tomato);
+  }
+
+  .contact__submit {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-4);
+    margin-top: var(--space-2);
+  }
+
+  .contact__note {
+    margin: 0;
+    color: var(--color-ink-muted);
+  }
+
+  .contact__errors {
+    padding: var(--space-4) var(--space-5);
+    color: var(--color-ink);
+    background: var(--color-tomato-soft);
+    border-radius: var(--radius-md);
+  }
+
+  .contact__errors p {
+    margin: 0 0 var(--space-1);
+    font-weight: 600;
+  }
+
+  .contact__errors ul {
+    margin: 0;
+    padding-left: var(--space-5);
+  }
+
+  .contact__success {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding-block: var(--space-6);
+  }
+
+  .contact__success:focus {
+    outline: none;
+  }
+
+  .contact__success-icon {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    aspect-ratio: 1;
+    color: #fff;
+    background: var(--color-leaf-deep);
+    border-radius: var(--radius-full);
+  }
+
+  .contact__success-heading {
+    margin: var(--space-2) 0 0;
+    font-family: var(--font-heading--family);
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+
+  .contact__success-text {
+    margin: 0;
+    font-size: 17px;
+    color: var(--color-ink-muted);
+  }
+
+  /* ---------- Ways to reach us ---------- */
+
+  .contact__aside {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+
+  .contact__aside-heading {
+    margin: 0;
+    color: var(--color-ink);
+  }
+
+  .contact__channels {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .contact__channel {
+    display: flex;
+    gap: var(--space-4);
+    padding: var(--space-5);
+    background: var(--color-background);
+    border-radius: var(--radius-lg);
+  }
+
+  .contact__channel-icon {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 44px;
+    aspect-ratio: 1;
+    color: var(--color-surface-accent, var(--color-ink));
+    background: var(--color-card);
+    border-radius: var(--radius-full);
+  }
+
+  .contact__channel-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-width: 0;
+  }
+
+  .contact__channel-title {
+    margin: 0;
+    font-family: var(--font-heading--family);
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+
+  .contact__channel-text {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--color-ink-muted);
+  }
+
+  .contact__channel-link {
+    margin-top: var(--space-1);
+    font-weight: 600;
+    color: var(--color-ink);
+    overflow-wrap: anywhere;
+    text-decoration: underline;
+    text-decoration-color: var(--color-line-strong);
+    text-underline-offset: 4px;
+  }
+
+  .contact__channel-link:hover {
+    text-decoration-color: currentColor;
+  }
+
+  .contact__faq {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-5);
+    color: var(--color-ink);
+    text-decoration: none;
+    border: var(--stroke-sm) solid var(--color-line-strong);
+    border-radius: var(--radius-lg);
+    transition: border-color 150ms ease, background-color 150ms ease;
+  }
+
+  .contact__faq:hover {
+    border-color: var(--color-ink);
+    background: var(--color-card);
+  }
+
+  .contact__faq > span {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .contact__faq-heading {
+    font-size: 14px;
+    color: var(--color-ink-muted);
+  }
+
+  .contact__faq-label {
+    font-weight: 600;
+  }
+
+  .contact__faq .brand-icon {
+    flex: none;
+    transition: transform 150ms ease;
+  }
+
+  .contact__faq:hover .brand-icon {
+    transform: translateX(3px);
+  }
+
+  @media screen and (max-width: 989px) {
+    .contact__layout {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .contact {
+      padding-block: var(--space-7) var(--space-8);
+    }
+
+    .contact__header {
+      margin-bottom: var(--space-6);
+    }
+
+    .contact__text,
+    .contact__page-content {
+      font-size: 17px;
+    }
+
+    .contact__submit .brand-button {
+      width: 100%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .contact__faq,
+    .contact__faq .brand-icon,
+    .contact__field :is(input, select, textarea) {
+      transition: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Contact",
+  "tag": "section",
+  "class": "contact-section",
+  "max_blocks": 6,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Header"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Say hello"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "info": "Put a word in italics to give it the accent colour. Empty uses the page title.",
+      "default": "We'd love to <em>hear</em> from you"
+    },
+    {
+      "type": "text",
+      "id": "text",
+      "label": "Text",
+      "info": "The page's own content from Online Store → Pages shows under it too.",
+      "default": "A question about a book, an order or where to start? Write to us. A real person on our small team reads every message."
+    },
+    {
+      "type": "text",
+      "id": "sticker",
+      "label": "Reply time sticker",
+      "default": "We reply within 1 business day"
+    },
+    {
+      "type": "header",
+      "content": "Form"
+    },
+    {
+      "type": "text",
+      "id": "form_heading",
+      "label": "Heading",
+      "default": "Send us a message"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_phone",
+      "label": "Show phone field",
+      "default": true
+    },
+    {
+      "type": "textarea",
+      "id": "topics",
+      "label": "Topics",
+      "info": "One per line. Shown as a dropdown; leave empty to hide it.",
+      "default": "Choosing the right book\nAn order I placed\nShipping & returns\nSchools & bulk orders\nSomething else"
+    },
+    {
+      "type": "text",
+      "id": "message_placeholder",
+      "label": "Message placeholder",
+      "default": "Tell us a little about your child and how we can help."
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Send message"
+    },
+    {
+      "type": "text",
+      "id": "success_heading",
+      "label": "Thank-you heading",
+      "default": "Thank you! Your message is on its way."
+    },
+    {
+      "type": "text",
+      "id": "success_text",
+      "label": "Thank-you text",
+      "default": "We'll get back to you within 1 business day."
+    },
+    {
+      "type": "header",
+      "content": "Ways to reach us"
+    },
+    {
+      "type": "text",
+      "id": "aside_heading",
+      "label": "Heading",
+      "default": "Other ways to reach us"
+    },
+    {
+      "type": "text",
+      "id": "faq_heading",
+      "label": "Quick answers heading",
+      "default": "Need an answer now?"
+    },
+    {
+      "type": "text",
+      "id": "faq_label",
+      "label": "Quick answers link label",
+      "default": "Read the questions parents ask"
+    },
+    {
+      "type": "url",
+      "id": "faq_url",
+      "label": "Quick answers link",
+      "info": "The card shows once a link is set, e.g. #faq to jump to a FAQ section below."
+    },
+    {
+      "type": "select",
+      "id": "surface",
+      "label": "Background",
+      "options": [
+        { "value": "paper", "label": "Paper" },
+        { "value": "paper-deep", "label": "Paper deep" }
+      ],
+      "default": "paper"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "channel",
+      "name": "Way to reach us",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "mail", "label": "Email" },
+            { "value": "chat", "label": "Chat" },
+            { "value": "clock", "label": "Hours" },
+            { "value": "pin", "label": "Location" },
+            { "value": "truck", "label": "Shipping" },
+            { "value": "book", "label": "Book" },
+            { "value": "gift", "label": "Gift" },
+            { "value": "returns", "label": "Returns" }
+          ],
+          "default": "mail"
+        },
+        {
+          "type": "select",
+          "id": "color",
+          "label": "Colour",
+          "options": [
+            { "value": "sky", "label": "Sky" },
+            { "value": "sun", "label": "Sun" },
+            { "value": "leaf", "label": "Leaf" },
+            { "value": "grape", "label": "Grape" },
+            { "value": "tomato", "label": "Tomato" }
+          ],
+          "default": "sky"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Email us"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "The quickest way to reach us."
+        },
+        {
+          "type": "text",
+          "id": "link_label",
+          "label": "Link label",
+          "info": "E.g. the email address."
+        },
+        {
+          "type": "url",
+          "id": "link_url",
+          "label": "Link",
+          "info": "For an email, write mailto:hello@example.com."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Contact",
+      "blocks": [
+        {
+          "type": "channel",
+          "settings": {
+            "icon": "mail",
+            "color": "sky",
+            "title": "Email us",
+            "text": "The quickest way to reach us. Add the address in the link below."
+          }
+        },
+        {
+          "type": "channel",
+          "settings": {
+            "icon": "clock",
+            "color": "sun",
+            "title": "When we're here",
+            "text": "Monday to Friday, 9am – 5pm. We answer every message within 1 business day."
+          }
+        },
+        {
+          "type": "channel",
+          "settings": {
+            "icon": "truck",
+            "color": "leaf",
+            "title": "About an order?",
+            "text": "Include your order number and we'll find it straight away."
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

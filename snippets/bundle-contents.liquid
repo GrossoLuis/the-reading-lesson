@@ -1,0 +1,210 @@
+{%- doc -%}
+  What's inside a bundle, under the buy box of the product page in bundle layout.
+
+  - Left: eyebrow, heading ("[count]" becomes the number of books), text and a receipt:
+    what the books cost one by one, the bundle price and the saving. The receipt hides
+    when the bundle doesn't cost less than its books.
+  - Right: the covers fanned out on a soft tint (snippets/bundle-fan.liquid).
+  - Below: the books, numbered, as book cards (snippets/book-shelf.liquid).
+
+  The "What's in the box" list links here (#bundle-contents). Renders nothing without books.
+
+  @param {product[]} books - The bundle's books.
+  @param {number} price - The bundle's price, in cents.
+  @param {number} [value] - What its books cost one by one, in cents. Defaults to their lowest prices.
+  @param {string} [eyebrow]
+  @param {string} [heading]
+  @param {string} [text]
+
+  @example
+  {% render 'bundle-contents', books: bundle_items, price: current_variant.price, heading: 'Inside this bundle' %}
+{%- enddoc -%}
+
+{%- liquid
+  if value == blank
+    assign value = 0
+    for book in books
+      assign value = value | plus: book.price
+    endfor
+  endif
+  assign savings = 0
+  if value > price
+    assign savings = value | minus: price
+    assign savings_percent = savings | times: 100.0 | divided_by: value | round
+  endif
+-%}
+
+{%- if books.size > 0 -%}
+  <div
+    id="bundle-contents"
+    class="bundle-contents"
+  >
+      <div class="bundle-contents__intro">
+        <header class="bundle-contents__header">
+          {%- if eyebrow != blank -%}
+            <p class="bundle-contents__eyebrow text-eyebrow">{{ eyebrow }}</p>
+          {%- endif -%}
+          {%- if heading != blank -%}
+            <h2 class="bundle-contents__heading text-display">{{ heading | replace: '[count]', books.size }}</h2>
+          {%- endif -%}
+          {%- if text != blank -%}
+            <p class="bundle-contents__text">{{ text }}</p>
+          {%- endif -%}
+
+          {%- if savings > 0 -%}
+            <dl class="bundle-contents__receipt">
+              <div class="bundle-contents__line">
+                <dt>{{ books.size }} books one by one</dt>
+                <dd><s>{{ value | money }}</s></dd>
+              </div>
+              <div class="bundle-contents__line">
+                <dt>Bundle price</dt>
+                <dd>{{ price | money }}</dd>
+              </div>
+              <div class="bundle-contents__line bundle-contents__line--save">
+                <dt>You save</dt>
+                <dd>{{ savings | money }} <span>({{ savings_percent }}%)</span></dd>
+              </div>
+            </dl>
+          {%- endif -%}
+        </header>
+
+        <div class="bundle-contents__fan">
+          {%- capture fan_label -%}{{ books.size }} books{%- endcapture -%}
+          {% render 'bundle-fan', products: books, label: fan_label %}
+        </div>
+      </div>
+
+      {%- render 'book-shelf', source: 'products', products: books, numbered: true, limit: 12 -%}
+  </div>
+{%- endif -%}
+
+{% stylesheet %}
+  .bundle-contents {
+    margin-top: var(--space-9);
+    padding-top: var(--space-8);
+    border-top: var(--stroke-sm) solid var(--color-line);
+    scroll-margin-top: calc(var(--sticky-header-offset, 0px) + var(--space-5));
+  }
+
+  .bundle-contents__intro {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    gap: clamp(var(--space-6), 5vw, var(--space-9));
+    align-items: center;
+    margin-bottom: var(--space-8);
+  }
+
+  .bundle-contents__eyebrow {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: 0 0 var(--space-4);
+    color: var(--color-ink-muted);
+  }
+
+  .bundle-contents__eyebrow::before {
+    content: '';
+    flex: none;
+    width: 8px;
+    aspect-ratio: 1;
+    border-radius: var(--radius-full);
+    background: var(--color-grape);
+  }
+
+  .bundle-contents__heading {
+    margin: 0;
+    color: var(--color-ink);
+    text-wrap: balance;
+  }
+
+  .bundle-contents__heading :is(em, i) {
+    font-family: var(--font-accent--family);
+    font-style: var(--font-accent--style);
+    font-weight: var(--font-accent--weight);
+    color: var(--color-grape);
+  }
+
+  .bundle-contents__text {
+    margin: var(--space-4) 0 0;
+    font-size: 17px;
+    color: var(--color-ink-muted);
+  }
+
+  /* ---------- Receipt ---------- */
+
+  .bundle-contents__receipt {
+    display: flex;
+    flex-direction: column;
+    margin: var(--space-6) 0 0;
+    padding: var(--space-2) var(--space-5);
+    background: var(--color-card);
+    border: var(--stroke-sm) solid var(--color-line);
+    border-radius: var(--radius-lg);
+  }
+
+  .bundle-contents__line {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding-block: var(--space-3);
+  }
+
+  .bundle-contents__line + .bundle-contents__line {
+    border-top: var(--stroke-sm) dashed var(--color-line);
+  }
+
+  .bundle-contents__line dt {
+    color: var(--color-ink-muted);
+  }
+
+  .bundle-contents__line dd {
+    margin: 0;
+    font-family: var(--font-price--family);
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--color-ink);
+    white-space: nowrap;
+  }
+
+  .bundle-contents__line s {
+    font-weight: 400;
+    color: var(--color-ink-muted);
+  }
+
+  .bundle-contents__line--save :is(dt, dd) {
+    font-weight: 700;
+    color: var(--color-leaf-deep);
+  }
+
+  .bundle-contents__line--save dd span {
+    font-size: 15px;
+  }
+
+  /* ---------- Fan ---------- */
+
+  .bundle-contents__fan {
+    padding: var(--space-6) var(--space-5) 0;
+    background: var(--color-grape-soft);
+    border-radius: var(--radius-xl);
+  }
+
+
+  @media screen and (max-width: 989px) {
+    .bundle-contents__intro {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .bundle-contents {
+      margin-top: var(--space-8);
+      padding-top: var(--space-7);
+    }
+
+    .bundle-contents__intro {
+      margin-bottom: var(--space-6);
+    }
+  }
+{% endstylesheet %}

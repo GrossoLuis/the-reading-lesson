@@ -280,6 +280,7 @@ class ProductPage extends HTMLElement {
 
     this.#updateAvailability(selected);
     this.#renderVariant(variant);
+    this.#renderBundle(variant);
     document.dispatchEvent(
       new CustomEvent('pdp:variant-change', {
         detail: { productId: Number(this.dataset.productId), variantId: variant?.id ?? null },
@@ -358,6 +359,49 @@ class ProductPage extends HTMLElement {
     } else {
       this.#renderStock('in', 'In stock');
     }
+  }
+
+  // Bundle layout: each format compares with the same format of its books (data-bundle-formats).
+  #renderBundle(variant) {
+    const box = this.querySelector('[data-bundle-box]');
+    if (!box || !variant) return;
+
+    let formats = {};
+    try {
+      formats = JSON.parse(box.querySelector('[data-bundle-formats]')?.textContent || '{}');
+    } catch {
+      return;
+    }
+    const format = formats[variant.id];
+    if (!format) return;
+
+    box.querySelectorAll('[data-box-price]').forEach((price, i) => (price.innerHTML = this.#money(format.prices[i])));
+
+    const saving = format.value - variant.price;
+    const total = box.querySelector('[data-box-total]');
+    if (total) total.hidden = saving <= 0;
+    const value = box.querySelector('[data-box-value]');
+    if (value) value.innerHTML = this.#money(format.value);
+    const boxSaving = box.querySelector('[data-box-saving]');
+    if (boxSaving && saving > 0) boxSaving.innerHTML = this.#money(saving);
+
+    const percent = this.querySelector('[data-bundle-percent]');
+    if (percent) {
+      percent.hidden = saving <= 0;
+      if (saving > 0) percent.textContent = `Save ${Math.round((saving * 100) / format.value)}%`;
+    }
+
+    // Without its own compare-at price, the bundle's price is compared with its books' total.
+    if (variant.compare_at_price > variant.price || saving <= 0) return;
+    const compare = this.querySelector('[data-price-compare]');
+    const badge = this.querySelector('[data-price-badge]');
+    const priceSaving = this.querySelector('[data-price-saving]');
+    if (compare) {
+      compare.hidden = false;
+      compare.innerHTML = this.#money(format.value);
+    }
+    if (badge) badge.hidden = false;
+    if (priceSaving) priceSaving.innerHTML = this.#money(saving);
   }
 
   #renderStock(state, text) {

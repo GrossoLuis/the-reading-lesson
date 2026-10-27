@@ -1,0 +1,150 @@
+{%- doc -%}
+  The covers of a bundle's books fanned out like a set on a table: up to five covers,
+  the middle one in front, the others tilted to each side. Each cover links to its book.
+
+  @param {product[]} products - The bundle's books (custom.bundle_products).
+  @param {string} [label] - Sticker on the fan, e.g. "4 books". Hidden when empty.
+  @param {string} [sizes] - The image sizes attribute. Defaults to a third of the page.
+
+  @example
+  {% render 'bundle-fan', products: product.metafields.custom.bundle_products.value, label: '4 books' %}
+{%- enddoc -%}
+
+{%- liquid
+  assign sizes = sizes | default: '(min-width: 990px) 18vw, 40vw'
+  assign count = products.size
+  if count > 5
+    assign count = 5
+  endif
+  assign middle = count | minus: 1
+-%}
+
+{%- if count > 0 -%}
+  <div
+    class="bundle-fan"
+    style="--fan-count: {{ count }};"
+  >
+    <ul
+      class="bundle-fan__covers"
+      role="list"
+    >
+      {%- for book in products limit: 5 -%}
+        {%- liquid
+          comment
+            Offset from the middle, doubled so it stays a whole number: -4, -2, 0, 2, 4 for five covers.
+          endcomment
+          assign offset = forloop.index0 | times: 2 | minus: middle
+          assign distance = offset | abs
+          assign layer = 10 | minus: distance
+        -%}
+        <li
+          class="bundle-fan__cover"
+          style="--offset: {{ offset }}; --layer: {{ layer }};"
+        >
+          <a
+            href="{{ book.url }}"
+            class="bundle-fan__link"
+            aria-label="{{ book.title | escape }}"
+          >
+            {%- if book.featured_image -%}
+              {{-
+                book.featured_image
+                | image_url: width: 700
+                | image_tag: widths: '240, 360, 480, 700', sizes: sizes, loading: 'lazy', alt: '', class: 'bundle-fan__image'
+              -}}
+            {%- else -%}
+              {% render 'placeholder-book-cover', design: 'moon' %}
+            {%- endif -%}
+          </a>
+        </li>
+      {%- endfor -%}
+    </ul>
+
+    {%- if label != blank -%}
+      <span class="bundle-fan__sticker">{{ label }}</span>
+    {%- endif -%}
+  </div>
+{%- endif -%}
+
+{% stylesheet %}
+  .bundle-fan {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 5 / 4;
+  }
+
+  .bundle-fan__covers {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Covers spread from the centre: offset is -4…4, so each step is 4deg and 13% of a cover across. */
+  .bundle-fan__cover {
+    position: absolute;
+    bottom: 10%;
+    left: 50%;
+    z-index: var(--layer);
+    width: 40%;
+    transform: translateX(calc(-50% + var(--offset) * 13%)) rotate(calc(var(--offset) * 4deg));
+    transform-origin: 50% 100%;
+    transition: transform 250ms ease;
+  }
+
+  .bundle-fan__link {
+    display: block;
+    overflow: hidden;
+    background: var(--color-card);
+    border-radius: var(--radius-image);
+    box-shadow: var(--shadow-book);
+  }
+
+  .bundle-fan__image,
+  .bundle-fan__link svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+  }
+
+  .bundle-fan__cover:hover {
+    z-index: 20;
+    transform: translateX(calc(-50% + var(--offset) * 13%)) translateY(-6%) rotate(calc(var(--offset) * 4deg));
+  }
+
+  .bundle-fan__link:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus-ring, var(--color-grape));
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .bundle-fan__sticker {
+    position: absolute;
+    top: 6%;
+    right: 6%;
+    z-index: 30;
+    display: grid;
+    place-items: center;
+    width: 5.5rem;
+    aspect-ratio: 1;
+    padding: var(--space-2);
+    font-family: var(--font-accent--family);
+    font-style: var(--font-accent--style);
+    font-weight: var(--font-accent--weight);
+    font-size: 20px;
+    line-height: 1.05;
+    text-align: center;
+    color: var(--color-ink);
+    background: var(--color-sun);
+    border-radius: var(--radius-full);
+    transform: rotate(8deg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bundle-fan__cover {
+      transition: none;
+    }
+  }
+{% endstylesheet %}
