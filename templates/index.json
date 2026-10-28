@@ -330,11 +330,12 @@
           "settings": {
             "category": "reading",
             "other_label": "More",
-            "collection": "first-grade",
+            "collection": "reading",
             "product": "",
             "step_label": "Start here",
             "title": "The Reading Lesson",
             "text": "<p>Our best-selling and beloved reading program reviewed by over 4,000 families, and used all around the world.</p>",
+            "image": "shopify://shop_images/490770577_1348132470103736_2650731057638587171_n_fe06b5a9-1501-4b46-b642-26dc80e74c99.jpg",
             "link": "",
             "link_label": "Explore"
           }
@@ -344,7 +345,7 @@
           "settings": {
             "category": "writing",
             "other_label": "More",
-            "collection": "kindergarten",
+            "collection": "writing",
             "product": "",
             "step_label": "Alongside it",
             "title": "Handwriting companions",
@@ -358,7 +359,7 @@
           "settings": {
             "category": "math",
             "other_label": "More",
-            "collection": "third-grade",
+            "collection": "math",
             "product": "",
             "step_label": "Then",
             "title": "The Verbal Math Lesson",
