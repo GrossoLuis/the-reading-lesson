@@ -17,7 +17,7 @@
         "message_shipping": {
           "type": "message",
           "settings": {
-            "text": "Free shipping on orders over $40",
+            "text": "Free shipping on orders over $100",
             "link": ""
           }
         },
