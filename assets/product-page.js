@@ -55,6 +55,21 @@ class ProductPage extends HTMLElement {
 
     this.#index = Number(this.gallery?.dataset.initialIndex) || 0;
 
+    // Description excerpt: "See more" swaps the truncated text for the whole description.
+    this.querySelectorAll('[data-excerpt]').forEach((excerpt) => {
+      const toggle = excerpt.querySelector('[data-excerpt-toggle]');
+      const short = excerpt.querySelector('[data-excerpt-short]');
+      const full = excerpt.querySelector('[data-excerpt-full]');
+      if (!toggle || !short || !full) return;
+      toggle.addEventListener('click', () => {
+        const open = toggle.getAttribute('aria-expanded') !== 'true';
+        toggle.setAttribute('aria-expanded', String(open));
+        short.hidden = open;
+        full.hidden = !open;
+        toggle.textContent = open ? toggle.dataset.labelLess : toggle.dataset.labelMore;
+      });
+    });
+
     // Gallery
     this.thumbs.forEach((thumb) =>
       thumb.addEventListener('click', () => this.goTo(Number(thumb.dataset.index), { scroll: true }))

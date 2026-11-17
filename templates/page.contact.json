@@ -1,10 +1,31 @@
 {
   "sections": {
-    "main": {
-      "type": "blank"
+    "contact": {
+      "type": "contact",
+      "blocks": {
+        "email": {
+          "type": "channel",
+          "settings": {
+            "icon": "mail",
+            "color": "sky",
+            "title": "Email us",
+            "text": "Prefer your own inbox? Write to us directly.",
+            "link_label": "hello@mountcastlecompany.com",
+            "link_url": "mailto:hello@mountcastlecompany.com"
+          }
+        }
+      },
+      "block_order": [
+        "email"
+      ],
+      "settings": {
+        "sticker": "",
+        "success_text": "We'll get back to you soon.",
+        "surface": "paper"
+      }
     }
   },
   "order": [
-    "main"
+    "contact"
   ]
 }
