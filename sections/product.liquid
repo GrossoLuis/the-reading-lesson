@@ -559,17 +559,42 @@
           {%- endif -%}
 
           {%- if s.show_excerpt and product.description != blank -%}
-            <p class="pdp__excerpt text-lead">
-              {%- comment -%} A space before each closing tag keeps a heading from running into the next paragraph. {%- endcomment -%}
-              {{-
-                product.description
-                | replace: '</', ' </'
-                | replace: '<br', ' <br'
-                | strip_html
-                | strip_newlines
-                | truncatewords: s.excerpt_words
-              -}}
-            </p>
+            {%- comment -%}
+              A space before each closing tag keeps a heading from running into the next paragraph.
+              A description longer than the excerpt gets a "See more" toggle that reveals the
+              whole text in place (product-page.js).
+            {%- endcomment -%}
+            {%- liquid
+              assign excerpt_full = product.description | replace: '</', ' </' | replace: '<br', ' <br' | strip_html | strip_newlines | strip
+              assign excerpt_short = excerpt_full | truncatewords: s.excerpt_words, ''
+            -%}
+            {%- if excerpt_short.size < excerpt_full.size -%}
+              <p
+                class="pdp__excerpt text-lead"
+                data-excerpt
+              >
+                <span data-excerpt-short>{{ excerpt_short | strip }}… </span>
+                <span
+                  id="PdpExcerptFull-{{ section.id }}"
+                  data-excerpt-full
+                  hidden
+                  >{{ excerpt_full }}
+                </span>
+                <button
+                  type="button"
+                  class="pdp__excerpt-toggle"
+                  aria-expanded="false"
+                  aria-controls="PdpExcerptFull-{{ section.id }}"
+                  data-excerpt-toggle
+                  data-label-more="See more"
+                  data-label-less="See less"
+                >
+                  See more
+                </button>
+              </p>
+            {%- else -%}
+              <p class="pdp__excerpt text-lead">{{ excerpt_full }}</p>
+            {%- endif -%}
           {%- endif -%}
 
           {%- if bundle_count > 0 -%}
@@ -1432,6 +1457,26 @@
   .pdp__excerpt {
     margin: 0;
     color: var(--color-ink-muted);
+  }
+
+  .pdp__excerpt [hidden] {
+    display: none;
+  }
+
+  .pdp__excerpt-toggle {
+    padding: 0;
+    font: inherit;
+    font-weight: 700;
+    color: var(--color-ink);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+
+  .pdp__excerpt-toggle:hover {
+    text-decoration-thickness: 2px;
   }
 
   /* ---------- Form ---------- */
